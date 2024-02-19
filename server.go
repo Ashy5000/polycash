@@ -1,12 +1,10 @@
 package main
 
 import (
-	"crypto/dsa"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
-	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,18 +19,10 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	body := string(bodyBytes)
 	fields := strings.Split(body, ":")
-	var senderY big.Int
-	senderY.SetString(fields[0], 10)
-	senderKey := dsa.PublicKey{
-		Parameters: dsa.Parameters{},
-		Y:          &senderY,
-	}
-	var recipientY big.Int
-	recipientY.SetString(fields[1], 10)
-	recipientKey := dsa.PublicKey{
-		Parameters: dsa.Parameters{},
-		Y:          &recipientY,
-	}
+	senderStr := fields[0]
+	senderKey := DecodePublicKey(senderStr)
+	recipientStr := fields[1]
+	recipientKey := DecodePublicKey(recipientStr)
 	amount, err := strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		panic(err)
