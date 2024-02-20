@@ -67,8 +67,22 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	fmt.Println("Block appended to local blockchain!")
 }
 
-func Serve() {
-	http.HandleFunc("/mine", HandleMineRequest)
+func HandleBlockchainRequest(w http.ResponseWriter, req *http.Request) {
+	blockchainChars, err := json.Marshal(blockchain)
+	if err != nil {
+		panic(err)
+	}
+	_, err = io.WriteString(w, string(blockchainChars))
+	if err != nil {
+		panic(err)
+	}
+}
+
+func Serve(mine bool) {
+	if mine {
+		http.HandleFunc("/mine", HandleMineRequest)
+	}
 	http.HandleFunc("/block", HandleBlockRequest)
-	log.Fatal(http.ListenAndServe(":9090", nil))
+	http.HandleFunc("/blockchain", HandleBlockchainRequest)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
