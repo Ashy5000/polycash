@@ -67,7 +67,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	fmt.Println("Block appended to local blockchain!")
 }
 
-func HandleBlockchainRequest(w http.ResponseWriter, req *http.Request) {
+func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
 	blockchainChars, err := json.Marshal(blockchain)
 	if err != nil {
 		panic(err)
