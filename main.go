@@ -23,9 +23,10 @@ func main() {
 			fmt.Printf("BlockCMD console: ")
 			inputReader := bufio.NewReader(os.Stdin)
 			cmd, _ := inputReader.ReadString('\n')
+			cmd = cmd[:len(cmd)-1]
 			fields := strings.Split(cmd, " ")
 			action := fields[0]
-			if action == "sync" || action == "sync\n" {
+			if action == "sync" {
 				fmt.Println("Syncing blockchain...")
 				longestLength := 0
 				var longestBlockchain []Block
@@ -62,6 +63,22 @@ func main() {
 					}
 				}
 				fmt.Println(fmt.Sprintf("Balance of %s: %f", fields[1], total))
+			} else if action == "send" {
+				sender := fields[1]
+				receiver := fields[2]
+				amount := fields[3]
+				signaturePlaceholder := "&0&0&0"
+				body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s", sender, signaturePlaceholder, receiver, signaturePlaceholder, amount))
+				for _, peer := range GetPeers() {
+					req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
+					if err != nil {
+						panic(err)
+					}
+					_, err = http.DefaultClient.Do(req)
+					if err != nil {
+						panic(err)
+					}
+				}
 			}
 		}
 	}
