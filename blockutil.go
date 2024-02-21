@@ -1,11 +1,13 @@
 package main
 
 import (
+	"crypto/dsa"
 	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -44,9 +46,19 @@ func GetBalance(key big.Int) float64 {
 	return total
 }
 
-func Send(sender string, receiver string, amount string) {
-	signaturePlaceholder := "&0&0&0"
-	body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s", sender, signaturePlaceholder, receiver, signaturePlaceholder, amount))
+func Send(receiver string, amount string) {
+	keyJson, err := os.ReadFile("key.json")
+	if err != nil {
+		panic(err)
+	}
+	var key dsa.PrivateKey
+	err = json.Unmarshal(keyJson, &key)
+	sender := key.PublicKey.Y
+	if err != nil {
+		panic(err)
+	}
+	parametersString := fmt.Sprintf("&%s&%s&%s", key.PublicKey.Parameters.P, key.PublicKey.Parameters.Q, key.PublicKey.Parameters.G)
+	body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s", sender, parametersString, receiver, parametersString, amount))
 	for _, peer := range GetPeers() {
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {

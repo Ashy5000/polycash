@@ -2,6 +2,9 @@ package main
 
 import (
 	"bufio"
+	"crypto/dsa"
+	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
@@ -28,10 +31,26 @@ func StartCmdLine() {
 			balance := GetBalance(key)
 			fmt.Println(fmt.Sprintf("Balance of %s: %f", fields[1], balance))
 		} else if action == "send" {
-			sender := fields[1]
-			receiver := fields[2]
-			amount := fields[3]
-			Send(sender, receiver, amount)
+			receiver := fields[1]
+			amount := fields[2]
+			Send(receiver, amount)
+		} else if action == "keygen" {
+			var privateKey dsa.PrivateKey
+			var params dsa.Parameters
+			err := dsa.GenerateParameters(&params, rand.Reader, dsa.ParameterSizes(0))
+			if err != nil {
+				panic(err)
+			}
+			privateKey.Parameters = params
+			err = dsa.GenerateKey(&privateKey, rand.Reader)
+			if err != nil {
+				panic(err)
+			}
+			keyJson, err := json.Marshal(privateKey)
+			if err != nil {
+				panic(err)
+			}
+			err = os.WriteFile("key.json", keyJson, 0644)
 		}
 	}
 }
