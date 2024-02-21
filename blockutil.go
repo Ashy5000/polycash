@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/dsa"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -58,7 +59,8 @@ func Send(receiver string, amount string) {
 		panic(err)
 	}
 	parametersString := fmt.Sprintf("&%s&%s&%s", key.PublicKey.Parameters.P, key.PublicKey.Parameters.Q, key.PublicKey.Parameters.G)
-	body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s", sender, parametersString, receiver, parametersString, amount))
+	r, s, err := dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%s:%s:%s", sender, receiver, amount)))
+	body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s", sender, parametersString, receiver, parametersString, amount, r, s))
 	for _, peer := range GetPeers() {
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
