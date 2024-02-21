@@ -1,10 +1,12 @@
 package main
 
 import (
+	"crypto/dsa"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,6 +28,17 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	amount, err := strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		panic(err)
+	}
+	rStr := fields[3]
+	sStr := fields[4]
+	var r big.Int
+	var s big.Int
+	r.SetString(rStr, 10)
+	s.SetString(sStr, 10)
+	isValid := dsa.Verify(&senderKey, []byte(fmt.Sprintf("%s:%s:%s", senderKey.Y, recipientKey.Y, fields[2])), &r, &s)
+	if !isValid {
+		fmt.Println("Signature is invalid. Ignoring transaction request.")
+		return
 	}
 	block, err := CreateBlock(senderKey, recipientKey, amount)
 	if err != nil {

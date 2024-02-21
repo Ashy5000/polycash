@@ -60,7 +60,12 @@ func Send(receiver string, amount string) {
 	}
 	parametersString := fmt.Sprintf("&%s&%s&%s", key.PublicKey.Parameters.P, key.PublicKey.Parameters.Q, key.PublicKey.Parameters.G)
 	r, s, err := dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%s:%s:%s", sender, receiver, amount)))
-	body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s", sender, parametersString, receiver, parametersString, amount, r, s))
+	if err != nil {
+		panic(err)
+	}
+	rStr := r.String()
+	sStr := s.String()
+	body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s", sender, parametersString, receiver, parametersString, amount, rStr, sStr))
 	for _, peer := range GetPeers() {
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
