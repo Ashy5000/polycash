@@ -12,6 +12,19 @@ import (
 	"strings"
 )
 
+func GetKey() dsa.PrivateKey {
+	keyJson, err := os.ReadFile("key.json")
+	if err != nil {
+		panic(err)
+	}
+	var key dsa.PrivateKey
+	err = json.Unmarshal(keyJson, &key)
+	if err != nil {
+		panic(err)
+	}
+	return key
+}
+
 func SyncBlockchain() {
 	longestLength := 0
 	var longestBlockchain []Block
@@ -43,21 +56,16 @@ func GetBalance(key big.Int) float64 {
 		} else if block.Recipient.Y.Cmp(&key) == 0 {
 			total += block.Amount
 		}
+		if block.Miner.Y.Cmp(&key) == 0 {
+			total++
+		}
 	}
 	return total
 }
 
 func Send(receiver string, amount string) {
-	keyJson, err := os.ReadFile("key.json")
-	if err != nil {
-		panic(err)
-	}
-	var key dsa.PrivateKey
-	err = json.Unmarshal(keyJson, &key)
+	key := GetKey()
 	sender := key.PublicKey.Y
-	if err != nil {
-		panic(err)
-	}
 	parametersString := fmt.Sprintf("&%s&%s&%s", key.PublicKey.Parameters.P, key.PublicKey.Parameters.Q, key.PublicKey.Parameters.G)
 	r, s, err := dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%s:%s:%s", sender, receiver, amount)))
 	if err != nil {
@@ -76,4 +84,15 @@ func Send(receiver string, amount string) {
 			panic(err)
 		}
 	}
+}
+
+func GetLastMinedBlock() (Block, bool) {
+	pubKey := GetKey().PublicKey.Y
+	for i := len(blockchain) - 1; i >= 0; i-- {
+		block := blockchain[i]
+		if block.Miner.Y.Cmp(pubKey) == 0 {
+			return block, true
+		}
+	}
+	return Block{}, false
 }
