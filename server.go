@@ -105,5 +105,5 @@ func Serve(mine bool) {
 	}
 	http.HandleFunc("/block", HandleBlockRequest)
 	http.HandleFunc("/blockchain", HandleBlockchainRequest)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":9090", nil))
 }

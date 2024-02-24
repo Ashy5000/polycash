@@ -63,6 +63,13 @@ func GetBalance(key big.Int) float64 {
 	return total
 }
 
+func SendRequest(req *http.Request) {
+	_, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return
+	}
+}
+
 func Send(receiver string, amount string) {
 	key := GetKey()
 	sender := key.PublicKey.Y
@@ -79,10 +86,7 @@ func Send(receiver string, amount string) {
 		if err != nil {
 			panic(err)
 		}
-		_, err = http.DefaultClient.Do(req)
-		if err != nil {
-			panic(err)
-		}
+		go SendRequest(req)
 	}
 }
 
