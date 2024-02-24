@@ -5,12 +5,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 )
 
 var lostBlock = false
 
-func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64) (Block, error) {
+func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, r big.Int, s big.Int) (Block, error) {
 	start := time.Now()
 	previousBlock, previousBlockFound := GetLastMinedBlock()
 	if !previousBlockFound {
@@ -22,6 +23,8 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64) 
 		Sender:     sender,
 		Recipient:  recipient,
 		Amount:     amount,
+		R:          r,
+		S:          s,
 		Nonce:      0,
 		Difficulty: previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds())),
 	}

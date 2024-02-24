@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/dsa"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -36,12 +34,11 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	var s big.Int
 	r.SetString(rStr, 10)
 	s.SetString(sStr, 10)
-	isValid := dsa.Verify(&senderKey, []byte(fmt.Sprintf("%s:%s:%s", senderKey.Y, recipientKey.Y, fields[2])), &r, &s)
-	if !isValid {
-		fmt.Println("Signature is invalid. Ignoring transaction request.")
+	if !VerifyTransaction(senderKey, recipientKey, strconv.FormatFloat(amount, 'f', -1, 64), r, s) {
+		fmt.Println("Transaction is invalid. Ignoring transaction request.")
 		return
 	}
-	block, err := CreateBlock(senderKey, recipientKey, amount)
+	block, err := CreateBlock(senderKey, recipientKey, amount, r, s)
 	if err != nil {
 		fmt.Println("Block lost.")
 		return
@@ -77,11 +74,8 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	hashBytes := HashBlock(block)
-	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
-	if hash > 9223372036854776000/block.Difficulty {
-		fmt.Println("Block has invalid hash. Ignoring block request.")
-		fmt.Printf("Actual hash: %d\n", hash)
+	if !VerifyBlock(block) {
+		fmt.Println("Block is invalid. Ignoring block request.")
 		return
 	}
 	Append(block)
