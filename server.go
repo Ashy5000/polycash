@@ -99,11 +99,11 @@ func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func Serve(mine bool) {
+func Serve(mine bool, port string) {
 	if mine {
 		http.HandleFunc("/mine", HandleMineRequest)
 	}
 	http.HandleFunc("/block", HandleBlockRequest)
 	http.HandleFunc("/blockchain", HandleBlockchainRequest)
-	log.Fatal(http.ListenAndServe(":9090", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
