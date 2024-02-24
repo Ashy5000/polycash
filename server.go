@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/dsa"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -75,6 +76,13 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	err = json.Unmarshal(bodyBytes, &block)
 	if err != nil {
 		panic(err)
+	}
+	hashBytes := HashBlock(block)
+	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
+	if hash > 9223372036854776000/block.Difficulty {
+		fmt.Println("Block has invalid hash. Ignoring block request.")
+		fmt.Printf("Actual hash: %d\n", hash)
+		return
 	}
 	Append(block)
 	fmt.Println("Block appended to local blockchain!")
