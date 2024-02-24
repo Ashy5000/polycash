@@ -73,8 +73,8 @@ func Send(receiver string, amount string) {
 	}
 	rStr := r.String()
 	sStr := s.String()
-	body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s", sender, parametersString, receiver, parametersString, amount, rStr, sStr))
 	for _, peer := range GetPeers() {
+		body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s", sender, parametersString, receiver, parametersString, amount, rStr, sStr))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)
