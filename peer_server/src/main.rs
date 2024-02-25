@@ -1,6 +1,7 @@
 use actix_web::{get, web, App, HttpServer, Responder};
 
 mod add_peer;
+mod verify_peer;
 
 #[get("/add_peer/{ip}")]
 async fn collect_peer_list(ip: web::Path<String>) -> impl Responder {
