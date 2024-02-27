@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"math/big"
 	"net/http"
 	"os"
@@ -99,4 +100,44 @@ func GetLastMinedBlock() (Block, bool) {
 		}
 	}
 	return Block{}, false
+}
+
+func IsNewMiner(miner dsa.PublicKey, maxBlockPosition int) bool {
+	i := 0
+	for _, block := range blockchain {
+		if i > maxBlockPosition {
+			break
+		}
+		if block.Miner == miner {
+			return false
+		}
+		i++
+	}
+	return true
+}
+
+func GetMinerCount() int64 {
+	var result int64
+	result = 0
+	i := 0
+	for _, block := range blockchain {
+		if IsNewMiner(block.Miner, i-1) {
+			result++
+		}
+		i++
+	}
+	return result
+}
+
+func GetMaxMiners() int64 {
+	x := float64(len(blockchain))
+	if x == 0 {
+		return 1
+	}
+	t := 8.2
+	maxRes := max(x/2, 0)
+	top := math.Round(maxRes/t) * 10 * x
+	resFloat := (top / (3 * x)) + 1
+	res := int64(math.Round(resFloat))
+	return res
 }
