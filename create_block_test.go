@@ -26,7 +26,10 @@ func TestCreateBlock(t *testing.T) {
 		var amount float64
 		amount = 123
 		// Act
-		block := CreateBlock(senderPublicKey, recipientPublicKey, amount)
+		block, err := CreateBlock(senderPublicKey, recipientPublicKey, amount, a, b)
+		if err != nil {
+			panic(err)
+		}
 		// Assert
 		assert.Equal(t, senderPublicKey, block.Sender)
 		assert.Equal(t, recipientPublicKey, block.Recipient)
@@ -51,7 +54,10 @@ func TestCreateBlock(t *testing.T) {
 		var maxHash uint64
 		maxHash = 0x1000000000000000
 		// Act
-		block := CreateBlock(senderPublicKey, recipientPublicKey, amount)
+		block, err := CreateBlock(senderPublicKey, recipientPublicKey, amount, a, b)
+		if err != nil {
+			panic(err)
+		}
 		// Assert
 		hashBytes := HashBlock(block)
 		hash := binary.BigEndian.Uint64(hashBytes[:])

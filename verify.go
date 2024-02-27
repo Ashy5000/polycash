@@ -17,6 +17,15 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 	return isValid
 }
 
+func VerifyMiner(miner dsa.PublicKey) bool {
+	if IsNewMiner(miner, len(blockchain)) && GetMinerCount() >= GetMaxMiners() {
+		println("Miner count: ", GetMinerCount())
+		println("Maximum miner count: ", GetMaxMiners())
+		return false
+	}
+	return true
+}
+
 func VerifyBlock(block Block) bool {
 	if !VerifyTransaction(block.Sender, block.Recipient, strconv.FormatFloat(block.Amount, 'f', -1, 64), block.R, block.S) {
 		return false
@@ -26,6 +35,9 @@ func VerifyBlock(block Block) bool {
 	if hash > 9223372036854776000/block.Difficulty {
 		fmt.Println("Block has invalid hash. Ignoring block request.")
 		fmt.Printf("Actual hash: %d\n", hash)
+		return false
+	}
+	if !VerifyMiner(block.Miner) {
 		return false
 	}
 	return true
