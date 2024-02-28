@@ -16,4 +16,5 @@ type Block struct {
 	S          big.Int       `json:"S"`
 	MiningTime time.Duration `json:"miningTime"`
 	Difficulty uint64        `json:"difficulty"`
+	// TODO: Add a field called "PreviousBlockHash" of type string
 }

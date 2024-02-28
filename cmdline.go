@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -82,6 +83,20 @@ func StartCmdLine() {
 			fmt.Println("savestate - Save the blockchain to a file")
 			fmt.Println("loadstate - Load the blockchain from a file")
 			fmt.Println("exit - Exit the console")
+		} else if action == "addpeer" {
+			// Get the IP address of the peer
+			ip := fields[1]
+			// Send a request to the peer server to add the peer
+			peerServer := "http://192.168.4.87:8080"
+			req, err := http.NewRequest(http.MethodGet, peerServer+"/add_peer/"+ip, nil)
+			if err != nil {
+				panic(err)
+			}
+			_, err = http.DefaultClient.Do(req)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println("Peer added successfully!")
 		} else if action == "" {
 			continue
 		} else {

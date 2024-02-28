@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -48,9 +49,9 @@ func GetPeers() []string {
 
 		return result
 	} else {
-		peerServer := "http://192.168.4.8"
+		peerServer := "http://192.168.4.87:8080"
 		// Send a request to the peer server to get the list of peers
-		res, err := http.Get(peerServer + "/peers")
+		res, err := http.Get(peerServer + "/get_peers")
 		if err != nil {
 			panic(err)
 		}
@@ -59,7 +60,21 @@ func GetPeers() []string {
 			panic(err)
 		}
 
-		// Split result on newline
-		return strings.Split(string(body), "\n")
+		// Split response on newline
+		result := strings.Split(string(body), "\n")
+		// Remove empty strings
+		for i := 0; i < len(result); i++ {
+			if result[i] == "" {
+				result = append(result[:i], result[i+1:]...)
+				i--
+			}
+		}
+		// Add http:// to each peer
+		// Add :8080 to each peer (port 8080 is used for the peer server, and other ports can be used for local peer lists)
+		for i, peer := range result {
+			result[i] = "http://" + peer + ":8080"
+			fmt.Println("Peer: " + result[i])
+		}
+		return result
 	}
 }
