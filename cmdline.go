@@ -51,6 +51,41 @@ func StartCmdLine() {
 				panic(err)
 			}
 			err = os.WriteFile("key.json", keyJson, 0644)
+		} else if action == "savestate" {
+			// Save the blockchain to a file
+			blockchainJson, err := json.Marshal(blockchain)
+			if err != nil {
+				panic(err)
+			}
+			err = os.WriteFile("blockchain.json", blockchainJson, 0644)
+			if err != nil {
+				panic(err)
+			}
+		} else if action == "loadstate" {
+			// Load the blockchain from a file
+			blockchainJson, err := os.ReadFile("blockchain.json")
+			if err != nil {
+				panic(err)
+			}
+			err = json.Unmarshal(blockchainJson, &blockchain)
+			if err != nil {
+				panic(err)
+			}
+		} else if action == "exit" {
+			return
+		} else if action == "help" {
+			fmt.Println("Commands:")
+			fmt.Println("sync - Sync the blockchain with peers")
+			fmt.Println("balance <public key> - Get the balance of a public key")
+			fmt.Println("send <public key> <amount> - Send an amount to a public key")
+			fmt.Println("keygen - Generate a new key")
+			fmt.Println("savestate - Save the blockchain to a file")
+			fmt.Println("loadstate - Load the blockchain from a file")
+			fmt.Println("exit - Exit the console")
+		} else if action == "" {
+			continue
+		} else {
+			fmt.Println("Invalid command.")
 		}
 	}
 }
