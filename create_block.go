@@ -28,6 +28,11 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		Nonce:      0,
 		Difficulty: previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds())),
 	}
+	if len(blockchain) > 0 {
+		block.PreviousBlockHash = HashBlock(previousBlock)
+	} else {
+		block.PreviousBlockHash = [32]byte{}
+	}
 	hashBytes := HashBlock(block)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	fmt.Printf("Mining block with difficulty %d\n", block.Difficulty)
