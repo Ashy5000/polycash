@@ -6,3 +6,7 @@ As opposed to the original Proof of Work (PoW) protocol, this blockchain does no
 
 ## Directory structure
 The root directory of this project is occupied by the Golang source code that nodes run in order to interact with each other and the decentralized blockchain. In the ```peer_server``` directory, there is Rust code that can be run by servers to maintain a list of peers in the network. Nodes can connect to these servers or maintain their own lists. You will probably only need to run the Golang code. There is also a build directory that contains builds of the node and peer server for various platforms. By launch, almost all of the major platforms will be supported. Alternatively, you may build from source.
+
+
+## License
+This software is released under the GNU General Public License v3.0.
