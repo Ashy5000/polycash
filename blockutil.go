@@ -29,10 +29,12 @@ func GetKey() dsa.PrivateKey {
 func SyncBlockchain() {
 	longestLength := 0
 	var longestBlockchain []Block
+	errCount := 0
 	for _, peer := range GetPeers() {
 		res, err := http.Get(fmt.Sprintf("%s/blockchain", peer))
 		if err != nil {
-			panic(err)
+			errCount++
+			continue
 		}
 		body, err := io.ReadAll(res.Body)
 		var peerBlockchain []Block
@@ -46,6 +48,11 @@ func SyncBlockchain() {
 			longestBlockchain = peerBlockchain
 		}
 	}
+	if errCount >= len(GetPeers()) {
+		panic("Could not sync blockchain. All peers down.")
+	}
+	fmt.Println("Blockchain successfully synced!")
+	fmt.Println("{} out of {} peers responded.", len(GetPeers())-errCount, len(GetPeers()))
 	blockchain = longestBlockchain
 }
 
