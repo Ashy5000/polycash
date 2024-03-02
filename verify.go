@@ -48,5 +48,11 @@ func VerifyBlock(block Block) bool {
 	if !VerifyMiner(block.Miner) {
 		return false
 	}
+	for _, b := range blockchain {
+		if HashBlock(b) == hashBytes {
+			fmt.Println("Block already exists. Ignoring block request.")
+			return false
+		}
+	}
 	return true
 }

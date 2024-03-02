@@ -88,6 +88,26 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	Append(block)
 	fmt.Println("Block appended to local blockchain!")
+	if *useLocalPeerList {
+		// Broadcast block to peers
+		fmt.Println("Broadcasting block to peers...")
+		bodyChars, err := json.Marshal(&block)
+		if err != nil {
+			panic(err)
+		}
+		for _, peer := range GetPeers() {
+			body := strings.NewReader(string(bodyChars))
+			req, err := http.NewRequest(http.MethodGet, peer+"/block", body)
+			if err != nil {
+				panic(err)
+			}
+			_, err = http.DefaultClient.Do(req)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+	fmt.Println("All done!")
 }
 
 func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
