@@ -22,7 +22,13 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 		panic(err)
 	}
 	isValid := dsa.Verify(&senderKey, []byte(fmt.Sprintf("%s:%s:%s", senderKey.Y, recipientKey.Y, strconv.FormatFloat(amountFloat, 'f', -1, 64))), &r, &s)
-	return isValid
+	if !isValid {
+		return false
+	}
+	if GetBalance(*senderKey.Y)-amountFloat < 0 {
+		return false
+	}
+	return true
 }
 
 func VerifyMiner(miner dsa.PublicKey) bool {
