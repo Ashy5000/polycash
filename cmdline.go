@@ -21,10 +21,13 @@ import (
 )
 
 func StartCmdLine() {
+	fmt.Println("Copyright (C) 2024 Asher Wrobel")
+	fmt.Println("This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions.")
+	fmt.Println("To see the license, type `license`.")
 	for {
-		fmt.Printf("BlockCMD console: ")
 		inputReader := bufio.NewReader(os.Stdin)
 		cmd, _ := inputReader.ReadString('\n')
+		fmt.Printf("BlockCMD console: ")
 		cmd = cmd[:len(cmd)-1]
 		fields := strings.Split(cmd, " ")
 		action := fields[0]
@@ -105,6 +108,12 @@ func StartCmdLine() {
 				panic(err)
 			}
 			fmt.Println("Peer added successfully!")
+		} else if action == "license" {
+			license, err := os.ReadFile("COPYING")
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(string(license))
 		} else if action == "" {
 			continue
 		} else {
