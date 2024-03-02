@@ -7,6 +7,42 @@ As opposed to the original Proof of Work (PoW) protocol, this blockchain does no
 ## Directory structure
 The root directory of this project is occupied by the Golang source code that nodes run in order to interact with each other and the decentralized blockchain. In the ```peer_server``` directory, there is Rust code that can be run by servers to maintain a list of peers in the network. Nodes can connect to these servers or maintain their own lists. You will probably only need to run the Golang code. There is also a build directory that contains builds of the node and peer server for various platforms. By launch, almost all of the major platforms will be supported. Alternatively, you may build from source.
 
+## About decentralized peer lists
+There are two ways to run a node: using a peer server or a local peer list. With a peer server, there is far less configuration. To make yourself known to the network, use the `addpeer [YOUR IP]` command in the BlockCMD console (see `# To run as a client:` below to open the console). With a local peer list, you fully decentralize your connections with other computers to completely remove trust from the system. However, dealing with the configuration for this option is difficult. I personally recommend starting with the peer server and switching over to a local peer list once you get the hang of things. The two options both use the same network and the same blockchain, so your balance will be preserved if you switch over.
+
+## Setup & Usage
+```bash
+git clone https://github.com/ashy5000/cryptocurrency
+cd cryptocurrency
+
+# To run as a client:
+./builds/node/node_linux_x86_64 # replace for your os and architecture
+# Just type help to get information about the console, and you're set!
+
+# To run a node:
+./builds/node/node_linux_x86_64 -serve -port 8080  # replace for your os and architecture
+
+# To run a node with a decentralized peer list [BETA]:
+./builds/node/node_linux_x86_64 -serve -port 8080 # replace for your os and architecture
+# In a new terminal window:
+cd peer_server
+cargo run
+
+# To run a miner:
+./builds/node/node_linux_x86_64 -serve -mine -port 8080
+
+# To run a miner with a decentralized peer list [BETA]:
+./builds/node/node_linux_x86_64 -serve -mine -port 8080 # replace for your os and architecture
+# In a new terminal window:
+cd peer_server
+cargo run
+
+# To subscribe to a decentralized peer's events [BETA]:
+curl http://[PEER IP]:6060 -d 'http://[YOUR IP]:8080'
+
+# To add peers to your local list [BETA]:
+echo "http://[PEER IP]:8080" >> peers.txt
+```
 
 ## License
 This software is released under the GNU General Public License v3.0.

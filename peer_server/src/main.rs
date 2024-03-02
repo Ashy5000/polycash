@@ -30,7 +30,7 @@ async fn main() -> std::io::Result<()> {
             .service(collect_peer_list)
             .service(serve_peer_list)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", 6060))? // Note the default peer server runs on port 8080 due to an outdated version of the Github repository. This is the only difference in the source code.
     .run()
     .await
 }
