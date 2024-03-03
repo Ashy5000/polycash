@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-var lostBlock = false
+var lostBlock = true
 
 func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, r big.Int, s big.Int) (Block, error) {
 	start := time.Now()
