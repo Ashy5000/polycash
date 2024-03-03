@@ -25,9 +25,13 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Println("New job.")
+	lostBlock = false
 	fmt.Println("Broadcasting job to peers...")
+	bodyBytes, err := io.ReadAll(req.Body)
 	for _, peer := range GetPeers() {
-		req, err := http.NewRequest(http.MethodGet, peer+"/mine", req.Body)
+		// Create a new body
+		body := strings.NewReader(string(bodyBytes))
+		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)
 		}
@@ -37,8 +41,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		}
 	}
 	fmt.Println("Mining...")
-	lostBlock = false
-	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		panic(err)
 	}
