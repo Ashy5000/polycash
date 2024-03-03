@@ -59,6 +59,11 @@ func VerifyBlock(block Block) bool {
 			fmt.Println("Block already exists. Ignoring block request.")
 			return false
 		}
+		if b.PreviousBlockHash == block.PreviousBlockHash {
+			fmt.Println("Block creates a fork. Ignoring block request.")
+			fmt.Println("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.")
+			return false
+		}
 	}
 	return true
 }
