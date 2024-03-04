@@ -1,4 +1,7 @@
 # ashy5000/cryptocurrency
+
+![](https://github.com/Ashy5000/cryptocurrency/actions/workflows/go.yml/badge.svg)
+
 The home of a power-efficient, scalable, and modern cryptocurrency blockchain designed to resolve the issues presented by the traditional PoW (Proof of Work) incentive mechanism while maintaining decentralization. Written in Golang and Rust for secure algorithm implementations, lightweight networking, memory safety, speed, and reliability.
 
 ## Modified PoW protocol
