@@ -33,6 +33,8 @@ func TestCreateBlock(t *testing.T) {
 		}
 		var amount float64
 		amount = 123
+		blockchain = nil
+		lostBlock = false
 		// Act
 		block, err := CreateBlock(senderPublicKey, recipientPublicKey, amount, a, b)
 		if err != nil {
