@@ -65,5 +65,9 @@ func VerifyBlock(block Block) bool {
 			return false
 		}
 	}
+	if block.PreviousBlockHash != HashBlock(blockchain[len(blockchain)-1]) {
+		fmt.Println("Block has invalid previous block hash. Ignoring block request.")
+		return false
+	}
 	return true
 }
