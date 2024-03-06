@@ -9,6 +9,7 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,14 +21,25 @@ import (
 )
 
 func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
-	if !lostBlock {
+	bodyBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+	body := string(bodyBytes)
+	fields := strings.Split(body, ":")
+	senderStr := fields[0]
+	senderKey := DecodePublicKey(senderStr)
+	recipientStr := fields[1]
+	recipientKey := DecodePublicKey(recipientStr)
+	amount, err := strconv.ParseFloat(fields[2], 64)
+	hash := sha256.Sum256(bodyBytes)
+	if transactionHashes[hash] {
 		fmt.Println("No new job. Ignoring mine request.")
 		return
 	}
 	fmt.Println("New job.")
-	lostBlock = false
+	transactionHashes[hash] = true
 	fmt.Println("Broadcasting job to peers...")
-	bodyBytes, err := io.ReadAll(req.Body)
 	for _, peer := range GetPeers() {
 		// Create a new body
 		body := strings.NewReader(string(bodyBytes))
@@ -44,16 +56,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	body := string(bodyBytes)
-	fields := strings.Split(body, ":")
-	senderStr := fields[0]
-	senderKey := DecodePublicKey(senderStr)
-	recipientStr := fields[1]
-	recipientKey := DecodePublicKey(recipientStr)
-	amount, err := strconv.ParseFloat(fields[2], 64)
-	if err != nil {
-		panic(err)
-	}
 	rStr := fields[3]
 	sStr := fields[4]
 	var r big.Int
@@ -64,7 +66,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		fmt.Println("Transaction is invalid. Ignoring transaction request.")
 		return
 	}
-	block, err := CreateBlock(senderKey, recipientKey, amount, r, s)
+	block, err := CreateBlock(senderKey, recipientKey, amount, r, s, hash)
 	if err != nil {
 		fmt.Println("Block lost.")
 		return
@@ -90,7 +92,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 }
 
 func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
-	lostBlock = true
 	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		panic(err)
@@ -104,6 +105,13 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		fmt.Println("Block is invalid. Ignoring block request.")
 		return
 	}
+	// Get transaction as string
+	transaction := fmt.Sprintf("%s:%s:%f:%s:%s", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount, block.R.String(), block.S.String())
+	transactionBytes := []byte(transaction)
+	// Get hash of transaction
+	hash := sha256.Sum256(transactionBytes)
+	// Mark transaction as completed
+	transactionHashes[hash] = false
 	Append(block)
 	fmt.Println("Block appended to local blockchain!")
 	if *useLocalPeerList {

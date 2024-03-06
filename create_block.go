@@ -17,9 +17,9 @@ import (
 	"time"
 )
 
-var lostBlock = true
+var transactionHashes = make(map[[32]byte]bool)
 
-func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, r big.Int, s big.Int) (Block, error) {
+func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, r big.Int, s big.Int, transactionHash [32]byte) (Block, error) {
 	start := time.Now()
 	previousBlock, previousBlockFound := GetLastMinedBlock()
 	if !previousBlockFound {
@@ -45,8 +45,8 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	fmt.Printf("Mining block with difficulty %d\n", block.Difficulty)
 	for hash > 9223372036854776000/block.Difficulty {
-		if lostBlock {
-			lostBlock = false
+		if transactionHashes[transactionHash] {
+			transactionHashes[transactionHash] = false
 			return Block{}, errors.New("lost block")
 		} else {
 			block.Nonce++

@@ -34,3 +34,7 @@ func DecodePublicKey(keyString string) dsa.PublicKey {
 	}
 	return publicKey
 }
+
+func EncodePublicKey(key dsa.PublicKey) string {
+	return key.Y.String() + "&" + key.P.String() + "&" + key.Q.String() + "&" + key.G.String()
+}
