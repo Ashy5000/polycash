@@ -51,9 +51,6 @@ func VerifyBlock(block Block) bool {
 		fmt.Printf("Actual hash: %d\n", hash)
 		return false
 	}
-	if !VerifyMiner(block.Miner) {
-		return false
-	}
 	for _, b := range blockchain {
 		if HashBlock(b) == hashBytes {
 			fmt.Println("Block already exists. Ignoring block request.")
@@ -64,6 +61,9 @@ func VerifyBlock(block Block) bool {
 			fmt.Println("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.")
 			return false
 		}
+	}
+	if !VerifyMiner(block.Miner) {
+		return false
 	}
 	if len(blockchain) > 0 && block.PreviousBlockHash != HashBlock(blockchain[len(blockchain)-1]) {
 		fmt.Println("Block has invalid previous block hash. Ignoring block request.")
