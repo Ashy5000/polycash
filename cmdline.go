@@ -26,8 +26,8 @@ func StartCmdLine() {
 	fmt.Println("To see the license, type `license`.")
 	for {
 		inputReader := bufio.NewReader(os.Stdin)
-		cmd, _ := inputReader.ReadString('\n')
 		fmt.Printf("BlockCMD console: ")
+		cmd, _ := inputReader.ReadString('\n')
 		cmd = cmd[:len(cmd)-1]
 		fields := strings.Split(cmd, " ")
 		action := fields[0]
