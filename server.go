@@ -110,6 +110,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	transactionBytes := []byte(transaction)
 	// Get hash of transaction
 	hash := sha256.Sum256(transactionBytes)
+	fmt.Println("Transaction hash:", hash)
 	// Mark transaction as completed
 	transactionHashes[hash] = false
 	Append(block)
