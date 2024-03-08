@@ -49,7 +49,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		}
 		_, err = http.DefaultClient.Do(req)
 		if err != nil {
-			panic(err)
+			fmt.Println("Peer", peer, "is down.")
 		}
 	}
 	if err != nil {

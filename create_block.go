@@ -36,6 +36,9 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		Nonce:      0,
 		Difficulty: previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds())),
 	}
+	if block.Difficulty < 10000 {
+		block.Difficulty = 10000
+	}
 	if len(blockchain) > 0 {
 		block.PreviousBlockHash = HashBlock(previousBlock)
 	} else {
