@@ -32,7 +32,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	recipientStr := fields[1]
 	recipientKey := DecodePublicKey(recipientStr)
 	amount, err := strconv.ParseFloat(fields[2], 64)
-	hash := sha256.Sum256(bodyBytes)
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f", senderStr, recipientStr, amount)))
 	if transactionHashes[hash] {
 		fmt.Println("No new job. Ignoring mine request.")
 		return
@@ -52,7 +52,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			panic(err)
 		}
 	}
-	fmt.Println("Mining...")
 	if err != nil {
 		panic(err)
 	}
@@ -106,7 +105,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	// Get transaction as string
-	transaction := fmt.Sprintf("%s:%s:%f:%s:%s", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount, block.R.String(), block.S.String())
+	transaction := fmt.Sprintf("%s:%s:%f", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount)
 	transactionBytes := []byte(transaction)
 	// Get hash of transaction
 	hash := sha256.Sum256(transactionBytes)
