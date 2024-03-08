@@ -58,9 +58,11 @@ func VerifyBlock(block Block) bool {
 			return false
 		}
 		if b.PreviousBlockHash == block.PreviousBlockHash {
-			fmt.Println("Block creates a fork. Ignoring block request.")
+			fmt.Println("Block creates a fork.")
 			fmt.Println("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.")
-			return false
+			fmt.Println("The blockchain will be re-synced to stay on the longest chain.")
+			SyncBlockchain()
+			return true
 		}
 	}
 	if !VerifyMiner(block.Miner) {
