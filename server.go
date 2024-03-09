@@ -106,7 +106,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	// Get transaction as string
-	transaction := fmt.Sprintf("%s:%s:%f", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount, block.R.String(), block.S.String(), block.Timestamp.UnixNano())
+	transaction := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount, block.Timestamp.UnixNano())
 	transactionBytes := []byte(transaction)
 	// Get hash of transaction
 	hash := sha256.Sum256(transactionBytes)
