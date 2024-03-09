@@ -84,7 +84,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		}
 		_, err = http.DefaultClient.Do(req)
 		if err != nil {
-			panic(err)
+			fmt.Println("Peer down.")
 		}
 	}
 	fmt.Println("All done!")
@@ -129,7 +129,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 			}
 			_, err = http.DefaultClient.Do(req)
 			if err != nil {
-				panic(err)
+				fmt.Println("Peer is down.")
 			}
 		}
 	}

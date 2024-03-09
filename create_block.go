@@ -52,6 +52,16 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		if transactionHashes[transactionHash] == 2 {
 			return Block{}, errors.New("lost block")
 		} else {
+			previousBlock, previousBlockFound = GetLastMinedBlock()
+			if !previousBlockFound {
+				previousBlock.Difficulty = 100000
+				previousBlock.MiningTime = time.Minute
+			}
+			if len(blockchain) > 0 {
+				block.PreviousBlockHash = HashBlock(previousBlock)
+			} else {
+				block.PreviousBlockHash = [32]byte{}
+			}
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
