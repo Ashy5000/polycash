@@ -49,7 +49,7 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	fmt.Printf("Mining block with difficulty %d\n", block.Difficulty)
 	for hash > 9223372036854776000/block.Difficulty {
-		if transactionHashes[transactionHash] == 1 || transactionHashes[transactionHash] == 2 {
+		if transactionHashes[transactionHash] == 2 {
 			return Block{}, errors.New("lost block")
 		} else {
 			block.Nonce++
