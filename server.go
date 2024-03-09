@@ -32,7 +32,8 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	recipientStr := fields[1]
 	recipientKey := DecodePublicKey(recipientStr)
 	amount, err := strconv.ParseFloat(fields[2], 64)
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f", senderStr, recipientStr, amount)))
+	timestamp := fields[5]
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%s", senderStr, recipientStr, amount, timestamp)))
 	if transactionHashes[hash] > 0 {
 		fmt.Println("No new job. Ignoring mine request.")
 		return
@@ -65,7 +66,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		fmt.Println("Transaction is invalid. Ignoring transaction request.")
 		return
 	}
-	block, err := CreateBlock(senderKey, recipientKey, amount, r, s, hash)
+	block, err := CreateBlock(senderKey, recipientKey, amount, r, s, hash, timestamp)
 	if err != nil {
 		fmt.Println("Block lost.")
 		return
@@ -105,7 +106,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	// Get transaction as string
-	transaction := fmt.Sprintf("%s:%s:%f", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount)
+	transaction := fmt.Sprintf("%s:%s:%f", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount, block.R.String(), block.S.String(), block.Timestamp.UnixNano())
 	transactionBytes := []byte(transaction)
 	// Get hash of transaction
 	hash := sha256.Sum256(transactionBytes)

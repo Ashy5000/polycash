@@ -25,4 +25,5 @@ type Block struct {
 	MiningTime        time.Duration `json:"miningTime"`
 	Difficulty        uint64        `json:"difficulty"`
 	PreviousBlockHash [32]byte      `json:"previousBlockHash"`
+	Timestamp         time.Time     `json:"timestamp"`
 }

@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 func GetKey() dsa.PrivateKey {
@@ -97,7 +98,7 @@ func Send(receiver string, amount string) {
 	rStr := r.String()
 	sStr := s.String()
 	for _, peer := range GetPeers() {
-		body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s", sender, parametersString, receiver, parametersString, amount, rStr, sStr))
+		body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s:%d", sender, parametersString, receiver, parametersString, amount, rStr, sStr, time.Now().UnixNano()))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)

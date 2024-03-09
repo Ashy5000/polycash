@@ -14,18 +14,23 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strconv"
 	"time"
 )
 
 // transactionHashes is a map of transaction hashes to their current status. 0 means the transaction is unmined, 1 means the transaction is being mined, and 2 means the transaction has been mined.
 var transactionHashes = make(map[[32]byte]int)
 
-func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, r big.Int, s big.Int, transactionHash [32]byte) (Block, error) {
+func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, r big.Int, s big.Int, transactionHash [32]byte, timestamp string) (Block, error) {
 	start := time.Now()
 	previousBlock, previousBlockFound := GetLastMinedBlock()
 	if !previousBlockFound {
 		previousBlock.Difficulty = 100000
 		previousBlock.MiningTime = time.Minute
+	}
+	timestampInt64, err := strconv.ParseInt(timestamp, 10, 64)
+	if err != nil {
+		panic(err)
 	}
 	block := Block{
 		Miner:      GetKey().PublicKey,
@@ -36,6 +41,7 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		S:          s,
 		Nonce:      0,
 		Difficulty: previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds())),
+		Timestamp:  time.Unix(0, timestampInt64),
 	}
 	if block.Difficulty < 10000 {
 		block.Difficulty = 10000
