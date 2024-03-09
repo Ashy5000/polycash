@@ -123,7 +123,7 @@ func IsNewMiner(miner dsa.PublicKey, maxBlockPosition int) bool {
 		if i > maxBlockPosition {
 			break
 		}
-		if block.Miner == miner {
+		if block.Miner.Y.Cmp(miner.Y) == 0 {
 			return false
 		}
 		i++
