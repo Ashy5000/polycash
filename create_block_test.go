@@ -34,7 +34,7 @@ func TestCreateBlock(t *testing.T) {
 		var amount float64
 		amount = 123
 		blockchain = nil
-		transactionHashes[[32]byte{}] = true
+		transactionHashes[[32]byte{}] = 1
 		// Act
 		block, err := CreateBlock(senderPublicKey, recipientPublicKey, amount, a, b, [32]byte{})
 		if err != nil {
@@ -63,7 +63,7 @@ func TestCreateBlock(t *testing.T) {
 		amount = 123
 		var maxHash uint64
 		maxHash = 0x1000000000000000
-		transactionHashes[[32]byte{}] = true
+		transactionHashes[[32]byte{}] = 1
 		// Act
 		block, err := CreateBlock(senderPublicKey, recipientPublicKey, amount, a, b, [32]byte{})
 		if err != nil {

@@ -33,12 +33,12 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	recipientKey := DecodePublicKey(recipientStr)
 	amount, err := strconv.ParseFloat(fields[2], 64)
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f", senderStr, recipientStr, amount)))
-	if transactionHashes[hash] {
+	if transactionHashes[hash] > 0 {
 		fmt.Println("No new job. Ignoring mine request.")
 		return
 	}
 	fmt.Println("New job.")
-	transactionHashes[hash] = true
+	transactionHashes[hash] = 1
 	fmt.Println("Broadcasting job to peers...")
 	for _, peer := range GetPeers() {
 		// Create a new body
@@ -111,7 +111,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	hash := sha256.Sum256(transactionBytes)
 	fmt.Println("Transaction hash:", hash)
 	// Mark transaction as completed
-	transactionHashes[hash] = false
+	transactionHashes[hash] = 2
 	Append(block)
 	fmt.Println("Block appended to local blockchain!")
 	if *useLocalPeerList {
