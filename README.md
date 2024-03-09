@@ -21,37 +21,55 @@ The root directory of this project is occupied by the Golang source code that no
 There are two ways to run a node: using a peer server or a local peer list. With a peer server, there is far less configuration. To make yourself known to the network, use the `addpeer [YOUR IP]` command in the BlockCMD console (see `# To run as a client:` below to open the console). With a local peer list, you fully decentralize your connections with other computers to completely remove trust from the system. However, dealing with the configuration for this option can take a bit longer. I personally recommend using a local peer list. The security and reliability that decentralized peer tracking provides simply can't be reproduced with a centralized peer server, but if it seems daunting to manually configure IP addresses, the peer server's an okay way to start. The two options both use the same network and the same blockchain, so your balance will be preserved if you switch over.
 
 ## Setup & Usage
+
+Create and clone the repository:
+
 ```bash
 git clone https://github.com/ashy5000/cryptocurrency
 cd cryptocurrency
+```
 
-# To run as a client:
+### To run as a client:
+To use an interactive console for viewing and adding to the blockchain, run:
+```bash
 ./builds/node/node_linux_x86_64 # replace for your os and architecture
-# Just type help to get information about the console, and you're set!
+````
+Commands:
+- `help`: see a list of all commands
+- `sync`: update the blockchain and all balances and transactions
+- `keygen`: generate a key pair so you can send and receive tokens
+- `send {recipient} {amount}`: send {amount} tokens to {recipient}
+- `balance {key}`: get the balance associated with the public key {key}
+- `savestate`: save a backup of the current state of the blockchain to a file
+- `loadstate`: load a backup of the current state of the blockchain from a file
+- `exit`: exit the console
+- `addpeer {ip}`: by default, connects to a peer. If using a centralized peer server, makes yourself known to the network.
 
-# To run a node:
+### To run a node:
+To run the node software, which keeps the blockchain distributed across the p2p network, run:
+```bash
 ./builds/node/node_linux_x86_64 -serve -port 8080  # replace for your os and architecture
-
-# To run a node with a decentralized peer list [BETA]:
-./builds/node/node_linux_x86_64 -serve -port 8080 # replace for your os and architecture
-# In a new terminal window:
+# In a new terminal window: (optional, starts a peer server so you it is faster to find new nodes)
+# This is not at all required.
 cd peer_server
 cargo run
+```
 
-# To run a miner:
+
+### To run a miner:
+To run the mining software, which adds new blocks to the blockchain in exchange for a reward, run:
+```bash
 ./builds/node/node_linux_x86_64 -serve -mine -port 8080
-
-# To run a miner with a decentralized peer list [BETA]:
-./builds/node/node_linux_x86_64 -serve -mine -port 8080 # replace for your os and architecture
-# In a new terminal window:
+# In a new terminal window: (optional, starts a peer server so you it is faster to find new nodes)
+# This is not at all required.
 cd peer_server
 cargo run
+```
 
-# To subscribe to a decentralized peer's events [BETA]:
+### To connect to a peer via their peer server:
+To connect to a peer that is also running a peer server (ran the commands after `# In a new terminal window:`), run:
+```bash
 curl http://[PEER IP]:6060 -d 'http://[YOUR IP]:8080'
-
-# To add peers to your local list [BETA]:
-echo "http://[PEER IP]:8080" >> peers.txt
 ```
 
 ## License
