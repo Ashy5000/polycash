@@ -9,9 +9,72 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
+	"crypto/dsa"
 	"github.com/stretchr/testify/assert"
+	"math/big"
 	"testing"
 )
+
+func TestGetKey(t *testing.T) {
+	t.Run("It returns a dsa.PrivateKey when the key.json file is found", func(t *testing.T) {
+		// Act
+		key := GetKey()
+		// Assert
+		assert.NotNil(t, key)
+	})
+}
+
+func TestSyncBlockchain(t *testing.T) {
+	t.Run("It sets the blockchain to the longest blockchain from the peers or panics", func(t *testing.T) {
+		// Arrange
+		blockchain = nil
+		// Act
+		defer func() {
+			// Assert
+			if r := recover(); r == nil {
+				assert.NotNil(t, blockchain)
+			}
+		}()
+		SyncBlockchain()
+	})
+}
+
+func TestGetBalance(t *testing.T) {
+	t.Run("It returns 0 when the blockchain is empty", func(t *testing.T) {
+		// Arrange
+		blockchain = nil
+		var key big.Int
+		key.SetString("1234567890", 10)
+		// Act
+		balance := GetBalance(key)
+		// Assert
+		assert.Equal(t, float64(0), balance)
+	})
+	t.Run("It returns the correct balance of a key", func(t *testing.T) {
+		// Arrange
+		blockchain = nil
+		var key big.Int
+		key.SetString("1234567890", 10)
+		sender := dsa.PublicKey{
+			Parameters: dsa.Parameters{},
+			Y:          big.NewInt(987654321),
+		}
+		receiver := dsa.PublicKey{
+			Parameters: dsa.Parameters{},
+			Y:          &key,
+		}
+		Append(Block{
+			Sender:    sender,
+			Recipient: receiver,
+			Miner:     sender,
+			Amount:    100,
+		})
+		// Act
+		balance := GetBalance(key)
+		// Assert
+		assert.Equal(t, float64(100), balance)
+	})
+}
 
 func TestGetMaxMiners(t *testing.T) {
 	t.Run("It returns 1 when the length of the blockchain is 0", func(t *testing.T) {

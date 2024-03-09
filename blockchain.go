@@ -10,6 +10,12 @@ package main
 
 var blockchain []Block
 
+func GenesisBlock() Block {
+	return Block{
+		PreviousBlockHash: [32]byte{},
+	}
+}
+
 func Append(block Block) {
 	blockchain = append(blockchain, block)
 }

@@ -20,6 +20,7 @@ func main() {
 	port := flag.String("port", "8080", "Port to listen on (server only)")
 	useLocalPeerList = flag.Bool("useLocalPeerList", false, "Set to true to use local peer list and fully decentralize (slower, but more secure)")
 	flag.Parse()
+	Append(GenesisBlock())
 	if *serve {
 		Serve(*mine, *port)
 	} else {
