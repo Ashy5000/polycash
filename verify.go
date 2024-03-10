@@ -70,6 +70,9 @@ func VerifyBlock(block Block) bool {
 	}
 	if len(blockchain) > 0 && block.PreviousBlockHash != HashBlock(blockchain[len(blockchain)-1]) {
 		fmt.Println("Block has invalid previous block hash. Ignoring block request.")
+		fmt.Println("The block could be on a different fork.")
+		fmt.Println("The blockchain will be re-synced to stay on the longest chain.")
+		SyncBlockchain()
 		return false
 	}
 	return true
