@@ -32,6 +32,9 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	recipientStr := fields[1]
 	recipientKey := DecodePublicKey(recipientStr)
 	amount, err := strconv.ParseFloat(fields[2], 64)
+	if err != nil {
+		panic(err)
+	}
 	timestamp := fields[5]
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%s", senderStr, recipientStr, amount, timestamp)))
 	if transactionHashes[hash] > 0 {
@@ -52,9 +55,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			fmt.Println("Peer", peer, "is down.")
 		}
-	}
-	if err != nil {
-		panic(err)
 	}
 	rStr := fields[3]
 	sStr := fields[4]
