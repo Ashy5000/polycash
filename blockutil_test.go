@@ -53,6 +53,7 @@ func TestGetBalance(t *testing.T) {
 	t.Run("It returns the correct balance of a key", func(t *testing.T) {
 		// Arrange
 		blockchain = nil
+		Append(GenesisBlock())
 		var key big.Int
 		key.SetString("1234567890", 10)
 		sender := dsa.PublicKey{
