@@ -127,7 +127,12 @@ func GetLastMinedBlock() (Block, bool) {
 
 func IsNewMiner(miner dsa.PublicKey, maxBlockPosition int) bool {
 	i := 0
+	isGenesis := true
 	for _, block := range blockchain {
+		if isGenesis {
+			isGenesis = false
+			continue
+		}
 		if i > maxBlockPosition {
 			break
 		}
@@ -143,7 +148,12 @@ func GetMinerCount() int64 {
 	var result int64
 	result = 0
 	i := 0
+	isGenesis := true
 	for _, block := range blockchain {
+		if isGenesis {
+			isGenesis = false
+			continue
+		}
 		if IsNewMiner(block.Miner, i-1) {
 			result++
 		}
