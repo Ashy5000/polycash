@@ -22,7 +22,7 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 	if err != nil {
 		panic(err)
 	}
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f", senderKey.Y, recipientKey.Y, amountFloat)))
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", senderKey.Y, recipientKey.Y, amount)))
 	isValid := dsa.Verify(&senderKey, hash[:], &r, &s)
 	if !isValid {
 		return false
