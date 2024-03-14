@@ -68,7 +68,12 @@ func SyncBlockchain() {
 
 func GetBalance(key big.Int) float64 {
 	total := 0.0
+	isGenesis := true
 	for _, block := range blockchain {
+		if isGenesis {
+			isGenesis = false
+			continue
+		}
 		if block.Sender.Y.Cmp(&key) == 0 {
 			total -= block.Amount
 		} else if block.Recipient.Y.Cmp(&key) == 0 {
