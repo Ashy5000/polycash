@@ -11,6 +11,7 @@ package main
 import (
 	"crypto/dsa"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -91,7 +92,8 @@ func Send(receiver string, amount string) {
 	key := GetKey()
 	sender := key.PublicKey.Y
 	parametersString := fmt.Sprintf("&%s&%s&%s", key.PublicKey.Parameters.P, key.PublicKey.Parameters.Q, key.PublicKey.Parameters.G)
-	r, s, err := dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%s:%s:%s", sender, receiver, amount)))
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", sender, receiver, amount)))
+	r, s, err := dsa.Sign(rand.Reader, &key, hash[:])
 	if err != nil {
 		panic(err)
 	}

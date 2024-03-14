@@ -10,6 +10,7 @@ package main
 
 import (
 	"crypto/dsa"
+	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
 	"math/big"
@@ -21,7 +22,8 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 	if err != nil {
 		panic(err)
 	}
-	isValid := dsa.Verify(&senderKey, []byte(fmt.Sprintf("%s:%s:%s", senderKey.Y, recipientKey.Y, strconv.FormatFloat(amountFloat, 'f', -1, 64))), &r, &s)
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f", senderKey.Y, recipientKey.Y, amountFloat)))
+	isValid := dsa.Verify(&senderKey, hash[:], &r, &s)
 	if !isValid {
 		return false
 	}
