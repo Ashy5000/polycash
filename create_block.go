@@ -47,7 +47,7 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		block.Difficulty = 10000
 	}
 	if len(blockchain) > 0 {
-		block.PreviousBlockHash = HashBlock(previousBlock)
+		block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
 	} else {
 		block.PreviousBlockHash = [32]byte{}
 	}
@@ -64,10 +64,11 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 				previousBlock.MiningTime = time.Minute
 			}
 			if len(blockchain) > 0 {
-				block.PreviousBlockHash = HashBlock(previousBlock)
+				block.PreviousBlockHash = HashBlock(blockchain[len(blockchain) - 1])
 			} else {
 				block.PreviousBlockHash = [32]byte{}
 			}
+			block.Difficulty = previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds()));
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])

@@ -116,7 +116,12 @@ func Send(receiver string, amount string) {
 
 func GetLastMinedBlock() (Block, bool) {
 	pubKey := GetKey().PublicKey.Y
+	isGenesis := true
 	for i := len(blockchain) - 1; i >= 0; i-- {
+		if isGenesis {
+			isGenesis = false;
+			continue;
+		}
 		block := blockchain[i]
 		if block.Miner.Y.Cmp(pubKey) == 0 {
 			return block, true
