@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"math/big"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func TestVerifyTransaction(t *testing.T) {
@@ -91,23 +93,17 @@ func TestVerifyBlock(t *testing.T) {
 		Append(GenesisBlock())
 		sender := key.PublicKey
 		receiver := key.PublicKey
-		amount := "0"
+		amount := 0.0
 		r := big.NewInt(0)
 		s := big.NewInt(0)
-		hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", sender.Y, receiver.Y, amount)))
+		hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", sender.Y, receiver.Y, strconv.FormatFloat(amount, 'f', -1, 64))))
 		r, s, err := dsa.Sign(rand.Reader, &key, hash[:])
 		if err != nil {
 			panic(err)
 		}
-		block := Block{
-			Sender:            sender,
-			Recipient:         receiver,
-			Amount:            0,
-			R:                 *r,
-			S:                 *s,
-			PreviousBlockHash: HashBlock(GenesisBlock()),
-			Miner:             key.PublicKey,
-			Difficulty:        1,
+		block, err := CreateBlock(sender, receiver, amount, *r, *s, hash, strconv.FormatInt(time.Now().UnixNano(), 10))
+		if err != nil {
+			panic(err)
 		}
 		result := VerifyBlock(block)
 		assert.True(t, result)
