@@ -57,6 +57,33 @@ func TestVerifyTransaction(t *testing.T) {
 	})
 }
 
+func TestVerifyMiner(t *testing.T) {
+	t.Run("It should return true if the miner is valid", func(t *testing.T) {
+		key := GetKey()
+		blockchain = nil
+		Append(GenesisBlock())
+		result := VerifyMiner(key.PublicKey)
+		assert.True(t, result)
+	})
+	t.Run("It should return false if there are too many miners", func(t *testing.T) {
+		key := GetKey()
+		miner := key.PublicKey
+		miner.Y = big.NewInt(1)
+		blockchain = nil
+		Append(GenesisBlock())
+		Append(Block{
+			Sender:            key.PublicKey,
+			Recipient:         key.PublicKey,
+			Miner:             miner,
+			Amount:            0,
+			PreviousBlockHash: HashBlock(GenesisBlock()),
+			Difficulty:        1,
+		})
+		result := VerifyMiner(key.PublicKey)
+		assert.False(t, result)
+	})
+}
+
 func TestVerifyBlock(t *testing.T) {
 	t.Run("It should return true if the block is valid", func(t *testing.T) {
 		key := GetKey()
