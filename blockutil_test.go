@@ -12,6 +12,7 @@ import (
 	"crypto/dsa"
 	"github.com/stretchr/testify/assert"
 	"math/big"
+	"net/http"
 	"testing"
 )
 
@@ -74,6 +75,17 @@ func TestGetBalance(t *testing.T) {
 		balance := GetBalance(key)
 		// Assert
 		assert.Equal(t, float64(100), balance)
+	})
+}
+
+func TestSendRequest(t *testing.T) {
+	t.Run("It does not panic when the request is successful", func(t *testing.T) {
+		// Arrange
+		req := &http.Request{}
+		// Act & Assert
+		assert.NotPanics(t, func() {
+			SendRequest(req)
+		})
 	})
 }
 
