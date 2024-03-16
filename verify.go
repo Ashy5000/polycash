@@ -49,7 +49,7 @@ func VerifyBlock(block Block) bool {
 	}
 	hashBytes := HashBlock(block)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
-	if hash > 9223372036854776000/block.Difficulty {
+	if hash > maximumUint64/block.Difficulty {
 		fmt.Println("Block has invalid hash. Ignoring block request.")
 		fmt.Printf("Actual hash: %d\n", hash)
 		return false
