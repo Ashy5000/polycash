@@ -89,6 +89,33 @@ func TestSendRequest(t *testing.T) {
 	})
 }
 
+func TestGetLastMinedBlock(t *testing.T) {
+	t.Run("It returns the last block mined by the key", func(t *testing.T) {
+		// Arrange
+		blockchain = nil
+		Append(GenesisBlock())
+		key := GetKey().PublicKey
+		block := Block{
+			Miner: key,
+		}
+		Append(block)
+		// Act
+		lastMinedBlock, found := GetLastMinedBlock()
+		// Assert
+		assert.True(t, found)
+		assert.Equal(t, block, lastMinedBlock)
+	})
+	t.Run("It returns false when the key has not mined any blocks", func(t *testing.T) {
+		// Arrange
+		blockchain = nil
+		Append(GenesisBlock())
+		// Act
+		_, found := GetLastMinedBlock()
+		// Assert
+		assert.False(t, found)
+	})
+}
+
 func TestGetMaxMiners(t *testing.T) {
 	t.Run("It returns 1 when the length of the blockchain is 0", func(t *testing.T) {
 		// Arrange
