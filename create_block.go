@@ -25,7 +25,7 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 	start := time.Now()
 	previousBlock, previousBlockFound := GetLastMinedBlock()
 	if !previousBlockFound {
-		previousBlock.Difficulty = 100000
+		previousBlock.Difficulty = initialBlockDifficulty
 		previousBlock.MiningTime = time.Minute
 	}
 	timestampInt64, err := strconv.ParseInt(timestamp, 10, 64)
@@ -43,8 +43,8 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		Difficulty: previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds())),
 		Timestamp:  time.Unix(0, timestampInt64),
 	}
-	if block.Difficulty < 10000 {
-		block.Difficulty = 10000
+	if block.Difficulty < minimumBlockDifficulty {
+		block.Difficulty = minimumBlockDifficulty
 	}
 	if len(blockchain) > 0 {
 		block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
@@ -54,21 +54,21 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 	hashBytes := HashBlock(block)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	fmt.Printf("Mining block with difficulty %d\n", block.Difficulty)
-	for hash > 9223372036854776000/block.Difficulty {
+	for hash > maximumUint64/block.Difficulty {
 		if transactionHashes[transactionHash] == 2 {
 			return Block{}, errors.New("lost block")
 		} else {
 			previousBlock, previousBlockFound = GetLastMinedBlock()
 			if !previousBlockFound {
-				previousBlock.Difficulty = 100000
+				previousBlock.Difficulty = initialBlockDifficulty
 				previousBlock.MiningTime = time.Minute
 			}
 			if len(blockchain) > 0 {
-				block.PreviousBlockHash = HashBlock(blockchain[len(blockchain) - 1])
+				block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
 			} else {
 				block.PreviousBlockHash = [32]byte{}
 			}
-			block.Difficulty = previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds()));
+			block.Difficulty = previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds()))
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
