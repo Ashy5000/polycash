@@ -22,6 +22,8 @@ There are two ways to run a node: using a peer server or a local peer list. With
 
 ## Setup & Usage
 
+*Note: A node must have a publicly accessible IP address in order to join the network.*
+
 Create and clone the repository:
 
 ```bash
