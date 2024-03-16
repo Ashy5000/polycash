@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"time"
 )
 
 func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amount string, r big.Int, s big.Int) bool {
@@ -67,14 +68,38 @@ func VerifyBlock(block Block) bool {
 			return true
 		}
 	}
-	if !VerifyMiner(block.Miner) {
-		return false
-	}
 	if len(blockchain) > 0 && block.PreviousBlockHash != HashBlock(blockchain[len(blockchain)-1]) {
 		fmt.Println("Block has invalid previous block hash. Ignoring block request.")
 		fmt.Println("The block could be on a different fork.")
 		fmt.Println("The blockchain will be re-synced to stay on the longest chain.")
 		SyncBlockchain()
+		return false
+	}
+	if !VerifyMiner(block.Miner) {
+		return false
+	}
+	// Get the correct difficulty for the block
+	lastMinedBlock := Block{
+		Difficulty: initialBlockDifficulty,
+		MiningTime: time.Minute,
+	}
+	if len(blockchain) > 0 {
+		isGenesis := true
+		for _, b := range blockchain {
+			if isGenesis {
+				isGenesis = false
+				continue
+			}
+			if b.Miner.Y.Cmp(block.Miner.Y) == 0 {
+				lastMinedBlock = b
+			}
+		}
+	}
+	correctDifficulty := lastMinedBlock.Difficulty * (60 / uint64(lastMinedBlock.MiningTime.Seconds()))
+	if block.Difficulty != correctDifficulty {
+		fmt.Println("Block has invalid difficulty. Ignoring block request.")
+		fmt.Println("Expected difficulty: ", correctDifficulty)
+		fmt.Println("Actual difficulty: ", block.Difficulty)
 		return false
 	}
 	return true
