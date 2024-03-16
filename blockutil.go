@@ -104,8 +104,9 @@ func Send(receiver string, amount string) {
 	}
 	rStr := r.String()
 	sStr := s.String()
+	timestamp := time.Now().UnixNano()
 	for _, peer := range GetPeers() {
-		body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s:%d", sender, parametersString, receiver, parametersString, amount, rStr, sStr, time.Now().UnixNano()))
+		body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s:%d", sender, parametersString, receiver, parametersString, amount, rStr, sStr, timestamp))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)
