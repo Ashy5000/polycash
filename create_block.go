@@ -69,6 +69,9 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 				block.PreviousBlockHash = [32]byte{}
 			}
 			block.Difficulty = previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds()))
+			if block.Difficulty < minimumBlockDifficulty {
+				block.Difficulty = minimumBlockDifficulty
+			}
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
