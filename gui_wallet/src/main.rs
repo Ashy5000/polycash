@@ -1,4 +1,4 @@
-use iced::widget::{button, row, column, text, container, text_input};
+use iced::widget::{button, row, column, text, container, text_input, rule, Space};
 use iced::{Alignment, Element, Sandbox, Settings};
 mod sync;
 
@@ -22,7 +22,7 @@ impl Sandbox for App {
 
     fn new() -> Self {
         Self {
-            balance: 0.0,
+            balance: -1.0,
             amount: 0.0,
         }
     }
@@ -56,20 +56,36 @@ impl Sandbox for App {
         column![
             container(
                 row![
-                    text(format!("{:.0}", self.balance)).size(50),
-                    text(format!(".{}", format!("{:.2}", self.balance).split(".").collect::<Vec<&str>>()[1])).size(20),
+                    text({
+                        if self.balance != -1.0 {
+                            format!("{:.0}", self.balance)
+                        } else {
+                            "?".to_string()
+                        }
+                    }).size(50),
+                    text({
+                        if self.balance != -1.0 {
+                            format!(".{}", format!("{:.2}", self.balance).split(".").collect::<Vec<&str>>()[1])
+                        } else {
+                            ".??".to_string()
+                        }
+                    }).size(20),
                 ]
-                .padding(20)
+                .padding(0)
                 .align_items(Alignment::End)
             ),
             button("Sync").on_press(Message::Sync),
+            Space::with_height(20),
+            rule::Rule::horizontal(0.0),
+            Space::with_height(20),
+            text("Amount").size(10),
             text_input("Enter an amount...", self.amount.to_string().as_str())
                 .on_input(Message::AmountChanged)
                 .padding(10)
                 .size(30),
         ]
         .padding(20)
-        .align_items(Alignment::Center)
+        .align_items(Alignment::Start)
         .into()
     }
     
