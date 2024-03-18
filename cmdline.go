@@ -20,15 +20,9 @@ import (
 	"strings"
 )
 
-func StartCmdLine() {
-	fmt.Println("Copyright (C) 2024 Asher Wrobel")
-	fmt.Println("This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions.")
-	fmt.Println("To see the license, type `license`.")
-	for {
-		inputReader := bufio.NewReader(os.Stdin)
-		fmt.Printf("BlockCMD console: ")
-		cmd, _ := inputReader.ReadString('\n')
-		cmd = cmd[:len(cmd)-1]
+func RunCmd(input string) {
+	cmds := strings.Split(input, ";")
+	for _, cmd := range cmds {
 		fields := strings.Split(cmd, " ")
 		action := fields[0]
 		if action == "sync" {
@@ -84,7 +78,7 @@ func StartCmdLine() {
 				panic(err)
 			}
 		} else if action == "exit" {
-			return
+			os.Exit(0)
 		} else if action == "help" {
 			fmt.Println("Commands:")
 			fmt.Println("sync - Sync the blockchain with peers")
@@ -120,9 +114,22 @@ func StartCmdLine() {
 			}
 			fmt.Println(string(license))
 		} else if action == "" {
-			continue
+			return
 		} else {
 			fmt.Println("Invalid command.")
 		}
+	}
+}
+
+func StartCmdLine() {
+	fmt.Println("Copyright (C) 2024 Asher Wrobel")
+	fmt.Println("This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions.")
+	fmt.Println("To see the license, type `license`.")
+	for {
+		inputReader := bufio.NewReader(os.Stdin)
+		fmt.Printf("BlockCMD console: ")
+		cmd, _ := inputReader.ReadString('\n')
+		cmd = cmd[:len(cmd)-1]
+		RunCmd(cmd)
 	}
 }
