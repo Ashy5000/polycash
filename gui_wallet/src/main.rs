@@ -9,12 +9,14 @@ pub fn main() -> iced::Result {
 struct App {
     balance: f64,
     amount: f64,
+    address: String,
 }
 
 #[derive(Debug, Clone)]
 enum Message {
     Sync,
     AmountChanged(String),
+    AddressChanged(String),
 }
 
 impl Sandbox for App {
@@ -24,6 +26,7 @@ impl Sandbox for App {
         Self {
             balance: -1.0,
             amount: 0.0,
+            address: "".to_string(),
         }
     }
 
@@ -49,11 +52,15 @@ impl Sandbox for App {
                     }
                 }
             }
+            Message::AddressChanged(new_address) => {
+                self.address = new_address;
+            }
         }
     }
 
     fn view(&self) -> Element<Message> {
         column![
+            text("Balance: ").size(15),
             container(
                 row![
                     text({
@@ -74,13 +81,20 @@ impl Sandbox for App {
                 .padding(0)
                 .align_items(Alignment::End)
             ),
+            Space::with_height(10),
             button("Sync").on_press(Message::Sync),
             Space::with_height(20),
             rule::Rule::horizontal(0.0),
             Space::with_height(20),
-            text("Amount").size(10),
+            text("Amount").size(15),
             text_input("Enter an amount...", self.amount.to_string().as_str())
                 .on_input(Message::AmountChanged)
+                .padding(10)
+                .size(30),
+            Space::with_height(10),
+            text("Address").size(15),
+            text_input("Enter an address...", self.address.as_str())
+                .on_input(Message::AddressChanged)
                 .padding(10)
                 .size(30),
         ]
