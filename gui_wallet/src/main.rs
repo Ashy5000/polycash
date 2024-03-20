@@ -1,6 +1,9 @@
 use iced::widget::{button, row, column, text, container, text_input, rule, Space};
 use iced::{Alignment, Element, Sandbox, Settings};
+use crate::send::send;
+
 mod sync;
+mod send;
 
 pub fn main() -> iced::Result {
     App::run(Settings::default())
@@ -17,6 +20,7 @@ enum Message {
     Sync,
     AmountChanged(String),
     AddressChanged(String),
+    Send,
 }
 
 impl Sandbox for App {
@@ -37,7 +41,7 @@ impl Sandbox for App {
     fn update(&mut self, message: Message) {
         match message {
             Message::Sync => {
-                self.balance = crate::sync::sync();
+                self.balance = sync::sync();
             }
             Message::AmountChanged(new_amount) => {
                 let parsed_amount = new_amount.parse::<f64>();
@@ -54,6 +58,9 @@ impl Sandbox for App {
             }
             Message::AddressChanged(new_address) => {
                 self.address = new_address;
+            }
+            Message::Send => {
+                send(self.amount.clone(), self.address.clone());
             }
         }
     }
@@ -86,17 +93,21 @@ impl Sandbox for App {
             Space::with_height(20),
             rule::Rule::horizontal(0.0),
             Space::with_height(20),
+            text("Send").size(23),
+            Space::with_height(10),
             text("Amount").size(15),
             text_input("Enter an amount...", self.amount.to_string().as_str())
                 .on_input(Message::AmountChanged)
                 .padding(10)
-                .size(30),
+                .size(20),
             Space::with_height(10),
             text("Address").size(15),
             text_input("Enter an address...", self.address.as_str())
                 .on_input(Message::AddressChanged)
                 .padding(10)
-                .size(30),
+                .size(20),
+            Space::with_height(15),
+            button("Send").on_press(Message::Send)
         ]
         .padding(20)
         .align_items(Alignment::Start)
