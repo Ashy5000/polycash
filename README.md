@@ -17,10 +17,10 @@ The roadmap for this repository looks something like this:
 **Production**: Launching the final product, fixing any issues if and when they arrive.
 
 ## Directory structure
-The root directory of this project is occupied by the Golang source code that nodes run in order to interact with each other and the decentralized blockchain. In the ```peer_server``` directory, there is Rust code that can be run by servers to maintain a list of peers in the network. Nodes can connect to these servers or maintain their own lists. You will probably only need to run the Golang code. There is also a build directory that contains builds of the node and peer server for various platforms. By launch, almost all of the major platforms will be supported. Alternatively, you may build from source.
+The root directory of this project is occupied by the Golang source code that nodes run in order to interact with each other and the decentralized blockchain. In the ```peer_server``` directory, there is Rust code that can be run by servers to maintain a list of peers in the network. Nodes can connect to these servers or maintain their own lists. Using this code is optional, and its only purpose is to make it faster to discover peers. Thirdly, the ```gui_wallet``` directory contains Rust code for a GUI wallet to make transactions easier to make. Note that you will still have to generate a key using the ```keygen``` command in the interactive console (see *To run as a client* below).
 
 ## About decentralized peer lists
-There are two ways to run a node: using a peer server or a local peer list. With a peer server, there is far less configuration. To make yourself known to the network, use the `addpeer [YOUR IP]` command in the BlockCMD console (see `# To run as a client:` below to open the console). With a local peer list, you fully decentralize your connections with other computers to completely remove trust from the system. However, dealing with the configuration for this option can take a bit longer. I personally recommend using a local peer list. The security and reliability that decentralized peer tracking provides simply can't be reproduced with a centralized peer server, but if it seems daunting to manually configure IP addresses, the peer server's an okay way to start. The two options both use the same network and the same blockchain, so your balance will be preserved if you switch over.
+There are two ways to run a node: using a peer server or a local peer list. With a peer server, there is far less configuration. To make yourself known to the network, use the `addpeer [YOUR IP]` command in the BlockCMD console (see *To run as a client:* below to open the console). With a local peer list, you fully decentralize your connections with other computers to completely remove trust from the system. However, dealing with the configuration for this option can take a bit longer. I personally recommend using a local peer list. The security and reliability that decentralized peer tracking provides simply can't be reproduced with a centralized peer server, but if it seems daunting to manually configure IP addresses, the peer server's an okay way to start. The two options both use the same network and the same blockchain, so your balance will be preserved if you switch over.
 
 ## Setup & Usage
 
@@ -48,6 +48,8 @@ Commands:
 - `loadstate`: load a backup of the current state of the blockchain from a file
 - `exit`: exit the console
 - `addpeer {ip}`: by default, connects to a peer. If using a centralized peer server, makes yourself known to the network.
+
+To get started, run `keygen` to generate a new key. To get your balance, find your public key in the ```key.json``` file (the long number following ```"Y":```), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key.
 
 ### To run a node:
 To run the node software, which keeps the blockchain distributed across the p2p network, run:
