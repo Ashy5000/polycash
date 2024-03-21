@@ -20,8 +20,11 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
+
+var wg sync.WaitGroup
 
 func GetKey() dsa.PrivateKey {
 	keyJson, err := os.ReadFile("key.json")
@@ -89,8 +92,10 @@ func GetBalance(key big.Int) float64 {
 func SendRequest(req *http.Request) {
 	_, err := http.DefaultClient.Do(req)
 	if err != nil {
+		wg.Done()
 		return
 	}
+	wg.Done()
 }
 
 func Send(receiver string, amount string) {
@@ -106,11 +111,13 @@ func Send(receiver string, amount string) {
 	sStr := s.String()
 	timestamp := time.Now().UnixNano()
 	for _, peer := range GetPeers() {
+		fmt.Println("Sending transaction to peer: " + peer)
 		body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s:%d", sender, parametersString, receiver, parametersString, amount, rStr, sStr, timestamp))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)
 		}
+		wg.Add(1)
 		go SendRequest(req)
 	}
 }

@@ -40,6 +40,9 @@ func RunCmd(input string) {
 			receiver := fields[1]
 			amount := fields[2]
 			Send(receiver, amount)
+			fmt.Println("Waiting for all workers to finish")
+			wg.Wait()
+			fmt.Println("All workers have finished")
 		} else if action == "keygen" {
 			var privateKey dsa.PrivateKey
 			var params dsa.Parameters
