@@ -108,6 +108,17 @@ var words = map[string]string{
 	"97": "around",
 	"98": "arrange",
 	"99": "arrest",
+	// Words with placeholders
+	"0!": "buddy",
+	"1!": "basic",
+	"2!": "bizarre",
+	"3!": "bless",
+	"4!": "boring",
+	"5!": "brave",
+	"6!": "breeze",
+	"7!": "bribe",
+	"8!": "broken",
+	"9!": "banana",
 }
 
 func GetMnemonic(key dsa.PrivateKey) string {
@@ -116,6 +127,9 @@ func GetMnemonic(key dsa.PrivateKey) string {
 	keyString := key.X.String()
 	// Split the string into groups of 2 digits.
 	var groups []string
+	if len(keyString)%2 != 0 {
+		keyString = keyString + "!"
+	}
 	for i := 0; i < len(keyString); i += 2 {
 		groups = append(groups, keyString[i:i+2])
 	}
@@ -145,6 +159,10 @@ func RestoreMnemonic(mnemonic string) dsa.PrivateKey {
 	}
 	// Join the groups of 2 digits together.
 	keyString := strings.Join(groups, "")
+	// Remove the last character if it is a "!".
+	if keyString[len(keyString)-1] == '!' {
+		keyString = keyString[:len(keyString)-1]
+	}
 	// Convert the string to a big.Int.
 	key := dsa.PrivateKey{
 		PublicKey: dsa.PublicKey{},

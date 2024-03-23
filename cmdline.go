@@ -60,6 +60,12 @@ func RunCmd(input string) {
 				panic(err)
 			}
 			err = os.WriteFile("key.json", keyJson, 0644)
+			if err != nil {
+				panic(err)
+			}
+			mnemonic := GetMnemonic(privateKey)
+			fmt.Println("Mnemonic: " + mnemonic)
+			fmt.Println("Write down the mnemonic and keep it safe, or better yet memorize it. It is the ONLY WAY to recover your private key.")
 		} else if action == "savestate" {
 			// Save the blockchain to a file
 			blockchainJson, err := json.Marshal(blockchain)
