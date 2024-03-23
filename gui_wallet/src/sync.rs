@@ -4,7 +4,7 @@ use std::str::FromStr;
 use crate::key::get_public_key;
 
 pub(crate) fn sync() -> f64 {
-    let binding = get_public_key();
+    let binding = get_public_key().expect("Failed to get public key");
     let public_key = binding.as_str();
     if public_key == "" {
         return -1.0

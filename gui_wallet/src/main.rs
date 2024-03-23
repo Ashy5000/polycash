@@ -9,6 +9,22 @@ mod key;
 mod shorten;
 
 pub fn main() -> iced::Result {
+    let public_key = key::get_public_key();
+    match public_key {
+        Ok(_) => {}
+        Err(e) => {
+            println!("Key not found. Would you like to generate a new key? (y/n)");
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+            if input.trim() == "y" {
+                key::generate_key();
+                println!("Continuing to GUI...")
+            } else {
+                println!("Exiting...");
+                std::process::exit(0);
+            }
+        }
+    }
     App::run(Settings::default())
 }
 
@@ -67,7 +83,7 @@ impl Sandbox for App {
                 send(self.amount.clone(), self.address.clone());
             }
             Message::Copy => {
-                let public_key = key::get_public_key();
+                let public_key = key::get_public_key().expect("Failed to get public key");
                 let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
                 ctx.set_contents(public_key.clone()).unwrap();
                 assert_eq!(ctx.get_contents().unwrap(), public_key);
@@ -129,7 +145,7 @@ impl Sandbox for App {
                 text("Public Key:").size(20),
                 container(
                     row![
-                        text(crate::shorten::shorten(crate::key::get_public_key())).size(15),
+                        text(crate::shorten::shorten(crate::key::get_public_key().expect("Failed to get public key"))).size(15),
                         button("Copy").on_press(Message::Copy)
                     ]
                 )
