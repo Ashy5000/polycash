@@ -18,17 +18,21 @@ var blockchain []Block
 
 func GenesisBlock() Block {
 	return Block{
-		Sender:            dsa.PublicKey{},
-		Recipient:         dsa.PublicKey{},
-		Miner:             dsa.PublicKey{},
-		Amount:            0,
-		Nonce:             0,
-		R:                 big.Int{},
-		S:                 big.Int{},
-		MiningTime:        0,
-		Difficulty:        0,
-		PreviousBlockHash: [32]byte{},
-		Timestamp:         time.Time{},
+		Sender:    dsa.PublicKey{},
+		Recipient: dsa.PublicKey{},
+		Miner:     dsa.PublicKey{},
+		Amount:    0,
+		Nonce:     0,
+		SenderSignature: Signature{
+			R: big.Int{},
+			S: big.Int{},
+		},
+		MiningTime:             0,
+		Difficulty:             0,
+		PreviousBlockHash:      [32]byte{},
+		Timestamp:              time.Time{},
+		TimeVerifierSignatures: []Signature{},
+		TimeVerifiers:          []dsa.PublicKey{},
 	}
 }
 

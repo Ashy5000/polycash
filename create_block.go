@@ -108,6 +108,7 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println(string(bodyBytes))
 		// Unmarshal the response body
 		responseBlock := Block{}
 		err = json.Unmarshal(bodyBytes, &responseBlock)
