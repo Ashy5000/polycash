@@ -40,7 +40,7 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		R:          r,
 		S:          s,
 		Nonce:      0,
-		Difficulty: previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds())),
+		Difficulty: GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
 		Timestamp:  time.Unix(0, timestampInt64),
 	}
 	if block.Difficulty < minimumBlockDifficulty {

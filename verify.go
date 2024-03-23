@@ -95,7 +95,7 @@ func VerifyBlock(block Block) bool {
 			}
 		}
 	}
-	correctDifficulty := lastMinedBlock.Difficulty * (60 / uint64(lastMinedBlock.MiningTime.Seconds()))
+	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty)
 	if block.Difficulty != correctDifficulty {
 		fmt.Println("Block has invalid difficulty. Ignoring block request.")
 		fmt.Println("Expected difficulty: ", correctDifficulty)
