@@ -11,10 +11,14 @@ package main
 import (
 	"crypto/dsa"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
+	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -33,15 +37,19 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		panic(err)
 	}
 	block := Block{
-		Miner:      GetKey().PublicKey,
-		Sender:     sender,
-		Recipient:  recipient,
-		Amount:     amount,
-		R:          r,
-		S:          s,
-		Nonce:      0,
-		Difficulty: GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
-		Timestamp:  time.Unix(0, timestampInt64),
+		Miner:     GetKey().PublicKey,
+		Sender:    sender,
+		Recipient: recipient,
+		Amount:    amount,
+		SenderSignature: Signature{
+			R: r,
+			S: s,
+		},
+		Nonce:                  0,
+		Difficulty:             GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
+		Timestamp:              time.Unix(0, timestampInt64),
+		TimeVerifierSignatures: []Signature{},
+		TimeVerifiers:          []dsa.PublicKey{},
 	}
 	if block.Difficulty < minimumBlockDifficulty {
 		block.Difficulty = minimumBlockDifficulty
@@ -78,5 +86,36 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		}
 	}
 	block.MiningTime = time.Since(start)
+	// Convert the block to a string (JSON)
+	bodyChars, err := json.Marshal(&block)
+	if err != nil {
+		panic(err)
+	}
+	// Ask for time verifiers
+	for _, peer := range GetPeers() {
+		body := strings.NewReader(string(bodyChars))
+		req, err := http.NewRequest(http.MethodGet, peer+"/verifyTime", body)
+		if err != nil {
+			panic(err)
+		}
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Println("Peer down.")
+			continue
+		}
+		// Get the response body
+		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			panic(err)
+		}
+		// Unmarshal the response body
+		responseBlock := Block{}
+		err = json.Unmarshal(bodyBytes, &responseBlock)
+		if err != nil {
+			panic(err)
+		}
+		// Set the time verifiers
+		block.TimeVerifiers = responseBlock.TimeVerifiers // TODO: Verify time verifiers
+	}
 	return block, nil
 }

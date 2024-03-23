@@ -9,6 +9,8 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
+	"crypto/dsa"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -18,6 +20,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
@@ -187,6 +190,56 @@ func HandlePeerIpRequest(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
+	// Verify that the time the block was mined is within a reasonable range of the current time
+	// Sign the time with the time verifier's private key
+	// This is to prevent miners from mining blocks in the future or the past
+	requestBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+	request := string(requestBytes)
+	// Parse the request (JSON)
+	block := Block{}
+	err = json.Unmarshal([]byte(request), &block)
+	if err != nil {
+		panic(err)
+	}
+	// Get the current time
+	currentTime := time.Now()
+	// Check if the time the block was mined is within a reasonable range of the current time
+	// It cannot be in the future, and it cannot be more than 10 seconds in the past
+	if block.Timestamp.After(currentTime) || block.Timestamp.Before(currentTime.Add(-10*time.Second)) {
+		_, err := io.WriteString(w, "invalid")
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+	// Sign the time with the time verifier's (this node's) private key
+	key := GetKey()
+	r, s, err := dsa.Sign(rand.Reader, &key, []byte(block.Timestamp.String()))
+	if err != nil {
+		panic(err)
+	}
+	signature := Signature{
+		R: *r,
+		S: *s,
+	}
+	block.TimeVerifierSignatures = append(block.TimeVerifierSignatures, signature)
+	block.TimeVerifiers = append(block.TimeVerifiers, key.PublicKey)
+	// Convert the block back to JSON
+	blockBytes, err := json.Marshal(&block)
+	if err != nil {
+		panic(err)
+	}
+	// Send the block back to the requester
+	_, err = io.WriteString(w, string(blockBytes))
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Serve(mine bool, port string) {
 	if mine {
 		http.HandleFunc("/mine", HandleMineRequest)
@@ -195,5 +248,6 @@ func Serve(mine bool, port string) {
 	http.HandleFunc("/blockchain", HandleBlockchainRequest)
 	http.HandleFunc("/identify", HandleIdentifyRequest)
 	http.HandleFunc("/peerIp", HandlePeerIpRequest)
+	http.HandleFunc("/verifyTime", HandleVerifyTimeRequest)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }

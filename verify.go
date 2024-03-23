@@ -44,7 +44,7 @@ func VerifyMiner(miner dsa.PublicKey) bool {
 }
 
 func VerifyBlock(block Block) bool {
-	if !VerifyTransaction(block.Sender, block.Recipient, strconv.FormatFloat(block.Amount, 'f', -1, 64), block.R, block.S) {
+	if !VerifyTransaction(block.Sender, block.Recipient, strconv.FormatFloat(block.Amount, 'f', -1, 64), block.SenderSignature.R, block.SenderSignature.S) {
 		fmt.Println("Block has invalid transaction/transaction signature. Ignoring block request.")
 		return false
 	}
