@@ -71,6 +71,7 @@ func SyncBlockchain() {
 
 func GetBalance(key big.Int) float64 {
 	total := 0.0
+	miningTotal := 0.0
 	isGenesis := true
 	for _, block := range blockchain {
 		if isGenesis {
@@ -83,8 +84,11 @@ func GetBalance(key big.Int) float64 {
 			total += block.Amount
 		}
 		if block.Miner.Y.Cmp(&key) == 0 {
-			total++
+			miningTotal += 1.0
 		}
+	}
+	if miningTotal > blocksBeforeSpendable { // A miner must mine n blocks before they can spend their mining rewards
+		total += miningTotal
 	}
 	return total
 }

@@ -9,3 +9,5 @@ const dpm = 1
 const kdpm = 1000
 const mdpm = 1000000
 const gdpm = 1000000000
+
+const blocksBeforeSpendable = 3
