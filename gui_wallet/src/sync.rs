@@ -1,21 +1,20 @@
 use regex::Regex;
-use std::fs;
 use std::process::Command;
 use std::str::FromStr;
+use crate::key::get_public_key;
 
 pub(crate) fn sync() -> f64 {
-    let key_string = fs::read_to_string("../key.json").expect("Key file missing!");
-    let re = Regex::new(r"Y(.):(?<y>.*)}").unwrap();
-    let Some(caps) = re.captures(&key_string) else {
-        println!("no match!");
-        return -1.0;
-    };
+    let binding = get_public_key();
+    let public_key = binding.as_str();
+    if public_key == "" {
+        return -1.0
+    }
     let output = Command::new("env")
         .arg("-C")
         .arg("..")
         .arg("./builds/node/node_linux-amd64")
         .arg("-command")
-        .arg("sync;balance ".to_owned() + &caps["y"])
+        .arg("sync;balance ".to_owned() + public_key)
         .output()
         .expect("Failed to run node executable");
     let output_string =

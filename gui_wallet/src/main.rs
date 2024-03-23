@@ -1,9 +1,12 @@
 use crate::send::send;
 use iced::widget::{button, column, container, row, rule, scrollable, text, text_input, Space};
 use iced::{Alignment, Element, Sandbox, Settings};
+use clipboard::{ClipboardContext, ClipboardProvider};
 
 mod send;
 mod sync;
+mod key;
+mod shorten;
 
 pub fn main() -> iced::Result {
     App::run(Settings::default())
@@ -21,6 +24,7 @@ enum Message {
     AmountChanged(String),
     AddressChanged(String),
     Send,
+    Copy,
 }
 
 impl Sandbox for App {
@@ -61,6 +65,12 @@ impl Sandbox for App {
             }
             Message::Send => {
                 send(self.amount.clone(), self.address.clone());
+            }
+            Message::Copy => {
+                let public_key = key::get_public_key();
+                let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+                ctx.set_contents(public_key.clone()).unwrap();
+                assert_eq!(ctx.get_contents().unwrap(), public_key);
             }
         }
     }
@@ -115,7 +125,14 @@ impl Sandbox for App {
                     .padding(10)
                     .size(20),
                 Space::with_height(15),
-                button("Send").on_press(Message::Send)
+                button("Send").on_press(Message::Send),
+                text("Public Key:").size(20),
+                container(
+                    row![
+                        text(crate::shorten::shorten(crate::key::get_public_key())).size(15),
+                        button("Copy").on_press(Message::Copy)
+                    ]
+                )
             ]
             .padding(20)
             .align_items(Alignment::Start),
