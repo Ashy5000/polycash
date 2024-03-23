@@ -24,7 +24,7 @@ There are two ways to run a node: using a peer server or a local peer list. With
 
 ## Setup & Usage
 
-*Note: A node must have a publicly accessible IP address in order to join the network.*
+*Note: A node must have a publicly accessible IP address in order to join the network. You may have to set up port forwarding on your router.*
 
 Create and clone the repository:
 
