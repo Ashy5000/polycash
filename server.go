@@ -148,11 +148,52 @@ func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+func HandleIdentifyRequest(w http.ResponseWriter, _ *http.Request) {
+	_, err := io.WriteString(w, GetKey().Y.String())
+	if err != nil {
+		panic(err)
+	}
+}
+
+func HandlePeerIpRequest(w http.ResponseWriter, req *http.Request) {
+	// Find the IP address of a peer by their public key
+	peerKeyBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+	peerKey := string(peerKeyBytes)
+	for _, peer := range GetPeers() {
+		req, err := http.NewRequest(http.MethodGet, peer+"/identify", nil)
+		if err != nil {
+			panic(err)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Println("Peer is down.")
+			continue
+		}
+		currentPeerKeyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		currentPeerKey := string(currentPeerKeyBytes)
+		if currentPeerKey == peerKey {
+			_, err := io.WriteString(w, peer)
+			if err != nil {
+				panic(err)
+			}
+			return
+		}
+	}
+}
+
 func Serve(mine bool, port string) {
 	if mine {
 		http.HandleFunc("/mine", HandleMineRequest)
 	}
 	http.HandleFunc("/block", HandleBlockRequest)
 	http.HandleFunc("/blockchain", HandleBlockchainRequest)
+	http.HandleFunc("/identify", HandleIdentifyRequest)
+	http.HandleFunc("/peerIp", HandlePeerIpRequest)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
