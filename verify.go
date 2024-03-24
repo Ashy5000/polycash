@@ -35,8 +35,8 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 }
 
 func VerifyMiner(miner dsa.PublicKey) bool {
-	if IsNewMiner(miner, len(blockchain)) && GetMinerCount() >= GetMaxMiners() {
-		println("Miner count: ", GetMinerCount())
+	if IsNewMiner(miner, len(blockchain)) && GetMinerCount(len(blockchain)) >= GetMaxMiners() {
+		println("Miner count: ", GetMinerCount(len(blockchain)))
 		println("Maximum miner count: ", GetMaxMiners())
 		return false
 	}
@@ -102,5 +102,53 @@ func VerifyBlock(block Block) bool {
 		fmt.Println("Actual difficulty: ", block.Difficulty)
 		return false
 	}
+	if block.Difficulty < minimumBlockDifficulty {
+		fmt.Println("Block has invalid difficulty. Ignoring block request.")
+		fmt.Println("Difficulty is below minimum block difficulty.")
+		return false
+	}
+	if block.Timestamp.After(time.Now()) {
+		fmt.Println("Block has invalid timestamp. Ignoring block request.")
+		fmt.Println("Timestamp is in the future.")
+		return false
+	}
+	if !VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures) {
+		fmt.Println("Block has invalid time verifiers. Ignoring block request.")
+		return false
+	}
 	return true
+}
+
+func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Signature) bool {
+	if len(verifiers) != len(signatures) {
+		return false
+	}
+	for i, verifier := range verifiers {
+		if !dsa.Verify(&verifier, []byte(fmt.Sprintf("%d", block.Timestamp.Add(block.MiningTime).UnixNano())), &signatures[i].R, &signatures[i].S) {
+			return false
+		}
+	}
+	// Ensure all verifiers are unique
+	verifierMap := make(map[string]bool)
+	for _, verifier := range verifiers {
+		if verifierMap[verifier.Y.String()] {
+			return false
+		}
+		verifierMap[verifier.Y.String()] = true
+	}
+	// Ensure all verifiers are miners
+	for _, verifier := range verifiers {
+		if !IsNewMiner(verifier, len(blockchain)) {
+			return false
+		}
+	}
+	// Ensure there are enough verifiers
+	if len(verifiers) < GetMinVerifiers() {
+		return false
+	}
+	return true
+}
+
+func GetMinVerifiers() int {
+	return int(GetMinerCount(len(blockchain)) / 5)
 }

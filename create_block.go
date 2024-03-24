@@ -154,7 +154,7 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		// Set the time verifiers
 		block.TimeVerifiers = responseBlock.TimeVerifiers // TODO: Verify time verifiers
 	}
-	if int64(len(block.TimeVerifiers)) < GetMinerCount()/5 {
+	if int64(len(block.TimeVerifiers)) < GetMinerCount(len(blockchain))/5 {
 		fmt.Println("Not enough time verifiers.")
 		return Block{}, errors.New("lost block")
 	}
