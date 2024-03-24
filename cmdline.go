@@ -66,6 +66,22 @@ func RunCmd(input string) {
 			mnemonic := GetMnemonic(privateKey)
 			fmt.Println("Mnemonic: " + mnemonic)
 			fmt.Println("Write down the mnemonic and keep it safe, or better yet memorize it. It is the ONLY WAY to recover your private key.")
+		} else if action == "encrypt" {
+			// Ask the user for a password
+			fmt.Print("Enter a password: ")
+			inputReader := bufio.NewReader(os.Stdin)
+			password, _ := inputReader.ReadString('\n')
+			password = password[:len(password)-1]
+			// Encrypt the key
+			EncryptKey(password)
+		} else if action == "decrypt" {
+			// Ask the user for a password
+			fmt.Print("Enter a password: ")
+			inputReader := bufio.NewReader(os.Stdin)
+			password, _ := inputReader.ReadString('\n')
+			password = password[:len(password)-1]
+			// Decrypt the key
+			DecryptKey(password)
 		} else if action == "savestate" {
 			// Save the blockchain to a file
 			blockchainJson, err := json.Marshal(blockchain)
@@ -136,7 +152,7 @@ func StartCmdLine() {
 	fmt.Println("To see the license, type `license`.")
 	for {
 		inputReader := bufio.NewReader(os.Stdin)
-		fmt.Printf("BlockCMD console: ")
+		fmt.Printf("BlockCMD console (encrypted: %t): ", IsKeyEncrypted())
 		cmd, _ := inputReader.ReadString('\n')
 		cmd = cmd[:len(cmd)-1]
 		RunCmd(cmd)
