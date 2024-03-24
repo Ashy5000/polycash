@@ -42,6 +42,8 @@ Commands:
 - `help`: see a list of all commands
 - `sync`: update the blockchain and all balances and transactions
 - `keygen`: generate a key pair so you can send and receive tokens
+- `encrypt`: encrypt the private key so you can store it safely
+- `decrypt`: decrypt the private key so you can use it
 - `send {recipient} {amount}`: send {amount} tokens to {recipient}
 - `balance {key}`: get the balance associated with the public key {key}
 - `savestate`: save a backup of the current state of the blockchain to a file
@@ -49,7 +51,7 @@ Commands:
 - `exit`: exit the console
 - `addpeer {ip}`: by default, connects to a peer. If using a centralized peer server, makes yourself known to the network.
 
-To get started, run `keygen` to generate a new key. To get your balance, find your public key in the ```key.json``` file (the long number following ```"Y":```), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key.
+To get started, run `keygen` to generate a new key. To get your balance, find your public key in the ```key.json``` file (the long number following ```"Y":```), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key. When you're done, type `encrypt` to encrypt your private key and store it safely. You can decrypt it later to use it again with `decrypt`. You must use a passcode that is a multiple of 16 characters long for encryption and decryption. Write it down somewhere safe, as you will not be able to access your private key without it.
 
 ### To run a node:
 To run the node software, which keeps the blockchain distributed across the p2p network, run:
