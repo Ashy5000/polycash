@@ -93,8 +93,8 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 	}
 	// Ask for time verifiers
 	for _, peer := range GetPeers() {
-		body := strings.NewReader(string(bodyChars))
-		req, err := http.NewRequest(http.MethodGet, peer+"/verifyTime", body)
+		// Verify that the peer has mined a block (only miners can be time verifiers)
+		req, err := http.NewRequest(http.MethodGet, peer+"/identify", nil)
 		if err != nil {
 			panic(err)
 		}
@@ -105,6 +105,39 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		}
 		// Get the response body
 		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			panic(err)
+		}
+		// Convert the response body to a string
+		bodyString := string(bodyBytes)
+		// Convert the response body to a big.Int
+		peerY, ok := new(big.Int).SetString(bodyString, 10)
+		if !ok {
+			fmt.Println("Could not convert peer Y to big.Int")
+			continue
+		}
+		// Create a dsa.PublicKey from the big.Int
+		peerKey := dsa.PublicKey{
+			Y: peerY,
+		}
+		// Verify that the peer has mined a block
+		if IsNewMiner(peerKey, len(blockchain)) {
+			fmt.Println("Peer has not mined a block.")
+			continue
+		}
+		// Ask to verify the time
+		body := strings.NewReader(string(bodyChars))
+		req, err = http.NewRequest(http.MethodGet, peer+"/verifyTime", body)
+		if err != nil {
+			panic(err)
+		}
+		res, err = http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Println("Peer down.")
+			continue
+		}
+		// Get the response body
+		bodyBytes, err = io.ReadAll(res.Body)
 		if err != nil {
 			panic(err)
 		}
@@ -120,6 +153,10 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		}
 		// Set the time verifiers
 		block.TimeVerifiers = responseBlock.TimeVerifiers // TODO: Verify time verifiers
+	}
+	if int64(len(block.TimeVerifiers)) < GetMinerCount()/5 {
+		fmt.Println("Not enough time verifiers.")
+		return Block{}, errors.New("lost block")
 	}
 	return block, nil
 }
