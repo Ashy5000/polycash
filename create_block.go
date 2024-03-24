@@ -108,7 +108,10 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(string(bodyBytes))
+		if string(bodyBytes) == "invalid" {
+			fmt.Println("Time verifier believes block is invalid.")
+			continue
+		}
 		// Unmarshal the response body
 		responseBlock := Block{}
 		err = json.Unmarshal(bodyBytes, &responseBlock)
