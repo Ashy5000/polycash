@@ -8,14 +8,14 @@ You should have received a copy of the GNU General Public License along with thi
 */
 package main
 
-const initialBlockDifficulty = uint64(100000)
-const minimumBlockDifficulty = uint64(100000)
-const maximumUint64 = ^uint64(0)
+var securityLevel = 0
+var initialBlockDifficulty = uint64(100000)
+var minimumBlockDifficulty = uint64(100000)
+var maximumUint64 = ^uint64(0)
+var blocksBeforeSpendable = 3
 
 // Mining power is measured in difficulty points per minute (DPM).
 const dpm = 1
 const kdpm = 1000
 const mdpm = 1000000
 const gdpm = 1000000000
-
-const blocksBeforeSpendable = 3

@@ -87,7 +87,7 @@ func GetBalance(key big.Int) float64 {
 			miningTotal += 1.0
 		}
 	}
-	if miningTotal > blocksBeforeSpendable { // A miner must mine n blocks before they can spend their mining rewards
+	if int(miningTotal) > blocksBeforeSpendable { // A miner must mine n blocks before they can spend their mining rewards
 		total += miningTotal
 	}
 	return total

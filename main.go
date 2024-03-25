@@ -22,6 +22,7 @@ func main() {
 	useLocalPeerList = flag.Bool("useLocalPeerList", true, "Set to true to use local peer list and fully decentralize (slower, but more secure)")
 	flag.Parse()
 	Append(GenesisBlock())
+	ApplySecurityLevel(securityLevel)
 	if *serve {
 		Serve(*mine, *port)
 	} else {
