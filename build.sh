@@ -14,3 +14,11 @@ for os in linux darwin windows; do
     env GOOS=$os GOARCH=$arch go build -o builds/node/node_$os-$arch
   done
 done
+
+# Build the GUI wallet
+cd gui_wallet
+for triple in x86_64-unknown-linux-gnu; do
+  echo "Building for $triple"
+  cargo build --release --target $triple
+  mv target/$triple/release/gui_wallet ../builds/gui_wallet/gui_wallet_$triple
+done
