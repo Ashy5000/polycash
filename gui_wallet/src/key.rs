@@ -19,7 +19,7 @@ pub(crate) fn get_public_key() -> Result<String, PublicKeyError> {
     let key_string_result = fs::read_to_string("../key.json");
     let key_string = match key_string_result {
         Ok(key_string) => key_string,
-        Err(_) => {
+        Err(..) => {
             return Err(PublicKeyError {
                 message: "Key not found".to_string(),
             })

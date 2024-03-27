@@ -20,7 +20,7 @@ pub fn main() -> iced::Result {
     let public_key = key::get_public_key();
     match public_key {
         Ok(_) => {}
-        Err(e) => {
+        Err(..) => {
             println!("Key not found. Would you like to generate a new key? (y/n)");
             let mut input = String::new();
             std::io::stdin().read_line(&mut input).unwrap();
