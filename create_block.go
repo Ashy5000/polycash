@@ -61,6 +61,7 @@ func CreateBlock() (Block, error) {
 			hash := sha256.Sum256(transactionBytes)
 			if transactionHashes[hash] > 1 {
 				miningTransactions[i] = miningTransactions[len(miningTransactions)-1]
+				miningTransactions = miningTransactions[:len(miningTransactions)-1]
 				i--
 			}
 		}
