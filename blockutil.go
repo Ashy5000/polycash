@@ -78,10 +78,12 @@ func GetBalance(key big.Int) float64 {
 			isGenesis = false
 			continue
 		}
-		if block.Sender.Y.Cmp(&key) == 0 {
-			total -= block.Amount
-		} else if block.Recipient.Y.Cmp(&key) == 0 {
-			total += block.Amount
+		for _, transaction := range block.Transactions {
+			if transaction.Sender.Y.Cmp(&key) == 0 {
+				total -= transaction.Amount
+			} else if transaction.Recipient.Y.Cmp(&key) == 0 {
+				total += transaction.Amount
+			}
 		}
 		if block.Miner.Y.Cmp(&key) == 0 {
 			miningTotal += 1.0

@@ -39,6 +39,12 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	timestamp := fields[5]
+	rStr := fields[3]
+	sStr := fields[4]
+	var r big.Int
+	var s big.Int
+	r.SetString(rStr, 10)
+	s.SetString(sStr, 10)
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%s", senderStr, recipientStr, amount, timestamp)))
 	if transactionHashes[hash] > 0 {
 		fmt.Println("No new job. Ignoring mine request.")
@@ -46,6 +52,16 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Println("New job.")
 	transactionHashes[hash] = 1
+	miningTransactions = append(miningTransactions, Transaction{
+		Sender:          senderKey,
+		Recipient:       recipientKey,
+		Amount:          amount,
+		SenderSignature: Signature{
+			R: r,
+			S: s,
+		},
+		Timestamp:       time.Time{},
+	})
 	fmt.Println("Broadcasting job to peers...")
 	for _, peer := range GetPeers() {
 		// Create a new body
@@ -59,17 +75,11 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			fmt.Println("Peer", peer, "is down.")
 		}
 	}
-	rStr := fields[3]
-	sStr := fields[4]
-	var r big.Int
-	var s big.Int
-	r.SetString(rStr, 10)
-	s.SetString(sStr, 10)
 	if !VerifyTransaction(senderKey, recipientKey, strconv.FormatFloat(amount, 'f', -1, 64), r, s) {
 		fmt.Println("Transaction is invalid. Ignoring transaction request.")
 		return
 	}
-	block, err := CreateBlock(senderKey, recipientKey, amount, r, s, hash, timestamp)
+	block, err := CreateBlock()
 	if err != nil {
 		fmt.Println("Block lost.")
 		return
@@ -108,14 +118,16 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		fmt.Println("Block is invalid. Ignoring block request.")
 		return
 	}
-	// Get transaction as string
-	transaction := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(block.Sender), EncodePublicKey(block.Recipient), block.Amount, block.Timestamp.UnixNano())
-	transactionBytes := []byte(transaction)
-	// Get hash of transaction
-	hash := sha256.Sum256(transactionBytes)
-	fmt.Println("Transaction hash:", hash)
-	// Mark transaction as completed
-	transactionHashes[hash] = 2
+	for _, transaction := range block.Transactions {
+		// Get transaction as string
+		transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, block.Timestamp.UnixNano())
+		transactionBytes := []byte(transactionString)
+		// Get hash of transaction
+		hash := sha256.Sum256(transactionBytes)
+		fmt.Println("Transaction hash:", hash)
+		// Mark transaction as completed
+		transactionHashes[hash] = 2
+	}
 	Append(block)
 	fmt.Println("Block appended to local blockchain!")
 	if *useLocalPeerList {

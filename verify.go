@@ -48,9 +48,11 @@ func VerifyBlock(block Block) bool {
 	if unsafe.Sizeof(block) > uintptr(maxBlockSize) {
 		return false
 	}
-	if !VerifyTransaction(block.Sender, block.Recipient, strconv.FormatFloat(block.Amount, 'f', -1, 64), block.SenderSignature.R, block.SenderSignature.S) {
-		fmt.Println("Block has invalid transaction/transaction signature. Ignoring block request.")
-		return false
+	for _, transaction := range block.Transactions {
+		if !VerifyTransaction(transaction.Sender, transaction.Recipient, strconv.FormatFloat(transaction.Amount, 'f', -1, 64), transaction.SenderSignature.R, transaction.SenderSignature.S) {
+			fmt.Println("Block has invalid transaction/transaction signature. Ignoring block request.")
+			return false
+		}
 	}
 	hashBytes := HashBlock(block)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.

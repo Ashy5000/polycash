@@ -36,14 +36,21 @@ func TestCreateBlock(t *testing.T) {
 		blockchain = nil
 		transactionHashes[[32]byte{}] = 1
 		// Act
-		block, err := CreateBlock(senderPublicKey, recipientPublicKey, amount, a, b, [32]byte{}, "0")
+		miningTransactions = []Transaction{
+			{
+				Sender: senderPublicKey,
+				Recipient: recipientPublicKey,
+				Amount: amount,
+			},
+		}
+		block, err := CreateBlock()
 		if err != nil {
 			panic(err)
 		}
 		// Assert
-		assert.Equal(t, senderPublicKey, block.Sender)
-		assert.Equal(t, recipientPublicKey, block.Recipient)
-		assert.Equal(t, amount, block.Amount)
+		assert.Equal(t, senderPublicKey, block.Transactions[0].Sender)
+		assert.Equal(t, recipientPublicKey, block.Transactions[0].Recipient)
+		assert.Equal(t, amount, block.Transactions[0].Amount)
 	})
 	t.Run("It creates a block with a valid hash", func(t *testing.T) {
 		// Arrange
@@ -65,7 +72,14 @@ func TestCreateBlock(t *testing.T) {
 		maxHash = 0x1000000000000000
 		transactionHashes[[32]byte{}] = 1
 		// Act
-		block, err := CreateBlock(senderPublicKey, recipientPublicKey, amount, a, b, [32]byte{}, "0")
+		miningTransactions = []Transaction{
+			{
+				Sender: senderPublicKey,
+				Recipient: recipientPublicKey,
+				Amount: amount,
+			},
+		}
+		block, err := CreateBlock()
 		if err != nil {
 			panic(err)
 		}

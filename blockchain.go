@@ -10,7 +10,6 @@ package main
 
 import (
 	"crypto/dsa"
-	"math/big"
 	"time"
 )
 
@@ -18,15 +17,9 @@ var blockchain []Block
 
 func GenesisBlock() Block {
 	return Block{
-		Sender:    dsa.PublicKey{},
-		Recipient: dsa.PublicKey{},
+		Transactions: nil,
 		Miner:     dsa.PublicKey{},
-		Amount:    0,
 		Nonce:     0,
-		SenderSignature: Signature{
-			R: big.Int{},
-			S: big.Int{},
-		},
 		MiningTime:             0,
 		Difficulty:             0,
 		PreviousBlockHash:      [32]byte{},

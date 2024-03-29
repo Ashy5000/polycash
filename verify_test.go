@@ -17,7 +17,6 @@ import (
 	"math/big"
 	"strconv"
 	"testing"
-	"time"
 )
 
 func TestVerifyTransaction(t *testing.T) {
@@ -82,10 +81,8 @@ func TestVerifyMiner(t *testing.T) {
 		blockchain = nil
 		Append(GenesisBlock())
 		Append(Block{
-			Sender:            key.PublicKey,
-			Recipient:         key.PublicKey,
+			Transactions:      []Transaction{},
 			Miner:             miner,
-			Amount:            0,
 			PreviousBlockHash: HashBlock(GenesisBlock()),
 			Difficulty:        1,
 		})
@@ -109,7 +106,18 @@ func TestVerifyBlock(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		block, err := CreateBlock(sender, receiver, amount, *r, *s, hash, strconv.FormatInt(time.Now().UnixNano(), 10))
+		miningTransactions = []Transaction{
+			{
+				Sender: sender,
+				Recipient: receiver,
+				Amount: amount,
+				SenderSignature: Signature{
+					R: *r,
+					S: *s,
+				},
+			},
+		}
+		block, err := CreateBlock()
 		if err != nil {
 			panic(err)
 		}
@@ -131,10 +139,14 @@ func TestVerifyBlock(t *testing.T) {
 			panic(err)
 		}
 		block := Block{
-			Sender:            sender,
-			Recipient:         receiver,
-			Amount:            0,
-			SenderSignature:   Signature{R: *r, S: *s},
+			Transactions: []Transaction {
+				{
+					Sender: sender,
+					Recipient: receiver,
+					Amount: 0,
+					SenderSignature: Signature{R: *r, S: *s},
+				},
+			},
 			PreviousBlockHash: HashBlock(GenesisBlock()),
 			Miner:             key.PublicKey,
 			Difficulty:        1,

@@ -66,10 +66,14 @@ func TestGetBalance(t *testing.T) {
 			Y:          &key,
 		}
 		Append(Block{
-			Sender:    sender,
-			Recipient: receiver,
+			Transactions: []Transaction {
+				{
+					Sender:    sender,
+					Recipient: receiver,
+					Amount:    100,
+				},
+			},
 			Miner:     sender,
-			Amount:    100,
 		})
 		// Act
 		balance := GetBalance(key)

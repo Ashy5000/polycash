@@ -12,7 +12,7 @@ import (
 	"flag"
 )
 
-var useLocalPeerList = &[]bool{true}[0]
+var useLocalPeerList *bool = &[]bool{true}[0]
 
 func main() {
 	mine := flag.Bool("mine", false, "Set to true to start node as miner")

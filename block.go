@@ -19,13 +19,18 @@ type Signature struct {
 	S big.Int `json:"S"`
 }
 
-type Block struct {
+type Transaction struct {
 	Sender                 dsa.PublicKey   `json:"sender"`
 	Recipient              dsa.PublicKey   `json:"recipient"`
-	Miner                  dsa.PublicKey   `json:"miner"`
 	Amount                 float64         `json:"amount"`
-	Nonce                  int64           `json:"nonce"`
 	SenderSignature        Signature       `json:"signature"`
+	Timestamp              time.Time       `json:"timestamp"`
+}
+
+type Block struct {
+	Transactions           []Transaction   `json:"transactions"`
+	Miner                  dsa.PublicKey   `json:"miner"`
+	Nonce                  int64           `json:"nonce"`
 	MiningTime             time.Duration   `json:"miningTime"`
 	Difficulty             uint64          `json:"difficulty"`
 	PreviousBlockHash      [32]byte        `json:"previousBlockHash"`

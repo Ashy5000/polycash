@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"
+	"time"
 )
 
 func TestBlock(t *testing.T) {
@@ -24,21 +25,26 @@ func TestBlock(t *testing.T) {
 		b.SetUint64(321)
 		// Act
 		block := Block{
-			Sender: dsa.PublicKey{
-				Parameters: dsa.Parameters{},
-				Y:          &a,
+			Transactions:           []Transaction{
+				{
+					Sender: dsa.PublicKey{Y: &a},
+					Recipient: dsa.PublicKey{Y: &b},
+					Amount: 2024,
+				},
 			},
-			Recipient: dsa.PublicKey{
-				Parameters: dsa.Parameters{},
-				Y:          &b,
-			},
-			Amount: 2024,
-			Nonce:  24,
+			Miner:                  dsa.PublicKey{},
+			Nonce:                  24,
+			MiningTime:             0,
+			Difficulty:             0,
+			PreviousBlockHash:      [32]byte{},
+			Timestamp:              time.Time{},
+			TimeVerifierSignatures: nil,
+			TimeVerifiers:          nil,
 		}
 		// Assert
-		assert.Equal(t, &a, block.Sender.Y)
-		assert.Equal(t, &b, block.Recipient.Y)
-		assert.Equal(t, float64(2024), block.Amount)
+		assert.Equal(t, &a, block.Transactions[0].Sender.Y)
+		assert.Equal(t, &b, block.Transactions[0].Recipient.Y)
+		assert.Equal(t, float64(2024), block.Transactions[0].Amount)
 		assert.Equal(t, int64(24), block.Nonce)
 	})
 }

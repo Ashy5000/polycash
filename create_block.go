@@ -10,6 +10,7 @@ package main
 
 import (
 	"crypto/dsa"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -17,37 +18,27 @@ import (
 	"io"
 	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
 
 // transactionHashes is a map of transaction hashes to their current status. 0 means the transaction is unmined, 1 means the transaction is being mined, and 2 means the transaction has been mined.
 var transactionHashes = make(map[[32]byte]int)
+var miningTransactions []Transaction
 
-func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, r big.Int, s big.Int, transactionHash [32]byte, timestamp string) (Block, error) {
+func CreateBlock() (Block, error) {
 	start := time.Now()
 	previousBlock, previousBlockFound := GetLastMinedBlock()
 	if !previousBlockFound {
 		previousBlock.Difficulty = initialBlockDifficulty
 		previousBlock.MiningTime = time.Minute
 	}
-	timestampInt64, err := strconv.ParseInt(timestamp, 10, 64)
-	if err != nil {
-		panic(err)
-	}
 	block := Block{
-		Miner:     GetKey().PublicKey,
-		Sender:    sender,
-		Recipient: recipient,
-		Amount:    amount,
-		SenderSignature: Signature{
-			R: r,
-			S: s,
-		},
+		Miner:                  GetKey().PublicKey,
+		Transactions:           miningTransactions,
 		Nonce:                  0,
 		Difficulty:             GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
-		Timestamp:              time.Unix(0, timestampInt64),
+		Timestamp:              time.Now(),
 		TimeVerifierSignatures: []Signature{},
 		TimeVerifiers:          []dsa.PublicKey{},
 	}
@@ -63,9 +54,17 @@ func CreateBlock(sender dsa.PublicKey, recipient dsa.PublicKey, amount float64, 
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	fmt.Printf("Mining block with difficulty %d\n", block.Difficulty)
 	for hash > maximumUint64/block.Difficulty {
-		if transactionHashes[transactionHash] == 2 {
-			return Block{}, errors.New("lost block")
-		} else {
+		for i := 0; i < len(miningTransactions); i++ {
+			transaction := miningTransactions[i]
+			transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
+			transactionBytes := []byte(transactionString)
+			hash := sha256.Sum256(transactionBytes)
+			if transactionHashes[hash] > 1 {
+				miningTransactions[i] = miningTransactions[len(miningTransactions)-1]
+				i--
+			}
+		}
+		if len(miningTransactions) > 0 {
 			previousBlock, previousBlockFound = GetLastMinedBlock()
 			if !previousBlockFound {
 				previousBlock.Difficulty = initialBlockDifficulty
