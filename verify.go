@@ -16,6 +16,7 @@ import (
 	"math/big"
 	"strconv"
 	"time"
+	"unsafe"
 )
 
 func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amount string, r big.Int, s big.Int) bool {
@@ -44,6 +45,9 @@ func VerifyMiner(miner dsa.PublicKey) bool {
 }
 
 func VerifyBlock(block Block) bool {
+	if unsafe.Sizeof(block) > uintptr(maxBlockSize) {
+		return false
+	}
 	if !VerifyTransaction(block.Sender, block.Recipient, strconv.FormatFloat(block.Amount, 'f', -1, 64), block.SenderSignature.R, block.SenderSignature.S) {
 		fmt.Println("Block has invalid transaction/transaction signature. Ignoring block request.")
 		return false
