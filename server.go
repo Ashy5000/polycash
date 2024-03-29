@@ -52,6 +52,14 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Println("New job.")
 	transactionHashes[hash] = 1
+	timestampInt, err := strconv.ParseInt(timestamp, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	timestampParsed := time.Unix(timestampInt, 0)
+	if err != nil {
+		panic(err)
+	}
 	miningTransactions = append(miningTransactions, Transaction{
 		Sender:          senderKey,
 		Recipient:       recipientKey,
@@ -60,7 +68,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			R: r,
 			S: s,
 		},
-		Timestamp:       time.Time{},
+		Timestamp:       timestampParsed,
 	})
 	fmt.Println("Broadcasting job to peers...")
 	for _, peer := range GetPeers() {
