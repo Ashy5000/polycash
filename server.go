@@ -56,7 +56,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	timestampParsed := time.Unix(timestampInt, 0)
+	timestampParsed := time.Unix(0, timestampInt)
 	if err != nil {
 		panic(err)
 	}
