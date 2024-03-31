@@ -27,9 +27,11 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", senderKey.Y, recipientKey.Y, amount)))
 	isValid := dsa.Verify(&senderKey, hash[:], &r, &s)
 	if !isValid {
+		fmt.Println("Signature is not valid for this transaction.")
 		return false
 	}
 	if GetBalance(*senderKey.Y)-amountFloat < 0 {
+		fmt.Println("Double-spending detected.")
 		return false
 	}
 	return true

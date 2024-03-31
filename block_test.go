@@ -10,10 +10,14 @@ package main
 
 import (
 	"crypto/dsa"
-	"github.com/stretchr/testify/assert"
+	"crypto/rand"
+	"encoding/json"
+	"fmt"
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlock(t *testing.T) {
@@ -25,11 +29,11 @@ func TestBlock(t *testing.T) {
 		b.SetUint64(321)
 		// Act
 		block := Block{
-			Transactions:           []Transaction{
+			Transactions: []Transaction{
 				{
-					Sender: dsa.PublicKey{Y: &a},
+					Sender:    dsa.PublicKey{Y: &a},
 					Recipient: dsa.PublicKey{Y: &b},
-					Amount: 2024,
+					Amount:    2024,
 				},
 			},
 			Miner:                  dsa.PublicKey{},
@@ -46,5 +50,47 @@ func TestBlock(t *testing.T) {
 		assert.Equal(t, &b, block.Transactions[0].Recipient.Y)
 		assert.Equal(t, float64(2024), block.Transactions[0].Amount)
 		assert.Equal(t, int64(24), block.Nonce)
+	})
+	t.Run("It marshals and unmarshals the block correctly", func(t *testing.T) {
+		// Arrange
+		var a big.Int
+		a.SetUint64(123)
+		var b big.Int
+		b.SetUint64(321)
+		var parameters dsa.Parameters
+		dsa.GenerateParameters(&parameters, rand.Reader, dsa.ParameterSizes(0))
+		block := Block{
+			Transactions: []Transaction{
+				{
+					Sender:    dsa.PublicKey{Y: &a, Parameters: parameters},
+					Recipient: dsa.PublicKey{Y: &b, Parameters: parameters},
+					Amount:    2024,
+					Timestamp: time.Now(),
+				},
+			},
+			Miner:                  dsa.PublicKey{Y: &a, Parameters: parameters},
+			Nonce:                  24,
+			MiningTime:             0,
+			Difficulty:             0,
+			PreviousBlockHash:      [32]byte{},
+			Timestamp:              time.Now(),
+			TimeVerifierSignatures: nil,
+			TimeVerifiers:          nil,
+		}
+		marshaled, err := json.Marshal(block)
+		if err != nil {
+			panic(err)
+		}
+		unmarshaled := Block{}
+		err = json.Unmarshal(marshaled, &unmarshaled)
+		timestamp := time.Time{}
+		block.Timestamp = timestamp
+		for _, transaction := range block.Transactions {
+			transaction.Timestamp = timestamp
+		}
+		// Assert
+		fmt.Printf("%+v\n", block)
+		fmt.Printf("%+v\n", unmarshaled)
+		assert.Equal(t, HashBlock(block), HashBlock(unmarshaled))
 	})
 }

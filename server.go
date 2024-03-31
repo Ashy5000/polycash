@@ -61,14 +61,14 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	miningTransactions = append(miningTransactions, Transaction{
-		Sender:          senderKey,
-		Recipient:       recipientKey,
-		Amount:          amount,
+		Sender:    senderKey,
+		Recipient: recipientKey,
+		Amount:    amount,
 		SenderSignature: Signature{
 			R: r,
 			S: s,
 		},
-		Timestamp:       timestampParsed,
+		Timestamp: timestampParsed,
 	})
 	fmt.Println("Broadcasting job to peers...")
 	for _, peer := range GetPeers() {
@@ -93,6 +93,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Println("Block mined successfully!")
+	fmt.Printf("%+v\n", block)
 	fmt.Println("Broadcasting block to peers...")
 	bodyChars, err := json.Marshal(&block)
 	if err != nil {
@@ -117,18 +118,20 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(string(bodyBytes))
 	block := Block{}
 	err = json.Unmarshal(bodyBytes, &block)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("%+v\n", block)
 	if !VerifyBlock(block) {
 		fmt.Println("Block is invalid. Ignoring block request.")
 		return
 	}
 	for _, transaction := range block.Transactions {
 		// Get transaction as string
-		transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, block.Timestamp.UnixNano())
+		transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
 		transactionBytes := []byte(transactionString)
 		// Get hash of transaction
 		hash := sha256.Sum256(transactionBytes)

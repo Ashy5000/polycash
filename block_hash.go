@@ -9,6 +9,7 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
+	"crypto/dsa"
 	"crypto/sha256"
 	"fmt"
 	"time"
@@ -17,6 +18,11 @@ import (
 func HashBlock(block Block) [32]byte {
 	block.MiningTime = time.Minute
 	block.TimeVerifierSignatures = []Signature{}
+	block.TimeVerifiers = []dsa.PublicKey{}
+	block.Timestamp = time.Time{}
+	for i, _ := range block.Transactions {
+		block.Transactions[i].Timestamp = time.Time{}
+	}
 	blockBytes := []byte(fmt.Sprintf("%v", block))
 	sum := sha256.Sum256(blockBytes)
 	return sum
