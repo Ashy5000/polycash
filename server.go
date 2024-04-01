@@ -93,7 +93,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Println("Block mined successfully!")
-	fmt.Printf("%+v\n", block)
 	fmt.Println("Broadcasting block to peers...")
 	bodyChars, err := json.Marshal(&block)
 	if err != nil {
@@ -118,13 +117,11 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(bodyBytes))
 	block := Block{}
 	err = json.Unmarshal(bodyBytes, &block)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%+v\n", block)
 	if !VerifyBlock(block) {
 		fmt.Println("Block is invalid. Ignoring block request.")
 		return
