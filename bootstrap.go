@@ -28,8 +28,10 @@ func Bootstrap() {
 		var peerPeers []string
 		err = json.Unmarshal(peerPeersBytes, &peerPeers)
 		for _, peerPeer := range peerPeers {
-			// Add the peer's peers to the list of peers
-			AddPeer(peerPeer)
+			if !PeerKnown(peerPeer) {
+				// Add the peer's peers to the list of peers
+				AddPeer(peerPeer)
+			}
 		}
 	}
 }

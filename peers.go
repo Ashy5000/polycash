@@ -86,3 +86,13 @@ func GetPeers() []string {
 		return result
 	}
 }
+
+func PeerKnown(ip string) bool {
+	peers := GetPeers()
+	for _, peer := range peers {
+		if peer == ip {
+			return true
+		}
+	}
+	return false
+}
