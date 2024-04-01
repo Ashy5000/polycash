@@ -87,28 +87,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		fmt.Println("Transaction is invalid. Ignoring transaction request.")
 		return
 	}
-	block, err := CreateBlock()
-	if err != nil {
-		fmt.Println("Block lost.")
-		return
-	}
-	fmt.Println("Block mined successfully!")
-	fmt.Println("Broadcasting block to peers...")
-	bodyChars, err := json.Marshal(&block)
-	if err != nil {
-		panic(err)
-	}
-	for _, peer := range GetPeers() {
-		body := strings.NewReader(string(bodyChars))
-		req, err := http.NewRequest(http.MethodGet, peer+"/block", body)
-		if err != nil {
-			panic(err)
-		}
-		_, err = http.DefaultClient.Do(req)
-		if err != nil {
-			fmt.Println("Peer down.")
-		}
-	}
 	fmt.Println("All done!")
 }
 

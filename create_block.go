@@ -27,6 +27,9 @@ var transactionHashes = make(map[[32]byte]int)
 var miningTransactions []Transaction
 
 func CreateBlock() (Block, error) {
+	if len(miningTransactions) == 0 {
+		return Block{}, errors.New("pool dry")
+	}
 	start := time.Now()
 	previousBlock, previousBlockFound := GetLastMinedBlock()
 	if !previousBlockFound {
@@ -83,6 +86,8 @@ func CreateBlock() (Block, error) {
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
+		} else {
+			return Block{}, errors.New("pool dry")
 		}
 	}
 	block.MiningTime = time.Since(start)
@@ -158,5 +163,6 @@ func CreateBlock() (Block, error) {
 		fmt.Println("Not enough time verifiers.")
 		return Block{}, errors.New("lost block")
 	}
+	miningTransactions = []Transaction{}
 	return block, nil
 }

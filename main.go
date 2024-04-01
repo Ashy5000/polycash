@@ -24,6 +24,9 @@ func main() {
 	Append(GenesisBlock())
 	ApplySecurityLevel(securityLevel)
 	if *serve {
+		if *mine {
+			go Mine()
+		}
 		Serve(*mine, *port)
 	} else {
 		if *command == "exit" {
