@@ -24,6 +24,8 @@ The root directory of this project is occupied by the Golang source code that no
 
 ## Setup & Usage
 
+For a simpler guide, see the [welcome](docs/welcome.md) page.
+
 *Note: A node must have a publicly accessible IP address in order to join the network. You may have to set up port forwarding on your router.*
 
 Create and clone the repository:
