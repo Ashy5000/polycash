@@ -5,3 +5,6 @@ The architecture of the blockchain revolves around altered version of the tradit
 
 ### Time Verification
 To ensure miners are honest about the time it took them to mine a block, each block must be signed by at least 1/5 of the miners in the network. These are called the 'time verifiers'. Their digital signature is requested, and they will sign the block if and only if the current time is less than 10 seconds after the time the miner claimed to have finished mining. If the miner says it took longer than it actually did to mine a block, the time verifiers will see that the finishing time is in the future and refuse to sign the block. If the miner attempts to wait before sending it to a time verifier, they will most likely lose the block before it is sent. This system creates a history of blocks with verified timestamps, ensuring the honesty of miners and their mining times, and preventing miners from manipulating block difficulty.
+
+### Maximum block size
+To enable high speeds and throughput of the network, the maximum size of each block is at a maximum 10 MB. Combining this with the 30 sec-1 min 30 sec block time, the network has a theoretical throughput 100x that of Bitcoin. The high maximum block size and the short block times are the two primary reasons behind the scalability of the network and blockchain.
