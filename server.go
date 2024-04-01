@@ -238,6 +238,17 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func HandlePeersRequest(w http.ResponseWriter, _ *http.Request) {
+	peersBytes, err := json.Marshal(GetPeers())
+	if err != nil {
+		panic(err)
+	}
+	_, err = io.WriteString(w, string(peersBytes))
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Serve(mine bool, port string) {
 	if mine {
 		http.HandleFunc("/mine", HandleMineRequest)
@@ -247,5 +258,6 @@ func Serve(mine bool, port string) {
 	http.HandleFunc("/identify", HandleIdentifyRequest)
 	http.HandleFunc("/peerIp", HandlePeerIpRequest)
 	http.HandleFunc("/verifyTime", HandleVerifyTimeRequest)
+	http.HandleFunc("/peers", HandlePeersRequest)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }

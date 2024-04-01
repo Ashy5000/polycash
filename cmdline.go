@@ -132,6 +132,9 @@ func RunCmd(input string) {
 				}
 			}
 			fmt.Println("Peer added successfully!")
+		} else if action == "bootstrap" {
+			Bootstrap()
+			fmt.Println("Bootstrap complete!")
 		} else if action == "license" {
 			license, err := os.ReadFile("COPYING")
 			if err != nil {
