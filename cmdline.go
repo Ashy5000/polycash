@@ -31,6 +31,12 @@ func RunCmd(input string) {
 			fmt.Printf("Blockchain successfully synced!")
 			fmt.Printf("Length: %d", len(blockchain))
 		} else if action == "balance" {
+			if len(fields) == 1 {
+				publicKey := GetKey().PublicKey.Y
+				balance := GetBalance(*publicKey)
+				fmt.Println(fmt.Sprintf("Balance of %s: %f", publicKey.String(), balance))
+				return
+			}
 			keyStr := fields[1]
 			var key big.Int
 			key.SetString(keyStr, 10)
@@ -102,17 +108,6 @@ func RunCmd(input string) {
 			if err != nil {
 				panic(err)
 			}
-		} else if action == "exit" {
-			os.Exit(0)
-		} else if action == "help" {
-			fmt.Println("Commands:")
-			fmt.Println("sync - Sync the blockchain with peers")
-			fmt.Println("balance <public key> - Get the balance of a public key")
-			fmt.Println("send <public key> <amount> - Send an amount to a public key")
-			fmt.Println("keygen - Generate a new key")
-			fmt.Println("savestate - Save the blockchain to a file")
-			fmt.Println("loadstate - Load the blockchain from a file")
-			fmt.Println("exit - Exit the console")
 		} else if action == "addpeer" {
 			if *useLocalPeerList {
 				// Add the peer to the local peer list
@@ -135,6 +130,17 @@ func RunCmd(input string) {
 		} else if action == "bootstrap" {
 			Bootstrap()
 			fmt.Println("Bootstrap complete!")
+		} else if action == "exit" {
+			os.Exit(0)
+		} else if action == "help" {
+			fmt.Println("Commands:")
+			fmt.Println("sync - Sync the blockchain with peers")
+			fmt.Println("balance <public key> - Get the balance of a public key")
+			fmt.Println("send <public key> <amount> - Send an amount to a public key")
+			fmt.Println("keygen - Generate a new key")
+			fmt.Println("savestate - Save the blockchain to a file")
+			fmt.Println("loadstate - Load the blockchain from a file")
+			fmt.Println("exit - Exit the console")
 		} else if action == "license" {
 			license, err := os.ReadFile("COPYING")
 			if err != nil {
