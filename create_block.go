@@ -150,14 +150,24 @@ func CreateBlock() (Block, error) {
 			fmt.Println("Time verifier believes block is invalid.")
 			continue
 		}
-		// Unmarshal the response body
-		responseBlock := Block{}
-		err = json.Unmarshal(bodyBytes, &responseBlock)
+		// Split the response body into the signature and the public key
+		split := strings.Split(string(bodyBytes), ":")
+		// Unmarshal the signature
+		var signature Signature
+		err = json.Unmarshal([]byte(split[0]), &signature)
 		if err != nil {
 			panic(err)
 		}
-		// Set the time verifiers
-		block.TimeVerifiers = responseBlock.TimeVerifiers // TODO: Verify time verifiers
+		// Unmarshal the public key
+		var publicKey dsa.PublicKey
+		err = json.Unmarshal([]byte(split[1]), &publicKey)
+		if err != nil {
+			panic(err)
+		}
+		// Add the time verifier to the block
+		block.TimeVerifiers = append(block.TimeVerifiers, publicKey)
+		// Add the time verifier signature to the block
+		block.TimeVerifierSignatures = append(block.TimeVerifierSignatures, signature)
 	}
 	if int64(len(block.TimeVerifiers)) < GetMinerCount(len(blockchain))/5 {
 		fmt.Println("Not enough time verifiers.")

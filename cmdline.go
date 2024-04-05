@@ -52,7 +52,7 @@ func RunCmd(input string) {
 		} else if action == "keygen" {
 			var privateKey dsa.PrivateKey
 			var params dsa.Parameters
-			err := dsa.GenerateParameters(&params, rand.Reader, dsa.ParameterSizes(0))
+			err := dsa.GenerateParameters(&params, rand.Reader, dsa.ParameterSizes(3))
 			if err != nil {
 				panic(err)
 			}

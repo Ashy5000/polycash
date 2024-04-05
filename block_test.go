@@ -58,7 +58,7 @@ func TestBlock(t *testing.T) {
 		var b big.Int
 		b.SetUint64(321)
 		var parameters dsa.Parameters
-		dsa.GenerateParameters(&parameters, rand.Reader, dsa.ParameterSizes(0))
+		dsa.GenerateParameters(&parameters, rand.Reader, dsa.ParameterSizes(3))
 		block := Block{
 			Transactions: []Transaction{
 				{

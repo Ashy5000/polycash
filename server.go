@@ -224,18 +224,12 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 		R: *r,
 		S: *s,
 	}
-	block.TimeVerifierSignatures = append(block.TimeVerifierSignatures, signature)
-	block.TimeVerifiers = append(block.TimeVerifiers, key.PublicKey)
-	// Convert the block back to JSON
-	blockBytes, err := json.Marshal(&block)
+	// Send the signature and public key back to the requester
+	signatureBytes, err := json.Marshal(signature)
 	if err != nil {
 		panic(err)
 	}
-	// Send the block back to the requester
-	_, err = io.WriteString(w, string(blockBytes))
-	if err != nil {
-		panic(err)
-	}
+	_, err = io.WriteString(w, string(signatureBytes)+":"+key.Y.String())
 }
 
 func HandlePeersRequest(w http.ResponseWriter, _ *http.Request) {
