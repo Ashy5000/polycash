@@ -129,10 +129,12 @@ func VerifyBlock(block Block) bool {
 
 func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Signature) bool {
 	if len(verifiers) != len(signatures) {
+		fmt.Println("Signature count does not match verifier count.")
 		return false
 	}
 	for i, verifier := range verifiers {
 		if !dsa.Verify(&verifier, []byte(fmt.Sprintf("%d", block.Timestamp.Add(block.MiningTime).UnixNano())), &signatures[i].R, &signatures[i].S) {
+			fmt.Println("Time verifier signature is not valid.")
 			return false
 		}
 	}
@@ -140,6 +142,7 @@ func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Si
 	verifierMap := make(map[string]bool)
 	for _, verifier := range verifiers {
 		if verifierMap[verifier.Y.String()] {
+			fmt.Println("Time verifier is not unique.")
 			return false
 		}
 		verifierMap[verifier.Y.String()] = true
@@ -147,11 +150,13 @@ func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Si
 	// Ensure all verifiers are miners
 	for _, verifier := range verifiers {
 		if !IsNewMiner(verifier, len(blockchain)) {
+			fmt.Println("Time verifier is not a miner.")
 			return false
 		}
 	}
 	// Ensure there are enough verifiers
 	if len(verifiers) < GetMinVerifiers() {
+		fmt.Println("Not enough time verifiers.")
 		return false
 	}
 	return true

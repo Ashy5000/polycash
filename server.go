@@ -205,9 +205,11 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 	}
 	// Get the current time
 	currentTime := time.Now()
+	// Get the time mining finished
+	miningFinishedTime := block.Timestamp.Add(block.MiningTime)
 	// Check if the time the block was mined is within a reasonable range of the current time
 	// It cannot be in the future, and it cannot be more than 10 seconds in the past
-	if block.Timestamp.After(currentTime) || block.Timestamp.Before(currentTime.Add(-10*time.Second)) {
+	if miningFinishedTime.After(currentTime) || miningFinishedTime.Before(currentTime.Add(-10*time.Second)) {
 		_, err := io.WriteString(w, "invalid")
 		if err != nil {
 			panic(err)
@@ -216,7 +218,7 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 	}
 	// Sign the time with the time verifier's (this node's) private key
 	key := GetKey()
-	r, s, err := dsa.Sign(rand.Reader, &key, []byte(block.Timestamp.String()))
+	r, s, err := dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%d", miningFinishedTime.UnixNano())))
 	if err != nil {
 		panic(err)
 	}
@@ -229,7 +231,15 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	_, err = io.WriteString(w, string(signatureBytes)+":"+key.Y.String())
+	// Marshal the public key
+	publicKeyBytes, err := json.Marshal(key.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+	_, err = io.WriteString(w, string(signatureBytes)+"%"+string(publicKeyBytes))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func HandlePeersRequest(w http.ResponseWriter, _ *http.Request) {

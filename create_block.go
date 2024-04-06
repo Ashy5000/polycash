@@ -79,7 +79,7 @@ func CreateBlock() (Block, error) {
 			} else {
 				block.PreviousBlockHash = [32]byte{}
 			}
-			block.Difficulty = previousBlock.Difficulty * (60 / uint64(previousBlock.MiningTime.Seconds()))
+			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty)
 			if block.Difficulty < minimumBlockDifficulty {
 				block.Difficulty = minimumBlockDifficulty
 			}
@@ -87,6 +87,7 @@ func CreateBlock() (Block, error) {
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
 		} else {
+			fmt.Println("Pool dry.")
 			return Block{}, errors.New("pool dry")
 		}
 	}
@@ -98,6 +99,9 @@ func CreateBlock() (Block, error) {
 	}
 	// Ask for time verifiers
 	for _, peer := range GetPeers() {
+		if int64(len(block.TimeVerifiers)) >= GetMinerCount(len(blockchain))/5 && VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures) {
+			break
+		}
 		// Verify that the peer has mined a block (only miners can be time verifiers)
 		req, err := http.NewRequest(http.MethodGet, peer+"/identify", nil)
 		if err != nil {
@@ -151,7 +155,7 @@ func CreateBlock() (Block, error) {
 			continue
 		}
 		// Split the response body into the signature and the public key
-		split := strings.Split(string(bodyBytes), ":")
+		split := strings.Split(string(bodyBytes), "%")
 		// Unmarshal the signature
 		var signature Signature
 		err = json.Unmarshal([]byte(split[0]), &signature)
