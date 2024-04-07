@@ -57,8 +57,7 @@ func CreateBlock() (Block, error) {
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	fmt.Printf("Mining block with difficulty %d\n", block.Difficulty)
 	for hash > maximumUint64/block.Difficulty {
-		for i := 0; i < len(miningTransactions); i++ {
-			transaction := miningTransactions[i]
+		for i, transaction := range miningTransactions {
 			transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
 			transactionBytes := []byte(transactionString)
 			hash := sha256.Sum256(transactionBytes)

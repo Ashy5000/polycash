@@ -11,19 +11,26 @@ package main
 import (
 	"crypto/dsa"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
 func HashBlock(block Block) [32]byte {
-	block.MiningTime = time.Minute
-	block.TimeVerifierSignatures = []Signature{}
-	block.TimeVerifiers = []dsa.PublicKey{}
-	block.Timestamp = time.Time{}
-	for i, _ := range block.Transactions {
-		block.Transactions[i].Timestamp = time.Time{}
+	marshaled, err := json.Marshal(block)
+	if err != nil {
+		panic(err)
 	}
-	blockBytes := []byte(fmt.Sprintf("%v", block))
+	blockCpy := Block{}
+	err = json.Unmarshal(marshaled, &blockCpy)
+	blockCpy.MiningTime = time.Minute
+	blockCpy.TimeVerifierSignatures = []Signature{}
+	blockCpy.TimeVerifiers = []dsa.PublicKey{}
+	blockCpy.Timestamp = time.Time{}
+	for i, _ := range block.Transactions {
+		blockCpy.Transactions[i].Timestamp = time.Time{}
+	}
+	blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
 	sum := sha256.Sum256(blockBytes)
 	return sum
 }

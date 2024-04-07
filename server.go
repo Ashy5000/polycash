@@ -38,29 +38,36 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	timestamp := fields[5]
+	timestampInt, err := strconv.ParseInt(fields[5], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	timestamp := time.Unix(0, timestampInt)
 	rStr := fields[3]
 	sStr := fields[4]
 	var r big.Int
 	var s big.Int
 	r.SetString(rStr, 10)
 	s.SetString(sStr, 10)
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%s", senderStr, recipientStr, amount, timestamp)))
+	fmt.Printf("Timestamp: %d\n", timestamp.UnixNano())
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", senderStr, recipientStr, amount, timestamp.UnixNano())))
 	if transactionHashes[hash] > 0 {
 		fmt.Println("No new job. Ignoring mine request.")
 		return
 	}
 	fmt.Println("New job.")
 	transactionHashes[hash] = 1
-	timestampInt, err := strconv.ParseInt(timestamp, 10, 64)
+	// Create a copy of the timestamp
+	marshaledTimestamp, err := json.Marshal(timestamp)
 	if err != nil {
 		panic(err)
 	}
-	timestampParsed := time.Unix(0, timestampInt)
+	unmarshaledTimestamp := time.Time{}
+	err = json.Unmarshal(marshaledTimestamp, &unmarshaledTimestamp)
 	if err != nil {
 		panic(err)
 	}
-	miningTransactions = append(miningTransactions, Transaction{
+	transaction := Transaction{
 		Sender:    senderKey,
 		Recipient: recipientKey,
 		Amount:    amount,
@@ -68,8 +75,10 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			R: r,
 			S: s,
 		},
-		Timestamp: timestampParsed,
-	})
+		Timestamp: unmarshaledTimestamp,
+	}
+	miningTransactions = append(miningTransactions, transaction)
+	fmt.Println("Transaction added:", miningTransactions[len(miningTransactions)-1])
 	fmt.Println("Broadcasting job to peers...")
 	for _, peer := range GetPeers() {
 		// Create a new body
@@ -110,7 +119,6 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		transactionBytes := []byte(transactionString)
 		// Get hash of transaction
 		hash := sha256.Sum256(transactionBytes)
-		fmt.Println("Transaction hash:", hash)
 		// Mark transaction as completed
 		transactionHashes[hash] = 2
 	}
