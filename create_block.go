@@ -45,9 +45,6 @@ func CreateBlock() (Block, error) {
 		TimeVerifierSignatures: []Signature{},
 		TimeVerifiers:          []dsa.PublicKey{},
 	}
-	if block.Difficulty < minimumBlockDifficulty {
-		block.Difficulty = minimumBlockDifficulty
-	}
 	if len(blockchain) > 0 {
 		block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
 	} else {
@@ -79,9 +76,6 @@ func CreateBlock() (Block, error) {
 				block.PreviousBlockHash = [32]byte{}
 			}
 			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty)
-			if block.Difficulty < minimumBlockDifficulty {
-				block.Difficulty = minimumBlockDifficulty
-			}
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])

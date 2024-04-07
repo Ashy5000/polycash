@@ -24,5 +24,9 @@ func GetDifficulty(lastTime time.Duration, lastDifficulty uint64) uint64 {
 	x := lastTime.Minutes() * float64(lastDifficulty)
 	adjustment := (1 / (1 + math.Pow(math.E, -(1/mdpm)*(x-mdpm)))) + 0.5
 	difficultyAfterAdjustment := float64(difficultyBeforeAdjustment) / adjustment
-	return uint64(difficultyAfterAdjustment)
+	difficultyUint64 := uint64(difficultyAfterAdjustment)
+	if difficultyUint64 > minimumBlockDifficulty {
+		return difficultyUint64
+	}
+	return minimumBlockDifficulty
 }
