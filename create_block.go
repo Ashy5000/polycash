@@ -76,6 +76,7 @@ func CreateBlock() (Block, error) {
 				block.PreviousBlockHash = [32]byte{}
 			}
 			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty)
+      block.Transactions = miningTransactions
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
