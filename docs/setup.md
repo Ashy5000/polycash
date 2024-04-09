@@ -36,6 +36,8 @@ To see the license, type `license`.
 BlockCMD console (encrypted: true):
 ```
 
+Type `bootstrap` and then enter. This will connect your device with other peers.
+
 Type `keygen` and then enter. This will generate a new DSA keypair. If you wish, type `encrypt` and then enter. This will encrypt your keypair with a 16-character-long passcode. When you need to check your balance or send currency, type `decrypt` to make it usable. When you are done, use `encrypt` once more.
 
 To use a graphical application to manage funds, first install the Rust programming language if you haven't already. Then, move into the `gui_wallet` directory and use the `cargo run` command to build and run the application.
