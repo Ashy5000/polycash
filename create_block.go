@@ -36,7 +36,7 @@ func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
 		panic(err)
 	}
 	for _, peer := range GetPeers() {
-    if int64(len(block.TimeVerifiers)) >= GetMinerCount(len(blockchain))/5 && VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures) {
+    if int64(len(block.TimeVerifiers)) >= GetMinerCount(len(blockchain))/5 {
 			break
 		}
 		// Verify that the peer has mined a block (only miners can be time verifiers)

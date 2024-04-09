@@ -120,24 +120,37 @@ func VerifyBlock(block Block) bool {
 		fmt.Println("Timestamp is in the future.")
 		return false
 	}
-	if !VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures) {
+	if !VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures, false) {
 		fmt.Println("Block has invalid time verifiers. Ignoring block request.")
 		return false
 	}
+  if !VerifyTimeVerifiers(block, block.PreMiningTimeVerifiers, block.PreMiningTimeVerifierSignatures, true) {
+    fmt.Println("Block has invalid time verifiers. Ignoring block request.")
+    return false
+  }
 	return true
 }
 
-func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Signature) bool {
+func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Signature, premining bool) bool {
 	if len(verifiers) != len(signatures) {
 		fmt.Println("Signature count does not match verifier count.")
 		return false
 	}
-	for i, verifier := range verifiers {
-		if !dsa.Verify(&verifier, []byte(fmt.Sprintf("%d", block.Timestamp.Add(block.MiningTime).UnixNano())), &signatures[i].R, &signatures[i].S) {
-			fmt.Println("Time verifier signature is not valid.")
-			return false
-		}
-	}
+  if premining {
+    for i, verifier := range verifiers {
+      if !dsa.Verify(&verifier, []byte(fmt.Sprintf("%d", block.Timestamp.UnixNano())), &signatures[i].R, &signatures[i].S) {
+        fmt.Println("Time verifier signature is not valid.")
+        return false
+      }
+    }
+  } else {
+    for i, verifier := range verifiers {
+      if !dsa.Verify(&verifier, []byte(fmt.Sprintf("%d", block.Timestamp.Add(block.MiningTime).UnixNano())), &signatures[i].R, &signatures[i].S) {
+        fmt.Println("Time verifier signature is not valid.")
+        return false
+      }
+    }
+  }
 	// Ensure all verifiers are unique
 	verifierMap := make(map[string]bool)
 	for _, verifier := range verifiers {
