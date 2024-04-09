@@ -84,13 +84,15 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 }
 
 type Block struct {
-	Transactions           []Transaction   `json:"transactions"`
-	Miner                  dsa.PublicKey   `json:"miner"`
-	Nonce                  int64           `json:"nonce"`
-	MiningTime             time.Duration   `json:"miningTime"`
-	Difficulty             uint64          `json:"difficulty"`
-	PreviousBlockHash      [32]byte        `json:"previousBlockHash"`
-	Timestamp              time.Time       `json:"timestamp"`
-	TimeVerifierSignatures []Signature     `json:"timeVerifierSignature"`
-	TimeVerifiers          []dsa.PublicKey `json:"timeVerifiers"`
+	Transactions                    []Transaction   `json:"transactions"`
+	Miner                           dsa.PublicKey   `json:"miner"`
+	Nonce                           int64           `json:"nonce"`
+	MiningTime                      time.Duration   `json:"miningTime"`
+	Difficulty                      uint64          `json:"difficulty"`
+	PreviousBlockHash               [32]byte        `json:"previousBlockHash"`
+	Timestamp                       time.Time       `json:"timestamp"`
+  PreMiningTimeVerifierSignatures []Signature     `json:"preMiningTimeVerifierSignatures"`
+	PreMiningTimeVerifiers          []dsa.PublicKey `json:"preMiningTimeVerifiers"`
+	TimeVerifierSignatures          []Signature     `json:"timeVerifierSignature"`
+	TimeVerifiers                   []dsa.PublicKey `json:"timeVerifiers"`
 }

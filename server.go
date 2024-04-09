@@ -213,20 +213,38 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 	}
 	// Get the current time
 	currentTime := time.Now()
-	// Get the time mining finished
-	miningFinishedTime := block.Timestamp.Add(block.MiningTime)
-	// Check if the time the block was mined is within a reasonable range of the current time
-	// It cannot be in the future, and it cannot be more than 10 seconds in the past
-	if miningFinishedTime.After(currentTime) || miningFinishedTime.Before(currentTime.Add(-10*time.Second)) {
-		_, err := io.WriteString(w, "invalid")
-		if err != nil {
-			panic(err)
-		}
-		return
-	}
+  var miningFinishedTime time.Time
+  if block.MiningTime > 0 {
+    // Get the time mining finished
+    miningFinishedTime = block.Timestamp.Add(block.MiningTime)
+    // Check if the time the block was mined is within a reasonable range of the current time
+    // It cannot be in the future, and it cannot be more than 10 seconds in the past
+    if miningFinishedTime.After(currentTime) || miningFinishedTime.Before(currentTime.Add(-10*time.Second)) {
+      _, err := io.WriteString(w, "invalid")
+      if err != nil {
+        panic(err)
+      }
+      return
+    }
+  } else {
+    // Check if the time the block started to be mined is within a reasonable range of the current time
+    // It cannot be in the future, and it cannot be more than 10 seconds in the past
+    if block.Timestamp.After(currentTime) || block.Timestamp.Before(currentTime.Add(-10*time.Second)) {
+      _, err := io.WriteString(w, "invalid")
+      if err != nil {
+        panic(err)
+      }
+    }
+  }
 	// Sign the time with the time verifier's (this node's) private key
 	key := GetKey()
-	r, s, err := dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%d", miningFinishedTime.UnixNano())))
+  var r *big.Int
+  var s *big.Int
+  if block.MiningTime > 0 {
+	  r, s, err = dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%d", miningFinishedTime.UnixNano())))
+  } else {
+	  r, s, err = dsa.Sign(rand.Reader, &key, []byte(fmt.Sprintf("%d", block.Timestamp.UnixNano())))
+  }
 	if err != nil {
 		panic(err)
 	}
