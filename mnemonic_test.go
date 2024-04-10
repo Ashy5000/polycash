@@ -13,16 +13,16 @@ import "testing"
 func TestGetMnemonic(t *testing.T) {
 	t.Run("It should return a non-empty string", func(t *testing.T) {
 		key := GetKey()
-		result := GetMnemonic(key)
+		result := GetMnemonic(*key.X)
 		if result == "" {
 			t.Errorf("GetMnemonic() = %v; want a mnemonic", result)
 		}
 	})
 	t.Run("It should return a reversible mnemonic", func(t *testing.T) {
 		key := GetKey()
-		mnemonic := GetMnemonic(key)
+		mnemonic := GetMnemonic(*key.X)
 		result := RestoreMnemonic(mnemonic)
-		if result.X.Cmp(key.X) != 0 {
+		if result.Cmp(key.X) != 0 {
 			t.Errorf("RestoreMnemonic(GetMnemonic()) = %v; want %v", result, key)
 		}
 	})
