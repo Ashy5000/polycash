@@ -9,8 +9,6 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"crypto/dsa"
-	"fmt"
 	"math/big"
 	"strings"
 )
@@ -129,19 +127,18 @@ var words = map[string]string{
 	"9!": "banana",
 }
 
-func GetMnemonic(key dsa.PrivateKey) string {
+func GetMnemonic(source big.Int) string {
 	// Get each group of 2 digits from the key and convert it to a word.
 	// Convert the key to a string.
-	keyString := key.X.String()
+	sourceString := source.String()
 	// Split the string into groups of 2 digits.
 	var groups []string
-	if len(keyString)%2 != 0 {
-		keyString = keyString + "!"
+	if len(sourceString)%2 != 0 {
+		sourceString += "!"
 	}
-	for i := 0; i < len(keyString); i += 2 {
-		groups = append(groups, keyString[i:i+2])
+	for i := 0; i < len(sourceString); i += 2 {
+		groups = append(groups, sourceString[i:i+2])
 	}
-	fmt.Println(groups)
 	// Convert each group of 2 digits to a word.
 	var mnemonic string
 
@@ -149,11 +146,10 @@ func GetMnemonic(key dsa.PrivateKey) string {
 		mnemonic += words[group] + " "
 	}
 
-	fmt.Println(mnemonic)
 	return mnemonic
 }
 
-func RestoreMnemonic(mnemonic string) dsa.PrivateKey {
+func RestoreMnemonic(mnemonic string) big.Int {
 	// Split the mnemonic into words.
 	mnemonicWords := strings.Split(mnemonic, " ")
 	// Convert each word to a group of 2 digits.
@@ -172,10 +168,7 @@ func RestoreMnemonic(mnemonic string) dsa.PrivateKey {
 		keyString = keyString[:len(keyString)-1]
 	}
 	// Convert the string to a big.Int.
-	key := dsa.PrivateKey{
-		PublicKey: dsa.PublicKey{},
-		X:         big.NewInt(0),
-	}
-	key.X.SetString(keyString, 10)
-	return key
+  var restored big.Int
+  restored.SetString(keyString, 10)
+	return restored
 }

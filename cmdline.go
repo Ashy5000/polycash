@@ -69,8 +69,17 @@ func RunCmd(input string) {
 			if err != nil {
 				panic(err)
 			}
-			mnemonic := GetMnemonic(privateKey)
-			fmt.Println("Mnemonic: " + mnemonic)
+			mnemonic0 := GetMnemonic(*privateKey.X)
+      mnemonic1 := GetMnemonic(*privateKey.PublicKey.Y)
+      mnemonic2 := GetMnemonic(*privateKey.PublicKey.Parameters.P)
+      mnemonic3 := GetMnemonic(*privateKey.PublicKey.Parameters.Q)
+      mnemonic4 := GetMnemonic(*privateKey.PublicKey.Parameters.G)
+      fmt.Println("Mnemonic:")
+			fmt.Println("Part 0: " + mnemonic0)
+			fmt.Println("Part 1: " + mnemonic1)
+			fmt.Println("Part 2: " + mnemonic2)
+			fmt.Println("Part 3: " + mnemonic3)
+			fmt.Println("Part 4: " + mnemonic4)
 			fmt.Println("Write down the mnemonic and keep it safe, or better yet memorize it. It is the ONLY WAY to recover your private key.")
 		} else if action == "encrypt" {
 			// Ask the user for a password
