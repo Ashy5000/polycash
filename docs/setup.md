@@ -17,7 +17,7 @@ git clone https://github.com/Ashy5000/cryptocurrency
 Find the correct executable.
 
 |         | x86_64                         | arm64                          | arm                          | 386                          |
--------------------------------------------------------------------------------------------------------------------------------------------
+| ------- | ------------------------------ | ------------------------------ | ---------------------------- | ---------------------------- |
 | Linux   | builds/node/node_linux-amd64   | builds/node/node_linux-arm64   | builds/node/node_linux-arm   | builds/node/node_linux-386   |
 | MacOS   | builds/node/node_darwin-amd64  | builds/node/node_darwin-arm64  | Combination not possible     | Combination not possible     |
 | Windows | builds/node/node_windows-amd64 | builds/node/node_windows-arm64 | builds/node/node_windows-arm | builds/node/node_windows-386 |
