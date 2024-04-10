@@ -65,7 +65,7 @@ func SyncBlockchain() {
 		panic("Could not sync blockchain. All peers down.")
 	}
 	Log("Blockchain successfully synced!", false)
-	fmt.Println("%d out of %d peers responded.\n", len(GetPeers())-errCount, len(GetPeers()), false)
+	Log(fmt.Sprintf("%d out of %d peers responded.", len(GetPeers())-errCount, len(GetPeers())), false)
 	blockchain = longestBlockchain
 }
 

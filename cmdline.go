@@ -29,7 +29,7 @@ func RunCmd(input string) {
 			Log("Syncing blockchain...", false)
 			SyncBlockchain()
 			Log("Blockchain successfully synced!", false)
-			fmt.Println("Length: %d", len(blockchain), false)
+			Log(fmt.Sprintf("Length: %d", len(blockchain)), false)
 		} else if action == "balance" {
 			if len(fields) == 1 {
 				publicKey := GetKey().PublicKey.Y
