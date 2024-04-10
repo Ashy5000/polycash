@@ -13,6 +13,7 @@ import (
 )
 
 var useLocalPeerList *bool = &[]bool{true}[0]
+var verbose *bool =&[]bool{true}[0]
 
 func main() {
 	mine := flag.Bool("mine", false, "Set to true to start node as miner")
@@ -20,6 +21,7 @@ func main() {
 	port := flag.String("port", "8080", "Port to listen on (server only)")
 	command := flag.String("command", "exit", "Run a command and exit")
 	useLocalPeerList = flag.Bool("useLocalPeerList", true, "Set to true to use local peer list and fully decentralize (slower, but more secure)")
+  verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
 	flag.Parse()
 	Append(GenesisBlock())
 	ApplySecurityLevel(securityLevel)

@@ -14,7 +14,6 @@ import (
 	"crypto/dsa"
 	"crypto/rand"
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 )
@@ -23,7 +22,7 @@ func IsKeyEncrypted() bool {
 	// Check if key.json is encrypted.
 	contents, err := os.ReadFile("key.json")
 	if err != nil {
-		fmt.Println("No key found.")
+		Error("No key found.", true)
 	}
 	var key dsa.PrivateKey
 	err = json.Unmarshal(contents, &key)
@@ -36,12 +35,11 @@ func IsKeyEncrypted() bool {
 func EncryptKey(password string) {
 	plaintext, err := os.ReadFile("key.json")
 	if err != nil {
-		fmt.Println("No key found.")
+		Error("No key found.", true)
 	}
 	block, err := aes.NewCipher([]byte(password))
 	if err != nil {
-		fmt.Println("Error creating cipher.")
-		fmt.Println("Ensure that the password is a multiple of 16 characters long.")
+		Error("Error creating cipher. Ensure that the password is a multiple of 16 characters long.", false)
 		return
 	}
 	gcm, err := cipher.NewGCM(block)

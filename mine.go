@@ -10,7 +10,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -21,8 +20,8 @@ func Mine() {
 		if err != nil {
 			continue
 		}
-		fmt.Println("Block mined successfully!")
-		fmt.Println("Broadcasting block to peers...")
+		Log("Block mined successfully!", false)
+		Log("Broadcasting block to peers...", true)
 		bodyChars, err := json.Marshal(&block)
 		if err != nil {
 			panic(err)
@@ -35,9 +34,9 @@ func Mine() {
 			}
 			_, err = http.DefaultClient.Do(req)
 			if err != nil {
-				fmt.Println("Peer down.")
+				Log("Peer down.", true)
 			}
 		}
-		fmt.Println("All done!")
+		Log("All done!", false)
 	}
 }

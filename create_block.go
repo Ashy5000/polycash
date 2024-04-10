@@ -27,7 +27,7 @@ var transactionHashes = make(map[[32]byte]int)
 var miningTransactions []Transaction
 
 func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
-  fmt.Println("Requesting time verification")
+  Log("Requesting time verification", true)
   var signatures []Signature
   var publicKeys []dsa.PublicKey
 	// Convert the block to a string (JSON)
@@ -46,7 +46,7 @@ func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
 		}
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println("Peer down.")
+			Log("Peer down.", true)
 			continue
 		}
 		// Get the response body
@@ -59,7 +59,7 @@ func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
 		// Convert the response body to a big.Int
 		peerY, ok := new(big.Int).SetString(bodyString, 10)
 		if !ok {
-			fmt.Println("Could not convert peer Y to big.Int")
+			Log("Could not convert peer Y to big.Int", true)
 			continue
 		}
 		// Create a dsa.PublicKey from the big.Int
@@ -68,7 +68,7 @@ func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
 		}
 		// Verify that the peer has mined a block
 		if IsNewMiner(peerKey, len(blockchain) + 1) {
-			fmt.Println("Peer has not mined a block.")
+			Log("Peer has not mined a block.", true)
 			continue
 		}
 		// Ask to verify the time
@@ -79,7 +79,7 @@ func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
 		}
 		res, err = http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println("Peer down.")
+			Log("Peer down.", true)
 			continue
 		}
 		// Get the response body
@@ -88,7 +88,7 @@ func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
 			panic(err)
 		}
 		if string(bodyBytes) == "invalid" {
-			fmt.Println("Time verifier believes block is invalid.")
+		  Warn("verifier believes block is invalid.")
 			continue
 		}
 		// Split the response body into the signature and the public key
@@ -109,7 +109,7 @@ func RequestTimeVerification(block Block) ([]Signature, []dsa.PublicKey) {
 		publicKeys = append(publicKeys, publicKey)
 		// Add the time verifier signature to the block
 		signatures = append(signatures, signature)
-    fmt.Println("Got verification.")
+    Log("Got verification.", true)
 	}
   return signatures, publicKeys
 }
@@ -143,7 +143,7 @@ func CreateBlock() (Block, error) {
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
   // Request time verifiers
   block.PreMiningTimeVerifierSignatures, block.PreMiningTimeVerifiers = RequestTimeVerification(block)
-	fmt.Printf("Mining block with difficulty %d\n", block.Difficulty)
+	Log(fmt.Sprintf("Mining block with difficulty %d", block.Difficulty), false)
 	for hash > maximumUint64/block.Difficulty {
 		for i, transaction := range miningTransactions {
 			transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
@@ -172,7 +172,7 @@ func CreateBlock() (Block, error) {
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
 		} else {
-			fmt.Println("Pool dry.")
+			Log("Pool dry.", false)
 			return Block{}, errors.New("pool dry")
 		}
 	}
@@ -180,7 +180,7 @@ func CreateBlock() (Block, error) {
 	// Ask for time verifiers
   block.TimeVerifierSignatures, block.TimeVerifiers = RequestTimeVerification(block)
 	if int64(len(block.TimeVerifiers)) < GetMinerCount(len(blockchain))/5 {
-		fmt.Println("Not enough time verifiers.")
+		Warn("Not enough time verifiers.")
 		return Block{}, errors.New("lost block")
 	}
 	miningTransactions = []Transaction{}

@@ -89,8 +89,6 @@ func TestBlock(t *testing.T) {
 			transaction.Timestamp = timestamp
 		}
 		// Assert
-		fmt.Printf("%+v\n", block)
-		fmt.Printf("%+v\n", unmarshaled)
 		assert.Equal(t, HashBlock(block), HashBlock(unmarshaled))
 	})
 }

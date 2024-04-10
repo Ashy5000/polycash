@@ -10,7 +10,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -81,7 +80,7 @@ func GetPeers() []string {
 		// Add :8080 to each peer (port 8080 is used for the peer server, and other ports can be used for local peer lists)
 		for i, peer := range result {
 			result[i] = "http://" + peer + ":8080"
-			fmt.Println("Peer: " + result[i])
+			Log("Peer: " + result[i], true)
 		}
 		return result
 	}

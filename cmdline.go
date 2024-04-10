@@ -26,10 +26,10 @@ func RunCmd(input string) {
 		fields := strings.Split(cmd, " ")
 		action := fields[0]
 		if action == "sync" {
-			fmt.Println("Syncing blockchain...")
+			Log("Syncing blockchain...", false)
 			SyncBlockchain()
-			fmt.Printf("Blockchain successfully synced!")
-			fmt.Printf("Length: %d", len(blockchain))
+			Log("Blockchain successfully synced!", false)
+			fmt.Println("Length: %d", len(blockchain), false)
 		} else if action == "balance" {
 			if len(fields) == 1 {
 				publicKey := GetKey().PublicKey.Y
@@ -46,9 +46,9 @@ func RunCmd(input string) {
 			receiver := fields[1]
 			amount := fields[2]
 			Send(receiver, amount)
-			fmt.Println("Waiting for all workers to finish")
+			Log("Waiting for all workers to finish", true)
 			wg.Wait()
-			fmt.Println("All workers have finished")
+			Log("All workers have finished", true)
 		} else if action == "keygen" {
 			var privateKey dsa.PrivateKey
 			var params dsa.Parameters

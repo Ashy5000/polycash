@@ -10,7 +10,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 )
@@ -26,7 +25,7 @@ func Bootstrap() {
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println("Peer is down.")
+			Log("Peer is down.", true)
 			continue
 		}
 		peerPeersBytes, err := io.ReadAll(resp.Body)

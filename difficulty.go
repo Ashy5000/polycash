@@ -17,6 +17,7 @@ func GetDifficulty(lastTime time.Duration, lastDifficulty uint64) uint64 {
 	// The target time for a block is 1 minute.
 	// The difficulty is adjusted on a per-miner, per-block basis.
 	// To give faster miners a (small) advantage, the difficulty is divided by the result of a modified sigmoid function.
+  // It should be noted that miners with mining rates past a certain point will be disadvantaged.
 	// It looks like this:
 	// 1 / (1 + e^(-(x-mdpm)/mdpm))
 	// Where x is the previous time times the previous difficulty, and 1 mdpm is  1000000 (1 million) difficulty points per minute.

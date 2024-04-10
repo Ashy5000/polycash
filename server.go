@@ -49,13 +49,16 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	var s big.Int
 	r.SetString(rStr, 10)
 	s.SetString(sStr, 10)
-	fmt.Printf("Timestamp: %d\n", timestamp.UnixNano())
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", senderStr, recipientStr, amount, timestamp.UnixNano())))
 	if transactionHashes[hash] > 0 {
-		fmt.Println("No new job. Ignoring mine request.")
+		Log("No new job. Ignoring mine request.", true)
 		return
 	}
-	fmt.Println("New job.")
+	if !VerifyTransaction(senderKey, recipientKey, strconv.FormatFloat(amount, 'f', -1, 64), r, s) {
+		Log("Transaction is invalid. Ignoring transaction request.", true)
+		return
+	}
+	Log("New job.", false)
 	transactionHashes[hash] = 1
 	// Create a copy of the timestamp
 	marshaledTimestamp, err := json.Marshal(timestamp)
@@ -78,8 +81,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		Timestamp: unmarshaledTimestamp,
 	}
 	miningTransactions = append(miningTransactions, transaction)
-	fmt.Println("Transaction added:", miningTransactions[len(miningTransactions)-1])
-	fmt.Println("Broadcasting job to peers...")
+	Log("Broadcasting job to peers...", true)
 	for _, peer := range GetPeers() {
 		// Create a new body
 		body := strings.NewReader(string(bodyBytes))
@@ -89,14 +91,9 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		}
 		_, err = http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println("Peer", peer, "is down.")
+			Log(fmt.Sprintf("Peer", peer, "is down."), true)
 		}
 	}
-	if !VerifyTransaction(senderKey, recipientKey, strconv.FormatFloat(amount, 'f', -1, 64), r, s) {
-		fmt.Println("Transaction is invalid. Ignoring transaction request.")
-		return
-	}
-	fmt.Println("All done!")
 }
 
 func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
@@ -110,7 +107,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	if !VerifyBlock(block) {
-		fmt.Println("Block is invalid. Ignoring block request.")
+		Log("Block is invalid. Ignoring block request.", true)
 		return
 	}
 	for _, transaction := range block.Transactions {
@@ -123,10 +120,10 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		transactionHashes[hash] = 2
 	}
 	Append(block)
-	fmt.Println("Block appended to local blockchain!")
+	Log("Block appended to local blockchain!", true)
 	if *useLocalPeerList {
 		// Broadcast block to peers
-		fmt.Println("Broadcasting block to peers...")
+		Log("Broadcasting block to peers...", true)
 		bodyChars, err := json.Marshal(&block)
 		if err != nil {
 			panic(err)
@@ -139,11 +136,10 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 			}
 			_, err = http.DefaultClient.Do(req)
 			if err != nil {
-				fmt.Println("Peer is down.")
+				Log("Peer is down.", true)
 			}
 		}
 	}
-	fmt.Println("All done!")
 }
 
 func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
@@ -178,7 +174,7 @@ func HandlePeerIpRequest(w http.ResponseWriter, req *http.Request) {
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println("Peer is down.")
+			Log("Peer is down.", true)
 			continue
 		}
 		currentPeerKeyBytes, err := io.ReadAll(resp.Body)

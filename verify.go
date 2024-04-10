@@ -27,11 +27,11 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", senderKey.Y, recipientKey.Y, amount)))
 	isValid := dsa.Verify(&senderKey, hash[:], &r, &s)
 	if !isValid {
-		fmt.Println("Signature is not valid for this transaction.")
+		Warn("Invalid transaction signature detected")
 		return false
 	}
 	if GetBalance(*senderKey.Y)-amountFloat < 0 {
-		fmt.Println("Double-spending detected.")
+		Log("Double-spending detected.", true)
 		return false
 	}
 	return true
@@ -39,8 +39,8 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 
 func VerifyMiner(miner dsa.PublicKey) bool {
 	if IsNewMiner(miner, len(blockchain)) && GetMinerCount(len(blockchain)) >= GetMaxMiners() {
-		println("Miner count: ", GetMinerCount(len(blockchain)))
-		println("Maximum miner count: ", GetMaxMiners())
+		Log(fmt.Sprintf("Miner count: ", GetMinerCount(len(blockchain))), true)
+		Log(fmt.Sprintf("Maximum miner count: ", GetMaxMiners()), true)
 		return false
 	}
 	return true
@@ -52,34 +52,34 @@ func VerifyBlock(block Block) bool {
 	}
 	for _, transaction := range block.Transactions {
 		if !VerifyTransaction(transaction.Sender, transaction.Recipient, strconv.FormatFloat(transaction.Amount, 'f', -1, 64), transaction.SenderSignature.R, transaction.SenderSignature.S) {
-			fmt.Println("Block has invalid transaction/transaction signature. Ignoring block request.")
+			Log("Block has invalid transaction/transaction signature. Ignoring block request.", true)
 			return false
 		}
 	}
 	hashBytes := HashBlock(block)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	if hash > maximumUint64/block.Difficulty {
-		fmt.Println("Block has invalid hash. Ignoring block request.")
-		fmt.Printf("Actual hash: %d\n", hash)
+		Warn("Invalid block hash detected.")
+		Log(fmt.Sprintf("Actual hash: %d\n", hash), true)
 		return false
 	}
 	for _, b := range blockchain {
 		if HashBlock(b) == hashBytes {
-			fmt.Println("Block already exists. Ignoring block request.")
 			return false
 		}
 		if b.PreviousBlockHash == block.PreviousBlockHash {
-			fmt.Println("Block creates a fork.")
-			fmt.Println("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.")
-			fmt.Println("The blockchain will be re-synced to stay on the longest chain.")
+			Warn("Block creates a fork.")
+      Log("The node software is designed to handle this edge case, so operations can continue as normal.", false)
+			Log("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.", true)
+			Log("The blockchain will be re-synced to stay on the longest chain.", true)
 			SyncBlockchain()
 			return true
 		}
 	}
 	if len(blockchain) > 0 && block.PreviousBlockHash != HashBlock(blockchain[len(blockchain)-1]) {
-		fmt.Println("Block has invalid previous block hash. Ignoring block request.")
-		fmt.Println("The block could be on a different fork.")
-		fmt.Println("The blockchain will be re-synced to stay on the longest chain.")
+		Log("Block has invalid previous block hash. Ignoring block request.", true)
+		Log("The block could be on a different fork.", true)
+		Log("The blockchain will be re-synced to stay on the longest chain.", true)
 		SyncBlockchain()
 		return false
 	}
@@ -105,27 +105,29 @@ func VerifyBlock(block Block) bool {
 	}
 	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty)
 	if block.Difficulty != correctDifficulty {
-		fmt.Println("Block has invalid difficulty. Ignoring block request.")
-		fmt.Println("Expected difficulty: ", correctDifficulty)
-		fmt.Println("Actual difficulty: ", block.Difficulty)
+		Warn("Invalid difficulty detected.")
+    Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)
+		Log(fmt.Sprintf("Expected difficulty: ", correctDifficulty), true)
+		Log(fmt.Sprintf("Actual difficulty: ", block.Difficulty), true)
 		return false
 	}
 	if block.Difficulty < minimumBlockDifficulty {
-		fmt.Println("Block has invalid difficulty. Ignoring block request.")
-		fmt.Println("Difficulty is below minimum block difficulty.")
+		Warn("Invalid difficulty detected.")
+    Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)
+		Log("Difficulty is below minimum block difficulty.", true)
 		return false
 	}
 	if block.Timestamp.After(time.Now()) {
-		fmt.Println("Block has invalid timestamp. Ignoring block request.")
-		fmt.Println("Timestamp is in the future.")
+		Log("Block has invalid timestamp. Ignoring block request.", true)
+		Log("Timestamp is in the future.", true)
 		return false
 	}
 	if !VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures, false) {
-		fmt.Println("Block has invalid time verifiers. Ignoring block request.")
+		Log("Block has invalid time verifiers. Ignoring block request.", true)
 		return false
 	}
   if !VerifyTimeVerifiers(block, block.PreMiningTimeVerifiers, block.PreMiningTimeVerifierSignatures, true) {
-    fmt.Println("Block has invalid time verifiers. Ignoring block request.")
+    Log("Block has invalid time verifiers. Ignoring block request.", true)
     return false
   }
 	return true
@@ -133,20 +135,20 @@ func VerifyBlock(block Block) bool {
 
 func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Signature, premining bool) bool {
 	if len(verifiers) != len(signatures) {
-		fmt.Println("Signature count does not match verifier count.")
+		Log("Signature count does not match verifier count.", true)
 		return false
 	}
   if premining {
     for i, verifier := range verifiers {
       if !dsa.Verify(&verifier, []byte(fmt.Sprintf("%d", block.Timestamp.UnixNano())), &signatures[i].R, &signatures[i].S) {
-        fmt.Println("Time verifier signature is not valid.")
+        Warn("Invalid time verifier signature detected")
         return false
       }
     }
   } else {
     for i, verifier := range verifiers {
       if !dsa.Verify(&verifier, []byte(fmt.Sprintf("%d", block.Timestamp.Add(block.MiningTime).UnixNano())), &signatures[i].R, &signatures[i].S) {
-        fmt.Println("Time verifier signature is not valid.")
+        Warn("Invalid time verifier signature detected")
         return false
       }
     }
@@ -155,7 +157,7 @@ func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Si
 	verifierMap := make(map[string]bool)
 	for _, verifier := range verifiers {
 		if verifierMap[verifier.Y.String()] {
-			fmt.Println("Time verifier is not unique.")
+			Log("Time verifier is not unique.", true)
 			return false
 		}
 		verifierMap[verifier.Y.String()] = true
@@ -163,13 +165,13 @@ func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Si
 	// Ensure all verifiers are miners
 	for _, verifier := range verifiers {
 		if !IsNewMiner(verifier, len(blockchain) + 1) {
-			fmt.Println("Time verifier is not a miner.")
+			Log("Time verifier is not a miner.", true)
 			return false
 		}
 	}
 	// Ensure there are enough verifiers
 	if len(verifiers) < GetMinVerifiers() {
-		fmt.Println("Not enough time verifiers.")
+		Log("Not enough time verifiers.", true)
 		return false
 	}
 	return true

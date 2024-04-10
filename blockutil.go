@@ -64,8 +64,8 @@ func SyncBlockchain() {
 	if errCount >= len(GetPeers()) {
 		panic("Could not sync blockchain. All peers down.")
 	}
-	fmt.Println("Blockchain successfully synced!")
-	fmt.Printf("%d out of %d peers responded.\n", len(GetPeers())-errCount, len(GetPeers()))
+	Log("Blockchain successfully synced!", false)
+	fmt.Println("%d out of %d peers responded.\n", len(GetPeers())-errCount, len(GetPeers()), false)
 	blockchain = longestBlockchain
 }
 
@@ -117,7 +117,7 @@ func Send(receiver string, amount string) {
 	sStr := s.String()
 	timestamp := time.Now().UnixNano()
 	for _, peer := range GetPeers() {
-		fmt.Println("Sending transaction to peer: " + peer)
+		Log("Sending transaction to peer: " + peer, false)
 		body := strings.NewReader(fmt.Sprintf("%s%s:%s%s:%s:%s:%s:%d", sender, parametersString, receiver, parametersString, amount, rStr, sStr, timestamp))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
