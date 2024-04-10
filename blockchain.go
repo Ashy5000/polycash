@@ -9,26 +9,26 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"crypto/dsa"
-	"time"
+    "crypto/dsa"
+    "time"
 )
 
 var blockchain []Block
 
 func GenesisBlock() Block {
-	return Block{
-		Transactions: nil,
-		Miner:     dsa.PublicKey{},
-		Nonce:     0,
-		MiningTime:             0,
-		Difficulty:             0,
-		PreviousBlockHash:      [32]byte{},
-		Timestamp:              time.Time{},
-		TimeVerifierSignatures: []Signature{},
-		TimeVerifiers:          []dsa.PublicKey{},
-	}
+    return Block{
+        Transactions: nil,
+        Miner:     dsa.PublicKey{},
+        Nonce:     0,
+        MiningTime:             0,
+        Difficulty:             0,
+        PreviousBlockHash:      [32]byte{},
+        Timestamp:              time.Time{},
+        TimeVerifierSignatures: []Signature{},
+        TimeVerifiers:          []dsa.PublicKey{},
+    }
 }
 
 func Append(block Block) {
-	blockchain = append(blockchain, block)
+    blockchain = append(blockchain, block)
 }

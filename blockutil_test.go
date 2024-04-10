@@ -9,136 +9,136 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"crypto/dsa"
-	"github.com/stretchr/testify/assert"
-	"math/big"
-	"net/http"
-	"testing"
+    "crypto/dsa"
+    "github.com/stretchr/testify/assert"
+    "math/big"
+    "net/http"
+    "testing"
 )
 
 func TestGetKey(t *testing.T) {
-	t.Run("It returns a dsa.PrivateKey when the key.json file is found", func(t *testing.T) {
-		// Act
-		key := GetKey()
-		// Assert
-		assert.NotNil(t, key)
-	})
+    t.Run("It returns a dsa.PrivateKey when the key.json file is found", func(t *testing.T) {
+        // Act
+        key := GetKey()
+        // Assert
+        assert.NotNil(t, key)
+    })
 }
 
 func TestSyncBlockchain(t *testing.T) {
-	t.Run("It sets the blockchain to the longest blockchain from the peers or panics", func(t *testing.T) {
-		// Arrange
-		blockchain = nil
-		// Act
-		defer func() {
-			// Assert
-			if r := recover(); r == nil {
-				assert.NotNil(t, blockchain)
-			}
-		}()
-		SyncBlockchain()
-	})
+    t.Run("It sets the blockchain to the longest blockchain from the peers or panics", func(t *testing.T) {
+        // Arrange
+        blockchain = nil
+        // Act
+        defer func() {
+            // Assert
+            if r := recover(); r == nil {
+                assert.NotNil(t, blockchain)
+            }
+        }()
+        SyncBlockchain()
+    })
 }
 
 func TestGetBalance(t *testing.T) {
-	t.Run("It returns 0 when the blockchain is empty", func(t *testing.T) {
-		// Arrange
-		blockchain = nil
-		var key big.Int
-		key.SetString("1234567890", 10)
-		// Act
-		balance := GetBalance(key)
-		// Assert
-		assert.Equal(t, float64(0), balance)
-	})
-	t.Run("It returns the correct balance of a key", func(t *testing.T) {
-		// Arrange
-		blockchain = nil
-		Append(GenesisBlock())
-		var key big.Int
-		key.SetString("1234567890", 10)
-		sender := dsa.PublicKey{
-			Parameters: dsa.Parameters{},
-			Y:          big.NewInt(987654321),
-		}
-		receiver := dsa.PublicKey{
-			Parameters: dsa.Parameters{},
-			Y:          &key,
-		}
-		Append(Block{
-			Transactions: []Transaction {
-				{
-					Sender:    sender,
-					Recipient: receiver,
-					Amount:    100,
-				},
-			},
-			Miner:     sender,
-		})
-		// Act
-		balance := GetBalance(key)
-		// Assert
-		assert.Equal(t, float64(100), balance)
-	})
+    t.Run("It returns 0 when the blockchain is empty", func(t *testing.T) {
+        // Arrange
+        blockchain = nil
+        var key big.Int
+        key.SetString("1234567890", 10)
+        // Act
+        balance := GetBalance(key)
+        // Assert
+        assert.Equal(t, float64(0), balance)
+    })
+    t.Run("It returns the correct balance of a key", func(t *testing.T) {
+        // Arrange
+        blockchain = nil
+        Append(GenesisBlock())
+        var key big.Int
+        key.SetString("1234567890", 10)
+        sender := dsa.PublicKey{
+            Parameters: dsa.Parameters{},
+            Y:          big.NewInt(987654321),
+        }
+        receiver := dsa.PublicKey{
+            Parameters: dsa.Parameters{},
+            Y:          &key,
+        }
+        Append(Block{
+            Transactions: []Transaction {
+                {
+                    Sender:    sender,
+                    Recipient: receiver,
+                    Amount:    100,
+                },
+            },
+            Miner:     sender,
+        })
+        // Act
+        balance := GetBalance(key)
+        // Assert
+        assert.Equal(t, float64(100), balance)
+    })
 }
 
 func TestSendRequest(t *testing.T) {
-	t.Run("It does not panic when the request is successful", func(t *testing.T) {
-		// Arrange
-		req := &http.Request{}
-		// Act & Assert
-		wg.Add(1)
-		assert.NotPanics(t, func() {
-			SendRequest(req)
-		})
-	})
+    t.Run("It does not panic when the request is successful", func(t *testing.T) {
+        // Arrange
+        req := &http.Request{}
+        // Act & Assert
+        wg.Add(1)
+        assert.NotPanics(t, func() {
+            SendRequest(req)
+        })
+    })
 }
 
 func TestGetLastMinedBlock(t *testing.T) {
-	t.Run("It returns the last block mined by the key", func(t *testing.T) {
-		// Arrange
-		blockchain = nil
-		Append(GenesisBlock())
-		key := GetKey().PublicKey
-		block := Block{
-			Miner: key,
-		}
-		Append(block)
-		// Act
-		lastMinedBlock, found := GetLastMinedBlock()
-		// Assert
-		assert.True(t, found)
-		assert.Equal(t, block, lastMinedBlock)
-	})
-	t.Run("It returns false when the key has not mined any blocks", func(t *testing.T) {
-		// Arrange
-		blockchain = nil
-		Append(GenesisBlock())
-		// Act
-		_, found := GetLastMinedBlock()
-		// Assert
-		assert.False(t, found)
-	})
+    t.Run("It returns the last block mined by the key", func(t *testing.T) {
+        // Arrange
+        blockchain = nil
+        Append(GenesisBlock())
+        key := GetKey().PublicKey
+        block := Block{
+            Miner: key,
+        }
+        Append(block)
+        // Act
+        lastMinedBlock, found := GetLastMinedBlock()
+        // Assert
+        assert.True(t, found)
+        assert.Equal(t, block, lastMinedBlock)
+    })
+    t.Run("It returns false when the key has not mined any blocks", func(t *testing.T) {
+        // Arrange
+        blockchain = nil
+        Append(GenesisBlock())
+        // Act
+        _, found := GetLastMinedBlock()
+        // Assert
+        assert.False(t, found)
+    })
 }
 
 func TestGetMaxMiners(t *testing.T) {
-	t.Run("It returns 1 when the length of the blockchain is 0", func(t *testing.T) {
-		// Arrange
-		blockchain = nil
-		// Act
-		maxMiners := GetMaxMiners()
-		// Assert
-		assert.Equal(t, int64(1), maxMiners)
-	})
-	t.Run("It returns 11 when the length of the blockchain is 50", func(t *testing.T) {
-		// Arrange
-		blockchain = nil
-		for i := 0; i < 50; i++ {
-			Append(Block{})
-		}
-		// Act
-		maxMiners := GetMaxMiners()
-		// Assert
-		assert.Equal(t, int64(11), maxMiners)
-	})
+    t.Run("It returns 1 when the length of the blockchain is 0", func(t *testing.T) {
+        // Arrange
+        blockchain = nil
+        // Act
+        maxMiners := GetMaxMiners()
+        // Assert
+        assert.Equal(t, int64(1), maxMiners)
+    })
+    t.Run("It returns 11 when the length of the blockchain is 50", func(t *testing.T) {
+        // Arrange
+        blockchain = nil
+        for i := 0; i < 50; i++ {
+            Append(Block{})
+        }
+        // Act
+        maxMiners := GetMaxMiners()
+        // Assert
+        assert.Equal(t, int64(11), maxMiners)
+    })
 }

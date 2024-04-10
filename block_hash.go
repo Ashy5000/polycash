@@ -9,28 +9,28 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"crypto/dsa"
-	"crypto/sha256"
-	"encoding/json"
-	"fmt"
-	"time"
+    "crypto/dsa"
+    "crypto/sha256"
+    "encoding/json"
+    "fmt"
+    "time"
 )
 
 func HashBlock(block Block) [32]byte {
-	marshaled, err := json.Marshal(block)
-	if err != nil {
-		panic(err)
-	}
-	blockCpy := Block{}
-	err = json.Unmarshal(marshaled, &blockCpy)
-	blockCpy.MiningTime = time.Minute
-	blockCpy.TimeVerifierSignatures = []Signature{}
-	blockCpy.TimeVerifiers = []dsa.PublicKey{}
-	blockCpy.Timestamp = time.Time{}
-	for i, _ := range block.Transactions {
-		blockCpy.Transactions[i].Timestamp = time.Time{}
-	}
-	blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
-	sum := sha256.Sum256(blockBytes)
-	return sum
+    marshaled, err := json.Marshal(block)
+    if err != nil {
+        panic(err)
+    }
+    blockCpy := Block{}
+    err = json.Unmarshal(marshaled, &blockCpy)
+    blockCpy.MiningTime = time.Minute
+    blockCpy.TimeVerifierSignatures = []Signature{}
+    blockCpy.TimeVerifiers = []dsa.PublicKey{}
+    blockCpy.Timestamp = time.Time{}
+    for i, _ := range block.Transactions {
+        blockCpy.Transactions[i].Timestamp = time.Time{}
+    }
+    blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
+    sum := sha256.Sum256(blockBytes)
+    return sum
 }

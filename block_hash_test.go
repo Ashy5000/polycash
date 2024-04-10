@@ -9,18 +9,18 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
-	"testing"
+    "github.com/stretchr/testify/assert"
+    "testing"
 )
 
 func TestHashBlock(t *testing.T) {
-	t.Run("It returns a checksum of the block", func(t *testing.T) {
-		// Arrange
-		block := Block{}
-		var emptyHash [32]byte
-		// Act
-		hash := HashBlock(block)
-		// Assert
-		assert.NotEqual(t, emptyHash, hash)
-	})
+    t.Run("It returns a checksum of the block", func(t *testing.T) {
+        // Arrange
+        block := Block{}
+        var emptyHash [32]byte
+        // Act
+        hash := HashBlock(block)
+        // Assert
+        assert.NotEqual(t, emptyHash, hash)
+    })
 }
