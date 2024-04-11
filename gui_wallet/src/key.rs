@@ -11,18 +11,14 @@ use std::process::Command;
 use regex::Regex;
 
 #[derive(Debug)]
-pub(crate) struct PublicKeyError {
-    message: String,
-}
+pub(crate) struct PublicKeyError {}
 
 pub(crate) fn get_public_key() -> Result<String, PublicKeyError> {
     let key_string_result = fs::read_to_string("../key.json");
     let key_string = match key_string_result {
         Ok(key_string) => key_string,
         Err(..) => {
-            return Err(PublicKeyError {
-                message: "Key not found".to_string(),
-            })
+            return Err(PublicKeyError {})
         }
     };
     let re = Regex::new(r"Y(.):(?<y>.*),").unwrap();

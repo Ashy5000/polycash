@@ -13,10 +13,12 @@ import (
     "crypto/rand"
     "crypto/sha256"
     "fmt"
-    "github.com/stretchr/testify/assert"
     "math/big"
     "strconv"
     "testing"
+    "time"
+
+    "github.com/stretchr/testify/assert"
 )
 
 func TestVerifyTransaction(t *testing.T) {
@@ -29,12 +31,13 @@ func TestVerifyTransaction(t *testing.T) {
         amount := "0"
         r := big.NewInt(0)
         s := big.NewInt(0)
-        hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", sender, receiver, amount)))
+        timestamp := time.Now()
+        hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", sender, receiver, amount, timestamp.UnixNano())))
         r, s, err := dsa.Sign(rand.Reader, &key, hash[:])
         if err != nil {
             panic(err)
         }
-        result := VerifyTransaction(key.PublicKey, key.PublicKey, amount, *r, *s)
+        result := VerifyTransaction(key.PublicKey, key.PublicKey, amount, timestamp, *r, *s)
         assert.True(t, result)
     })
     t.Run("It should return false if the transaction double spends", func(t *testing.T) {
@@ -51,7 +54,7 @@ func TestVerifyTransaction(t *testing.T) {
         if err != nil {
             panic(err)
         }
-        result := VerifyTransaction(key.PublicKey, key.PublicKey, amount, *r, *s)
+        result := VerifyTransaction(key.PublicKey, key.PublicKey, amount, time.Now(), *r, *s)
         assert.False(t, result)
     })
     t.Run("It should return false if the transaction signature is invalid", func(t *testing.T) {
@@ -61,7 +64,7 @@ func TestVerifyTransaction(t *testing.T) {
         amount := "1"
         r := big.NewInt(0)
         s := big.NewInt(0)
-        result := VerifyTransaction(key.PublicKey, key.PublicKey, amount, *r, *s)
+        result := VerifyTransaction(key.PublicKey, key.PublicKey, amount, time.Now(), *r, *s)
         assert.False(t, result)
     })
 }
@@ -101,20 +104,23 @@ func TestVerifyBlock(t *testing.T) {
         amount := 0.0
         r := big.NewInt(0)
         s := big.NewInt(0)
-        hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", sender.Y, receiver.Y, strconv.FormatFloat(amount, 'f', -1, 64))))
+        timestamp := time.Now()
+        hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", sender.Y, receiver.Y, strconv.FormatFloat(amount, 'f', -1, 64), timestamp.UnixNano())))
         r, s, err := dsa.Sign(rand.Reader, &key, hash[:])
         if err != nil {
             panic(err)
         }
+
         miningTransactions = []Transaction{
             {
-                Sender: sender,
+                Sender:    sender,
                 Recipient: receiver,
-                Amount: amount,
+                Amount:    amount,
                 SenderSignature: Signature{
                     R: *r,
                     S: *s,
                 },
+        Timestamp: timestamp,
             },
         }
         block, err := CreateBlock()
@@ -139,11 +145,11 @@ func TestVerifyBlock(t *testing.T) {
             panic(err)
         }
         block := Block{
-            Transactions: []Transaction {
+            Transactions: []Transaction{
                 {
-                    Sender: sender,
-                    Recipient: receiver,
-                    Amount: 0,
+                    Sender:          sender,
+                    Recipient:       receiver,
+                    Amount:          0,
                     SenderSignature: Signature{R: *r, S: *s},
                 },
             },

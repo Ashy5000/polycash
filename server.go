@@ -91,7 +91,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
         }
         _, err = http.DefaultClient.Do(req)
         if err != nil {
-            Log(fmt.Sprintf("Peer", peer, "is down."), true)
+            Log(fmt.Sprintf("Peer, %s is down.", peer), true)
         }
     }
 }
