@@ -164,7 +164,7 @@ func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Si
     }
     // Ensure all verifiers are miners
     for _, verifier := range verifiers {
-        if !IsNewMiner(verifier, len(blockchain)+1) {
+        if IsNewMiner(verifier, len(blockchain)+1) {
             Log("Time verifier is not a miner.", true)
             return false
         }
