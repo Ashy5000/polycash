@@ -178,5 +178,11 @@ func VerifyTimeVerifiers(block Block, verifiers []dsa.PublicKey, signatures []Si
 }
 
 func GetMinVerifiers() int {
-    return int(GetMinerCount(len(blockchain)) / 5)
+    // Get the last block
+    lastBlock := blockchain[len(blockchain)-1]
+    // Get the number of verifiers in the last block
+    lastVerifierCount := len(lastBlock.TimeVerifiers)
+    // Get the minimum number of verifiers
+    minVerifiers := int(float64(lastVerifierCount) * 0.66)
+    return minVerifiers
 }
