@@ -39,8 +39,8 @@ func VerifyTransaction(senderKey dsa.PublicKey, recipientKey dsa.PublicKey, amou
 
 func VerifyMiner(miner dsa.PublicKey) bool {
     if IsNewMiner(miner, len(blockchain)) && GetMinerCount(len(blockchain)) >= GetMaxMiners() {
-        Log(fmt.Sprintf("Miner count: ", GetMinerCount(len(blockchain))), true)
-        Log(fmt.Sprintf("Maximum miner count: ", GetMaxMiners()), true)
+        Log(fmt.Sprintf("Miner count: %d", GetMinerCount(len(blockchain))), true)
+        Log(fmt.Sprintf("Maximum miner count: %d", GetMaxMiners()), true)
         return false
     }
     return true
@@ -107,8 +107,8 @@ func VerifyBlock(block Block) bool {
     if block.Difficulty != correctDifficulty {
         Warn("Invalid difficulty detected.")
         Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)
-        Log(fmt.Sprintf("Expected difficulty: ", correctDifficulty), true)
-        Log(fmt.Sprintf("Actual difficulty: ", block.Difficulty), true)
+        Log(fmt.Sprintf("Expected difficulty: %d", correctDifficulty), true)
+        Log(fmt.Sprintf("Actual difficulty: %d", block.Difficulty), true)
         return false
     }
     if block.Difficulty < minimumBlockDifficulty {

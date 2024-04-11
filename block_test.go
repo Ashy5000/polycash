@@ -12,7 +12,6 @@ import (
     "crypto/dsa"
     "crypto/rand"
     "encoding/json"
-    "fmt"
     "math/big"
     "testing"
     "time"
