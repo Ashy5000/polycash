@@ -54,7 +54,7 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
         panic(err)
     }
     signature := string(signatureBytes)
-    result := []byte(EncodePublicKey(i.Sender) + ":" + EncodePublicKey(i.Recipient) + ":" + fmt.Sprintf("%f", i.Amount) + ":" + signature)
+    result := []byte(EncodePublicKey(i.Sender) + ":" + EncodePublicKey(i.Recipient) + ":" + fmt.Sprintf("%f", i.Amount) + ":" + signature + ":" + strconv.FormatInt(i.Timestamp.UnixNano(), 10))
     result = []byte(strings.Replace(string(result), `"`, "", -1))
     result = []byte(`"` + string(result) + `"`)
     return result, nil
@@ -69,10 +69,14 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
     str = strings.Replace(str, "\\u0026", "&", -1)
     // Split string into parts
     parts := strings.Split(str, ":")
+
     // Convert parts to appropriate types
     i.Sender = DecodePublicKey(parts[0])
     i.Recipient = DecodePublicKey(parts[1])
     i.Amount, _ = strconv.ParseFloat(parts[2], 64)
+    timestampInt, _ := strconv.ParseInt(parts[4], 10, 64)
+    i.Timestamp = time.Unix(0, timestampInt)
+
     var signature Signature
     err := json.Unmarshal([]byte(`"`+parts[3]+`"`), &signature)
     if err != nil {
