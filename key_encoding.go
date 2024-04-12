@@ -9,32 +9,23 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-    "crypto/dsa"
-    "math/big"
-    "strings"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
-func DecodePublicKey(keyString string) dsa.PublicKey {
-    fields := strings.Split(keyString, "&")
-    var y big.Int
-    y.SetString(fields[0], 10)
-    var p big.Int
-    p.SetString(fields[1], 10)
-    var q big.Int
-    q.SetString(fields[2], 10)
-    var g big.Int
-    g.SetString(fields[3], 10)
-    publicKey := dsa.PublicKey{
-        Parameters: dsa.Parameters{
-            P: &p,
-            Q: &q,
-            G: &g,
-        },
-        Y: &y,
-    }
-    return publicKey
+func DecodePublicKey(keyString string) PublicKey {
+	key := PublicKey{
+		Y: []byte(""),
+	}
+	for _, ps := range strings.Split(strings.Trim(keyString, "[]"), " ") {
+		pi,_ := strconv.Atoi(ps)
+		key.Y = append(key.Y,byte(pi))
+	}
+	return key
 }
 
-func EncodePublicKey(key dsa.PublicKey) string {
-    return key.Y.String() + "&" + key.P.String() + "&" + key.Q.String() + "&" + key.G.String()
+func EncodePublicKey(key PublicKey) string {
+	result := fmt.Sprintf("%v", key.Y)
+	return result
 }

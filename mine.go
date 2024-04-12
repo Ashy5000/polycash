@@ -9,34 +9,34 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-    "encoding/json"
-    "net/http"
-    "strings"
+	"encoding/json"
+	"net/http"
+	"strings"
 )
 
 func Mine() {
-    for {
-        block, err := CreateBlock()
-        if err != nil {
-            continue
-        }
-        Log("Block mined successfully!", false)
-        Log("Broadcasting block to peers...", true)
-        bodyChars, err := json.Marshal(&block)
-        if err != nil {
-            panic(err)
-        }
-        for _, peer := range GetPeers() {
-            body := strings.NewReader(string(bodyChars))
-            req, err := http.NewRequest(http.MethodGet, peer+"/block", body)
-            if err != nil {
-                panic(err)
-            }
-            _, err = http.DefaultClient.Do(req)
-            if err != nil {
-                Log("Peer down.", true)
-            }
-        }
-        Log("All done!", false)
-    }
+	for {
+		block, err := CreateBlock()
+		if err != nil {
+			continue
+		}
+		Log("Block mined successfully!", false)
+		Log("Broadcasting block to peers...", true)
+		bodyChars, err := json.Marshal(&block)
+		if err != nil {
+			panic(err)
+		}
+		for _, peer := range GetPeers() {
+			body := strings.NewReader(string(bodyChars))
+			req, err := http.NewRequest(http.MethodGet, peer+"/block", body)
+			if err != nil {
+				panic(err)
+			}
+			_, err = http.DefaultClient.Do(req)
+			if err != nil {
+				Log("Peer down.", true)
+			}
+		}
+		Log("All done!", false)
+	}
 }

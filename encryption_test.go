@@ -9,28 +9,28 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-    "testing"
+	"testing"
 
-    "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEncryptKey(t *testing.T) {
-    t.Run("It encrypts the key.json file", func(t *testing.T) {
-        // Act
-        EncryptKey("0123456789abcdef")
-        // Assert
-        assert.True(t, IsKeyEncrypted())
-        DecryptKey("0123456789abcdef")
-    })
+	t.Run("It encrypts the key.json file", func(t *testing.T) {
+		// Act
+		EncryptKey("0123456789abcdef")
+		// Assert
+		assert.True(t, IsKeyEncrypted())
+		DecryptKey("0123456789abcdef")
+	})
 }
 
 func TestDecryptKey(t *testing.T) {
-    t.Run("It decrypts the key.json file", func(t *testing.T) {
-        // Arrange
-        EncryptKey("0123456789abcdef")
-        // Act
-        DecryptKey("0123456789abcdef")
-        // Assert
-        assert.False(t, IsKeyEncrypted())
-    })
+	t.Run("It decrypts the key.json file", func(t *testing.T) {
+		// Arrange
+		EncryptKey("0123456789abcdef")
+		// Act
+		DecryptKey("0123456789abcdef")
+		// Assert
+		assert.False(t, IsKeyEncrypted())
+	})
 }

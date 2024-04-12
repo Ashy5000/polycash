@@ -9,39 +9,29 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-    "crypto/dsa"
-    "github.com/stretchr/testify/assert"
-    "math/big"
-    "testing"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestDecodePublicKey(t *testing.T) {
-    t.Run("It returns a valid dsa.PublicKey when the key is valid", func(t *testing.T) {
-        // Act
-        key := DecodePublicKey("1&2&3&4")
-        // Assert
-        assert.NotNil(t, key)
-        assert.Equal(t, int64(1), key.Y.Int64())
-        assert.Equal(t, int64(2), key.P.Int64())
-        assert.Equal(t, int64(3), key.Q.Int64())
-        assert.Equal(t, int64(4), key.G.Int64())
-    })
+	t.Run("It returns a valid PublicKey when the key is valid", func(t *testing.T) {
+		// Act
+		key := DecodePublicKey("1234")
+		// Assert
+		assert.NotNil(t, key)
+		assert.Equal(t, []byte("1234"), key.Y)
+	})
 }
 
 func TestEncodePublicKey(t *testing.T) {
-    t.Run("It returns a valid string when the key is valid", func(t *testing.T) {
-        // Arrange
-        key := dsa.PublicKey{
-            Parameters: dsa.Parameters{
-                P: big.NewInt(2),
-                Q: big.NewInt(3),
-                G: big.NewInt(4),
-            },
-            Y: big.NewInt(1),
-        }
-        // Act
-        encodedKey := EncodePublicKey(key)
-        // Assert
-        assert.Equal(t, "1&2&3&4", encodedKey)
-    })
+	t.Run("It returns a valid string when the key is valid", func(t *testing.T) {
+		// Arrange
+		key := PublicKey{
+			Y: []byte("1234"),
+		}
+		// Act
+		encodedKey := EncodePublicKey(key)
+		// Assert
+		assert.Equal(t, "1234", encodedKey)
+	})
 }

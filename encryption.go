@@ -9,75 +9,74 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-    "crypto/aes"
-    "crypto/cipher"
-    "crypto/dsa"
-    "crypto/rand"
-    "encoding/json"
-    "io"
-    "os"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/json"
+	"io"
+	"os"
 )
 
 func IsKeyEncrypted() bool {
-    // Check if key.json is encrypted.
-    contents, err := os.ReadFile("key.json")
-    if err != nil {
-        Error("No key found.", true)
-    }
-    var key dsa.PrivateKey
-    err = json.Unmarshal(contents, &key)
-    if err != nil {
-        return true
-    }
-    return false
+	// Check if key.json is encrypted.
+	contents, err := os.ReadFile("key.json")
+	if err != nil {
+		Error("No key found.", true)
+	}
+	var key PrivateKey
+	err = json.Unmarshal(contents, &key)
+	if err != nil {
+		return true
+	}
+	return false
 }
 
 func EncryptKey(password string) {
-    plaintext, err := os.ReadFile("key.json")
-    if err != nil {
-        Error("No key found.", true)
-    }
-    block, err := aes.NewCipher([]byte(password))
-    if err != nil {
-        Error("Error creating cipher. Ensure that the password is a multiple of 16 characters long.", false)
-        return
-    }
-    gcm, err := cipher.NewGCM(block)
-    if err != nil {
-        panic(err)
-    }
-    nonce := make([]byte, gcm.NonceSize())
-    if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-        panic(err)
-    }
-    cipherText := gcm.Seal(nonce, nonce, plaintext, nil)
-    err = os.WriteFile("key.json", cipherText, 0644)
-    if err != nil {
-        panic(err)
-    }
+	plaintext, err := os.ReadFile("key.json")
+	if err != nil {
+		Error("No key found.", true)
+	}
+	block, err := aes.NewCipher([]byte(password))
+	if err != nil {
+		Error("Error creating cipher. Ensure that the password is a multiple of 16 characters long.", false)
+		return
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err)
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err)
+	}
+	cipherText := gcm.Seal(nonce, nonce, plaintext, nil)
+	err = os.WriteFile("key.json", cipherText, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func DecryptKey(password string) {
-    ciphertext, err := os.ReadFile("key.json")
-    if err != nil {
-        panic(err)
-    }
-    block, err := aes.NewCipher([]byte(password))
-    if err != nil {
-        panic(err)
-    }
-    gcm, err := cipher.NewGCM(block)
-    if err != nil {
-        panic(err)
-    }
-    nonceSize := gcm.NonceSize()
-    nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-    plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-    if err != nil {
-        panic(err)
-    }
-    err = os.WriteFile("key.json", plaintext, 0644)
-    if err != nil {
-        panic(err)
-    }
+	ciphertext, err := os.ReadFile("key.json")
+	if err != nil {
+		panic(err)
+	}
+	block, err := aes.NewCipher([]byte(password))
+	if err != nil {
+		panic(err)
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err)
+	}
+	nonceSize := gcm.NonceSize()
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		panic(err)
+	}
+	err = os.WriteFile("key.json", plaintext, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
