@@ -36,7 +36,7 @@ func (i *Signature) UnmarshalJSON(data []byte) error {
 	str = strings.Replace(str, `"`, "", -1)
 	// Convert dashes to double quotes
 	str = strings.Replace(str, "-", `"`, -1)
-	// Convert S to byte
+	// Convert string to byte array
 	err := json.Unmarshal([]byte(str), &i.S)
 	if err != nil {
 		return err
