@@ -13,10 +13,11 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	"github.com/open-quantum-safe/liboqs-go/oqs"
 	"strconv"
 	"time"
 	"unsafe"
+
+	"github.com/open-quantum-safe/liboqs-go/oqs"
 )
 
 func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount string, timestamp time.Time, sig []byte) bool {
@@ -24,7 +25,9 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 	if err != nil {
 		panic(err)
 	}
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", senderKey.Y, recipientKey.Y, amount, timestamp.UnixNano())))
+	transactionString := fmt.Sprintf("%s:%s:%s:%d", senderKey.Y, recipientKey.Y, amount, timestamp.UnixNano())
+	fmt.Println("Transaction string: ", transactionString)
+	hash := sha256.Sum256([]byte(transactionString))
 	verifier := oqs.Signature{}
 	sigName := "Dilithium2"
 	if err := verifier.Init(sigName, nil); err != nil {

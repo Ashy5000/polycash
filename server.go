@@ -41,13 +41,17 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	timestamp := time.Unix(0, timestampInt)
 	sStr := fields[3]
-	s := []byte(sStr)
+	var s Signature
+	err = json.Unmarshal([]byte(sStr), &s)
+	if err != nil {
+		panic(err)
+	}
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", senderStr, recipientStr, amount, timestamp.UnixNano())))
 	if transactionHashes[hash] > 0 {
 		Log("No new job. Ignoring mine request.", true)
 		return
 	}
-	if !VerifyTransaction(senderKey, recipientKey, strconv.FormatFloat(amount, 'f', -1, 64), timestamp, s) {
+	if !VerifyTransaction(senderKey, recipientKey, strconv.FormatFloat(amount, 'f', -1, 64), timestamp, s.S) {
 		Log("Transaction is invalid. Ignoring transaction request.", true)
 		return
 	}
@@ -64,13 +68,11 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	transaction := Transaction{
-		Sender:    senderKey,
-		Recipient: recipientKey,
-		Amount:    amount,
-		SenderSignature: Signature{
-			S: s,
-		},
-		Timestamp: unmarshaledTimestamp,
+		Sender:          senderKey,
+		Recipient:       recipientKey,
+		Amount:          amount,
+		SenderSignature: s,
+		Timestamp:       unmarshaledTimestamp,
 	}
 	miningTransactions = append(miningTransactions, transaction)
 	Log("Broadcasting job to peers...", true)
