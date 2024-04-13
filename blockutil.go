@@ -109,14 +109,19 @@ func Send(receiver string, amount string) {
 	sender := key.PublicKey.Y
 	timestamp := time.Now().UnixNano()
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", sender, receiver, amount, timestamp)))
-	sig, err := key.X.Sign(hash[:])
+	sigBytes, err := key.X.Sign(hash[:])
+	sig := Signature {
+		S: sigBytes,
+	}
 	if err != nil {
 		panic(err)
 	}
-	sigStr := string(sig)
+	sigStr, err := json.Marshal(sig)
+	senderStr := EncodePublicKey(key.PublicKey)
+	receiverStr := EncodePublicKey(PublicKey{Y: []byte(receiver)})
 	for _, peer := range GetPeers() {
 		Log("Sending transaction to peer: "+peer, false)
-		body := strings.NewReader(fmt.Sprintf("%s:%s:%s:%s:%d", sender, receiver, amount, sigStr, timestamp))
+		body := strings.NewReader(fmt.Sprintf("%s:%s:%s:%s:%d", senderStr, receiverStr, amount, sigStr, timestamp))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)

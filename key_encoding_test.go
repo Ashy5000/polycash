@@ -9,17 +9,25 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDecodePublicKey(t *testing.T) {
-	t.Run("It returns a valid PublicKey when the key is valid", func(t *testing.T) {
+	t.Run("It returns a non-nil PublicKey when the key is valid", func(t *testing.T) {
 		// Act
 		key := DecodePublicKey("1234")
 		// Assert
 		assert.NotNil(t, key)
-		assert.Equal(t, []byte("1234"), key.Y)
+	})
+	t.Run("It returns a PublicKey that, when encoded, is the same as the original key", func(t *testing.T) {
+		// Arrange
+		originalKey := "1234"
+		// Act
+		key := DecodePublicKey(originalKey)
+		// Assert
+		assert.Equal(t, originalKey, EncodePublicKey(key))
 	})
 }
 
@@ -33,5 +41,13 @@ func TestEncodePublicKey(t *testing.T) {
 		encodedKey := EncodePublicKey(key)
 		// Assert
 		assert.Equal(t, "1234", encodedKey)
+	})
+	t.Run("It returns a string that, when decoded, is the same as the original key", func(t *testing.T) {
+		// Arrange
+		originalKey := "1234"
+		// Act
+		key := DecodePublicKey(originalKey)
+		// Assert
+		assert.Equal(t, originalKey, EncodePublicKey(key))
 	})
 }
