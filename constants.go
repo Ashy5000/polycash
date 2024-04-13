@@ -9,8 +9,8 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 var securityLevel = 0
-var initialBlockDifficulty = uint64(100000)
-var minimumBlockDifficulty = uint64(100000)
+var initialBlockDifficulty = uint64(50000)
+var minimumBlockDifficulty = uint64(50000)
 var maximumUint64 = ^uint64(0)
 var blocksBeforeSpendable = 3
 var maxBlockSize = 10000000
