@@ -58,7 +58,7 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
 		panic(err)
 	}
 	signature := string(signatureBytes)
-	result := []byte(EncodePublicKey(i.Sender) + ":" + EncodePublicKey(i.Recipient) + ":" + fmt.Sprintf("%f", i.Amount) + ":" + signature)
+	result := []byte(EncodePublicKey(i.Sender) + ":" + EncodePublicKey(i.Recipient) + ":" + fmt.Sprintf("%f", i.Amount) + ":" + signature + ":" + strconv.FormatInt(i.Timestamp.UnixNano(), 10))
 	result = []byte(strings.Replace(string(result), `"`, "", -1))
 	result = []byte(`"` + string(result) + `"`)
 	return result, nil
@@ -76,9 +76,18 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	// Convert parts to appropriate types
 	i.Sender = DecodePublicKey(parts[0])
 	i.Recipient = DecodePublicKey(parts[1])
-	i.Amount, _ = strconv.ParseFloat(parts[2], 64)
+	amount, err := strconv.ParseFloat(parts[2], 64)
+	if err != nil {
+		panic(err)
+	}
+	i.Amount = amount
+	timestampInt, err := strconv.ParseInt(parts[4], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	i.Timestamp = time.Unix(0, timestampInt)
 	var signature Signature
-	err := json.Unmarshal([]byte(`"`+parts[3]+`"`), &signature)
+	err = json.Unmarshal([]byte(`"`+parts[3]+`"`), &signature)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -88,15 +97,15 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 }
 
 type Block struct {
-	Transactions                    []Transaction   `json:"transactions"`
-	Miner                           PublicKey   `json:"miner"`
-	Nonce                           int64           `json:"nonce"`
-	MiningTime                      time.Duration   `json:"miningTime"`
-	Difficulty                      uint64          `json:"difficulty"`
-	PreviousBlockHash               [32]byte        `json:"previousBlockHash"`
-	Timestamp                       time.Time       `json:"timestamp"`
-	PreMiningTimeVerifierSignatures []Signature     `json:"preMiningTimeVerifierSignatures"`
-	PreMiningTimeVerifiers          []PublicKey `json:"preMiningTimeVerifiers"`
-	TimeVerifierSignatures          []Signature     `json:"timeVerifierSignature"`
-	TimeVerifiers                   []PublicKey `json:"timeVerifiers"`
+	Transactions                    []Transaction `json:"transactions"`
+	Miner                           PublicKey     `json:"miner"`
+	Nonce                           int64         `json:"nonce"`
+	MiningTime                      time.Duration `json:"miningTime"`
+	Difficulty                      uint64        `json:"difficulty"`
+	PreviousBlockHash               [32]byte      `json:"previousBlockHash"`
+	Timestamp                       time.Time     `json:"timestamp"`
+	PreMiningTimeVerifierSignatures []Signature   `json:"preMiningTimeVerifierSignatures"`
+	PreMiningTimeVerifiers          []PublicKey   `json:"preMiningTimeVerifiers"`
+	TimeVerifierSignatures          []Signature   `json:"timeVerifierSignature"`
+	TimeVerifiers                   []PublicKey   `json:"timeVerifiers"`
 }
