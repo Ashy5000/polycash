@@ -116,7 +116,7 @@ func Send(receiver string, amount string) {
 	timestamp := time.Now().UnixNano()
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", sender, receiver, amount, timestamp)))
 	sigBytes, err := key.X.Sign(hash[:])
-	sig := Signature {
+	sig := Signature{
 		S: sigBytes,
 	}
 	if err != nil {

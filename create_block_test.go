@@ -20,10 +20,10 @@ func TestCreateBlock(t *testing.T) {
 		a := []byte("123")
 		b := []byte("321")
 		senderPublicKey := PublicKey{
-			Y:          a,
+			Y: a,
 		}
 		recipientPublicKey := PublicKey{
-			Y:          b,
+			Y: b,
 		}
 		var amount float64
 		amount = 123
@@ -51,10 +51,10 @@ func TestCreateBlock(t *testing.T) {
 		a := []byte("123")
 		b := []byte("321")
 		senderPublicKey := PublicKey{
-			Y:          a,
+			Y: a,
 		}
 		recipientPublicKey := PublicKey{
-			Y:          b,
+			Y: b,
 		}
 		var amount float64
 		amount = 123

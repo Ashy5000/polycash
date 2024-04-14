@@ -12,7 +12,7 @@ type PublicKey struct {
 
 type PrivateKey struct {
 	PublicKey PublicKey
-	X oqs.Signature
+	X         oqs.Signature
 }
 
 func (i PrivateKey) MarshalJSON() ([]byte, error) {
@@ -35,7 +35,7 @@ func (i *PrivateKey) UnmarshalJSON(data []byte) error {
 	str := string(data)
 	// Split string into parts
 	parts := strings.Split(str, "-")
-	
+
 	var pubKey PublicKey
 	pubKeyStr := parts[0]
 	pubKeyStr = strings.Replace(pubKeyStr, "'", `"`, -1)
@@ -54,9 +54,9 @@ func (i *PrivateKey) UnmarshalJSON(data []byte) error {
 	if err := privKey.Init(sigName, privKeyBytes); err != nil {
 		panic(err)
 	}
-	
+
 	i.PublicKey = pubKey
 	i.X = privKey
-	
+
 	return nil
 }
