@@ -33,21 +33,21 @@ func RunCmd(input string) {
 			if len(fields) == 1 {
 				publicKey := GetKey().PublicKey.Y
 				balance := GetBalance(publicKey)
-				fmt.Println(fmt.Sprintf("Balance of %s: %f", publicKey, balance))
+				fmt.Println(fmt.Sprintf("Balance: %f", balance))
 				return
 			}
-			keyFields := fields[1:]
-			keyStr := strings.Join(keyFields, " ")
+			keyStrFields := fields[1:]
+			keyStr := strings.Join(keyStrFields, " ")
 			var key []byte
 			err := json.Unmarshal([]byte(keyStr), &key)
 			if err != nil {
 				panic(err)
 			}
 			balance := GetBalance(key)
-			fmt.Println(fmt.Sprintf("Balance of %s: %f", keyStr, balance))
+			fmt.Println(fmt.Sprintf("Balance: %f", balance))
 		} else if action == "send" {
-			receiverFields := fields[1 : len(fields)-1]
-			receiverStr := strings.Join(receiverFields, " ")
+			receiverStrFields := fields[1 : len(fields)-1]
+			receiverStr := strings.Join(receiverStrFields, " ")
 			var receiver []byte
 			err := json.Unmarshal([]byte(receiverStr), &receiver)
 			if err != nil {
@@ -150,13 +150,6 @@ func RunCmd(input string) {
 		} else if action == "bootstrap" {
 			Bootstrap()
 			fmt.Println("Bootstrap complete!")
-		} else if action == "getpubkey" {
-			y := GetKey().PublicKey.Y
-			jsonY, err := json.Marshal(y)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(string(jsonY))
 		} else if action == "exit" {
 			os.Exit(0)
 		} else if action == "help" {
