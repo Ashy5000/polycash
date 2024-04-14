@@ -19,8 +19,8 @@ func DecodePublicKey(keyString string) PublicKey {
 		Y: []byte(""),
 	}
 	for _, ps := range strings.Split(strings.Trim(keyString, "[]"), " ") {
-		pi,_ := strconv.Atoi(ps)
-		key.Y = append(key.Y,byte(pi))
+		pi, _ := strconv.Atoi(ps)
+		key.Y = append(key.Y, byte(pi))
 	}
 	return key
 }

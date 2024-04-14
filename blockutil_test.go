@@ -54,10 +54,10 @@ func TestGetBalance(t *testing.T) {
 		Append(GenesisBlock())
 		key := []byte("123")
 		sender := PublicKey{
-			Y:          []byte("321"),
+			Y: []byte("321"),
 		}
 		receiver := PublicKey{
-			Y:          key,
+			Y: key,
 		}
 		Append(Block{
 			Transactions: []Transaction{
