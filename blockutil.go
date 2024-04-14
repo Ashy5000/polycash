@@ -79,6 +79,8 @@ func GetBalance(key []byte) float64 {
 		for _, transaction := range block.Transactions {
 			if bytes.Equal(transaction.Sender.Y, key) {
 				total -= transaction.Amount
+				fee := 0.01
+				total -= fee
 			} else if bytes.Equal(transaction.Recipient.Y, key) {
 				total += transaction.Amount
 			}
@@ -87,6 +89,10 @@ func GetBalance(key []byte) float64 {
 			miningTotal += 1.0
 			lastBlock := blockchain[i-1]
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
+			fees := 0.0
+			for _, _ = range block.Transactions {
+				fees += 0.01
+			}
 		}
 	}
 	if int(miningTotal) > blocksBeforeSpendable { // A miner must mine n blocks before they can spend their mining rewards
