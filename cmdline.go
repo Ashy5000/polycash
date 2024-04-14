@@ -12,10 +12,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/open-quantum-safe/liboqs-go/oqs"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/open-quantum-safe/liboqs-go/oqs"
 )
 
 func RunCmd(input string) {
@@ -32,17 +33,28 @@ func RunCmd(input string) {
 			if len(fields) == 1 {
 				publicKey := GetKey().PublicKey.Y
 				balance := GetBalance(publicKey)
-				fmt.Println(fmt.Sprintf("Balance of %s: %f", publicKey, balance))
+				fmt.Println(fmt.Sprintf("Balance: %f", balance))
 				return
 			}
-			keyStr := fields[1]
-			key := []byte(keyStr)
+			keyStrFields := fields[1:]
+			keyStr := strings.Join(keyStrFields, " ")
+			var key []byte
+			err := json.Unmarshal([]byte(keyStr), &key)
+			if err != nil {
+				panic(err)
+			}
 			balance := GetBalance(key)
-			fmt.Println(fmt.Sprintf("Balance of %s: %f", fields[1], balance))
+			fmt.Println(fmt.Sprintf("Balance: %f", balance))
 		} else if action == "send" {
-			receiver := fields[1]
-			amount := fields[2]
-			Send(receiver, amount)
+			receiverStrFields := fields[1 : len(fields)-1]
+			receiverStr := strings.Join(receiverStrFields, " ")
+			var receiver []byte
+			err := json.Unmarshal([]byte(receiverStr), &receiver)
+			if err != nil {
+				panic(err)
+			}
+			amount := fields[len(fields)-1]
+			Send(string(receiver), amount)
 			Log("Waiting for all workers to finish", true)
 			wg.Wait()
 			Log("All workers have finished", true)
@@ -56,7 +68,7 @@ func RunCmd(input string) {
 			privateKey.X = signer
 			pubKey, err := privateKey.X.GenerateKeyPair()
 			fmt.Println(string(privateKey.X.ExportSecretKey()))
-			privateKey.PublicKey = PublicKey {
+			privateKey.PublicKey = PublicKey{
 				Y: pubKey,
 			}
 			keyJson, err := json.Marshal(privateKey)
@@ -68,18 +80,18 @@ func RunCmd(input string) {
 				panic(err)
 			}
 			// TODO: Implement mnemonics for Dilithium2
-//			mnemonic0 := GetMnemonic(*privateKey.X)
-//			mnemonic1 := GetMnemonic(*privateKey.PublicKey.Y)
-//			mnemonic2 := GetMnemonic(*privateKey.PublicKey.Parameters.P)
-//			mnemonic3 := GetMnemonic(*privateKey.PublicKey.Parameters.Q)
-//			mnemonic4 := GetMnemonic(*privateKey.PublicKey.Parameters.G)
-//			fmt.Println("Mnemonic:")
-//			fmt.Println("Part 0: " + mnemonic0)
-//			fmt.Println("Part 1: " + mnemonic1)
-//			fmt.Println("Part 2: " + mnemonic2)
-//			fmt.Println("Part 3: " + mnemonic3)
-//			fmt.Println("Part 4: " + mnemonic4)
-//			fmt.Println("Write down the mnemonic and keep it safe, or better yet memorize it. It is the ONLY WAY to recover your private key.")
+			//			mnemonic0 := GetMnemonic(*privateKey.X)
+			//			mnemonic1 := GetMnemonic(*privateKey.PublicKey.Y)
+			//			mnemonic2 := GetMnemonic(*privateKey.PublicKey.Parameters.P)
+			//			mnemonic3 := GetMnemonic(*privateKey.PublicKey.Parameters.Q)
+			//			mnemonic4 := GetMnemonic(*privateKey.PublicKey.Parameters.G)
+			//			fmt.Println("Mnemonic:")
+			//			fmt.Println("Part 0: " + mnemonic0)
+			//			fmt.Println("Part 1: " + mnemonic1)
+			//			fmt.Println("Part 2: " + mnemonic2)
+			//			fmt.Println("Part 3: " + mnemonic3)
+			//			fmt.Println("Part 4: " + mnemonic4)
+			//			fmt.Println("Write down the mnemonic and keep it safe, or better yet memorize it. It is the ONLY WAY to recover your private key.")
 		} else if action == "encrypt" {
 			// Ask the user for a password
 			fmt.Print("Enter a password: ")
