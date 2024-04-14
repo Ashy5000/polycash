@@ -79,19 +79,24 @@ func GetBalance(key []byte) float64 {
 		for _, transaction := range block.Transactions {
 			if bytes.Equal(transaction.Sender.Y, key) {
 				total -= transaction.Amount
-				fee := 0.01
-				total -= fee
+				if len(blockchain) > 50 {
+					fee := 0.01
+					total -= fee
+				}
 			} else if bytes.Equal(transaction.Recipient.Y, key) {
 				total += transaction.Amount
 			}
 		}
 		if bytes.Equal(block.Miner.Y, key) {
+			fmt.Println("Block mined by key")
 			miningTotal += 1.0
 			lastBlock := blockchain[i-1]
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
-			fees := 0.0
-			for _, _ = range block.Transactions {
-				fees += 0.01
+			if len(blockchain) > 50 {
+				fees := 0.0
+				for _, _ = range block.Transactions {
+					fees += 0.01
+				}
 			}
 		}
 	}
@@ -116,7 +121,7 @@ func Send(receiver string, amount string) {
 	timestamp := time.Now().UnixNano()
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", sender, receiver, amount, timestamp)))
 	sigBytes, err := key.X.Sign(hash[:])
-	sig := Signature {
+	sig := Signature{
 		S: sigBytes,
 	}
 	if err != nil {

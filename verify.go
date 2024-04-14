@@ -26,7 +26,6 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 		panic(err)
 	}
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", senderKey.Y, recipientKey.Y, amount, timestamp.UnixNano())
-	fmt.Println("Transaction string: ", transactionString)
 	hash := sha256.Sum256([]byte(transactionString))
 	verifier := oqs.Signature{}
 	sigName := "Dilithium2"
@@ -188,7 +187,7 @@ func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signat
 	}
 	// Ensure all verifiers are miners
 	for _, verifier := range verifiers {
-		if !IsNewMiner(verifier, len(blockchain)+1) {
+		if IsNewMiner(verifier, len(blockchain)+1) {
 			Log("Time verifier is not a miner.", true)
 			return false
 		}
