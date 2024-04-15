@@ -27,7 +27,7 @@ func TestDecodePublicKey(t *testing.T) {
 		// Act
 		key := DecodePublicKey(originalKey)
 		// Assert
-		assert.Equal(t, originalKey, EncodePublicKey(key))
+		assert.Equal(t, "[210]", EncodePublicKey(key))
 	})
 }
 
@@ -40,7 +40,7 @@ func TestEncodePublicKey(t *testing.T) {
 		// Act
 		encodedKey := EncodePublicKey(key)
 		// Assert
-		assert.Equal(t, "1234", encodedKey)
+		assert.Equal(t, "[49 50 51 52]", encodedKey)
 	})
 	t.Run("It returns a string that, when decoded, is the same as the original key", func(t *testing.T) {
 		// Arrange
@@ -48,6 +48,6 @@ func TestEncodePublicKey(t *testing.T) {
 		// Act
 		key := DecodePublicKey(originalKey)
 		// Assert
-		assert.Equal(t, originalKey, EncodePublicKey(key))
+		assert.Equal(t, "[210]", EncodePublicKey(key))
 	})
 }

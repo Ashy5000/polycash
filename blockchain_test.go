@@ -9,8 +9,9 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenesisBlock(t *testing.T) {
@@ -18,7 +19,7 @@ func TestGenesisBlock(t *testing.T) {
 		// Act
 		block := GenesisBlock()
 		// Assert
-		assert.Equal(t, [32]byte{}, block.PreviousBlockHash)
+		assert.Equal(t, [64]byte{}, block.PreviousBlockHash)
 	})
 }
 

@@ -56,6 +56,10 @@ func CreateBlock() (Block, error) {
 			transactionBytes := []byte(transactionString)
 			hash := sha256.Sum256(transactionBytes)
 			if transactionHashes[hash] > 1 {
+				if i > len(miningTransactions)-1 {
+					Error("Transaction index out of range.", false)
+					return Block{}, errors.New("transaction index out of range")
+				}
 				miningTransactions[i] = miningTransactions[len(miningTransactions)-1]
 				miningTransactions = miningTransactions[:len(miningTransactions)-1]
 				i--

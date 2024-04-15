@@ -10,9 +10,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlock(t *testing.T) {
@@ -33,7 +34,7 @@ func TestBlock(t *testing.T) {
 			Nonce:                  24,
 			MiningTime:             0,
 			Difficulty:             0,
-			PreviousBlockHash:      [32]byte{},
+			PreviousBlockHash:      [64]byte{},
 			Timestamp:              time.Time{},
 			TimeVerifierSignatures: nil,
 			TimeVerifiers:          nil,
@@ -61,7 +62,7 @@ func TestBlock(t *testing.T) {
 			Nonce:                  24,
 			MiningTime:             0,
 			Difficulty:             0,
-			PreviousBlockHash:      [32]byte{},
+			PreviousBlockHash:      [64]byte{},
 			Timestamp:              time.Now(),
 			TimeVerifierSignatures: nil,
 			TimeVerifiers:          nil,
