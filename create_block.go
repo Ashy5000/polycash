@@ -43,7 +43,7 @@ func CreateBlock() (Block, error) {
 	if len(blockchain) > 0 {
 		block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
 	} else {
-		block.PreviousBlockHash = [32]byte{}
+		block.PreviousBlockHash = [64]byte{}
 	}
 	hashBytes := HashBlock(block)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
@@ -70,7 +70,7 @@ func CreateBlock() (Block, error) {
 			if len(blockchain) > 0 {
 				block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
 			} else {
-				block.PreviousBlockHash = [32]byte{}
+				block.PreviousBlockHash = [64]byte{}
 			}
 			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty)
 			block.Transactions = miningTransactions

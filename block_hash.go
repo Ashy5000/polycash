@@ -9,13 +9,14 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"golang.org/x/crypto/sha3"
 )
 
-func HashBlock(block Block) [32]byte {
+func HashBlock(block Block) [64]byte {
 	marshaled, err := json.Marshal(block)
 	if err != nil {
 		panic(err)
@@ -30,6 +31,6 @@ func HashBlock(block Block) [32]byte {
 		blockCpy.Transactions[i].Timestamp = time.Time{}
 	}
 	blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
-	sum := sha256.Sum256(blockBytes)
+	sum := sha3.Sum512(blockBytes)
 	return sum
 }

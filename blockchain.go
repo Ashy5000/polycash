@@ -21,7 +21,7 @@ func GenesisBlock() Block {
 		Nonce:                  0,
 		MiningTime:             0,
 		Difficulty:             0,
-		PreviousBlockHash:      [32]byte{},
+		PreviousBlockHash:      [64]byte{},
 		Timestamp:              time.Time{},
 		TimeVerifierSignatures: []Signature{},
 		TimeVerifiers:          []PublicKey{},
