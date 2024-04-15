@@ -132,6 +132,18 @@ func RunCmd(input string) {
 			if *useLocalPeerList {
 				// Add the peer to the local peer list
 				AddPeer("http://" + fields[1] + ":8080\n")
+				// Add the peer to the peer's peer list
+				peerServer := fields[1]
+				localIp := fields[2]
+				body := strings.NewReader(localIp)
+				req, err := http.NewRequest(http.MethodGet, peerServer+"/addPeer", body)
+				if err != nil {
+					panic(err)
+				}
+				_, err = http.DefaultClient.Do(req)
+				if err != nil {
+					panic(err)
+				}
 			} else {
 				// Get the IP address of the peer
 				ip := fields[1]
