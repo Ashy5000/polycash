@@ -60,7 +60,7 @@ To get started, run `keygen` to generate a new key. To get your balance, find yo
 To run the node software, which keeps the blockchain distributed across the p2p network, run:
 ```bash
 ./builds/node/node_linux_x86_64 -serve -port 8080  # replace for your os and architecture
-# In a new terminal window: (optional, starts a peer server so you it is faster to find new nodes)
+# In a new terminal window: (optional, starts a peer server so it is faster to find new nodes)
 # This is not at all required.
 cd peer_server
 cargo run
@@ -71,7 +71,7 @@ cargo run
 To run the mining software, which adds new blocks to the blockchain in exchange for a reward, run:
 ```bash
 ./builds/node/node_linux_x86_64 -serve -mine -port 8080
-# In a new terminal window: (optional, starts a peer server so you it is faster to find new nodes)
+# In a new terminal window: (optional, starts a peer server so it is faster to find new nodes)
 # This is not at all required.
 cd peer_server
 cargo run
