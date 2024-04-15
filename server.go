@@ -267,6 +267,15 @@ func HandlePeersRequest(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+func HandleAddPeerRequest(_ http.ResponseWriter, req *http.Request) {
+	peerBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+	peer := string(peerBytes)
+	AddPeer(peer)
+}
+
 func Serve(mine bool, port string) {
 	if mine {
 		http.HandleFunc("/mine", HandleMineRequest)
@@ -277,5 +286,6 @@ func Serve(mine bool, port string) {
 	http.HandleFunc("/peerIp", HandlePeerIpRequest)
 	http.HandleFunc("/verifyTime", HandleVerifyTimeRequest)
 	http.HandleFunc("/peers", HandlePeersRequest)
+	http.HandleFunc("/addPeer", HandleAddPeerRequest)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
