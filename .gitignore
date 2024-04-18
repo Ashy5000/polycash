@@ -1,4 +1,5 @@
 key.json
 peer_server/target
 gui_wallet/target
+contracts/target
 nohup.out
