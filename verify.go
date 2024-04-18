@@ -9,7 +9,6 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
@@ -56,27 +55,18 @@ func VerifyMiner(miner PublicKey) bool {
 	return true
 }
 
-func VerifyBlock(block Block) bool {
-	if unsafe.Sizeof(block) > uintptr(maxBlockSize) {
-		return false
-	}
-	for _, transaction := range block.Transactions {
+func VerifyTransactions(transactions []Transaction) bool {
+	for _, transaction := range transactions {
 		if !VerifyTransaction(transaction.Sender, transaction.Recipient, strconv.FormatFloat(transaction.Amount, 'f', -1, 64), transaction.Timestamp, transaction.SenderSignature.S) {
 			Log("Block has invalid transaction/transaction signature. Ignoring block request.", true)
 			return false
 		}
 	}
-	hashBytes := HashBlock(block)
-	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
-	if hash > maximumUint64/block.Difficulty {
-		Warn("Invalid block hash detected.")
-		Log(fmt.Sprintf("Actual hash: %d\n", hash), true)
-		return false
-	}
+	return true
+}
+
+func DetectFork(block Block) bool {
 	for _, b := range blockchain {
-		if HashBlock(b) == hashBytes {
-			return false
-		}
 		if b.PreviousBlockHash == block.PreviousBlockHash {
 			Warn("Block creates a fork.")
 			Log("The node software is designed to handle this edge case, so operations can continue as normal.", false)
@@ -86,61 +76,60 @@ func VerifyBlock(block Block) bool {
 			return true
 		}
 	}
+	return false
+}
+
+func DetectDuplicateBlock(hashBytes [64]byte) bool {
+	isDuplicate := false
+	for _, b := range blockchain {
+		if HashBlock(b) == hashBytes {
+			isDuplicate = true
+		}
+	}
+	return isDuplicate
+}
+
+func VerifyBlock(block Block) bool {
+	isValid := true
+	isValid = unsafe.Sizeof(block) <= uintptr(maxBlockSize) && isValid
+	isValid = VerifyTransactions(block.Transactions) && isValid
+	hashBytes := HashBlock(block)
+	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
+	isValid = hash <= maximumUint64/block.Difficulty && isValid
+	isValid = !DetectDuplicateBlock(hashBytes) && isValid
+	isValid = !DetectFork(block) && isValid
 	if len(blockchain) > 0 && block.PreviousBlockHash != HashBlock(blockchain[len(blockchain)-1]) {
 		Log("Block has invalid previous block hash. Ignoring block request.", true)
 		Log("The block could be on a different fork.", true)
 		Log("The blockchain will be re-synced to stay on the longest chain.", true)
 		SyncBlockchain()
-		return false
+		isValid = false
 	}
-	if !VerifyMiner(block.Miner) {
-		return false
-	}
+	isValid = VerifyMiner(block.Miner) && isValid
 	// Get the correct difficulty for the block
-	lastMinedBlock := Block{
-		Difficulty: initialBlockDifficulty,
-		MiningTime: time.Minute,
-	}
-	if len(blockchain) > 0 {
-		isGenesis := true
-		for _, b := range blockchain {
-			if isGenesis {
-				isGenesis = false
-				continue
-			}
-			if bytes.Equal(b.Miner.Y, block.Miner.Y) {
-				lastMinedBlock = b
-			}
-		}
+	lastMinedBlock, found := GetLastMinedBlock()
+	if !found {
+		lastMinedBlock.Difficulty = initialBlockDifficulty
+		lastMinedBlock.MiningTime = time.Minute
 	}
 	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty)
-	if block.Difficulty != correctDifficulty {
+	if block.Difficulty != correctDifficulty || block.Difficulty < minimumBlockDifficulty {
 		Warn("Invalid difficulty detected.")
 		Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)
 		Log(fmt.Sprintf("Expected difficulty: %d", correctDifficulty), true)
 		Log(fmt.Sprintf("Actual difficulty: %d", block.Difficulty), true)
-		return false
-	}
-	if block.Difficulty < minimumBlockDifficulty {
-		Warn("Invalid difficulty detected.")
-		Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)
-		Log("Difficulty is below minimum block difficulty.", true)
-		return false
+		isValid = false
 	}
 	if block.Timestamp.After(time.Now()) {
 		Log("Block has invalid timestamp. Ignoring block request.", true)
 		Log("Timestamp is in the future.", true)
-		return false
+		isValid = false
 	}
-	if !VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures, false) {
+	if !VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures, false) || !VerifyTimeVerifiers(block, block.PreMiningTimeVerifiers, block.PreMiningTimeVerifierSignatures, true) {
 		Log("Block has invalid time verifiers. Ignoring block request.", true)
-		return false
+		isValid = false
 	}
-	if !VerifyTimeVerifiers(block, block.PreMiningTimeVerifiers, block.PreMiningTimeVerifierSignatures, true) {
-		Log("Block has invalid time verifiers. Ignoring block request.", true)
-		return false
-	}
-	return true
+	return isValid
 }
 
 func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signature, premining bool) bool {

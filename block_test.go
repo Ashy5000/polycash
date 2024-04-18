@@ -73,6 +73,9 @@ func TestBlock(t *testing.T) {
 		}
 		unmarshaled := Block{}
 		err = json.Unmarshal(marshaled, &unmarshaled)
+		if err != nil {
+			panic(err)
+		}
 		timestamp := time.Time{}
 		block.Timestamp = timestamp
 		for _, transaction := range block.Transactions {

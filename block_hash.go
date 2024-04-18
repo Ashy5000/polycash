@@ -23,11 +23,14 @@ func HashBlock(block Block) [64]byte {
 	}
 	blockCpy := Block{}
 	err = json.Unmarshal(marshaled, &blockCpy)
+	if err != nil {
+		panic(err)
+	}
 	blockCpy.MiningTime = time.Minute
 	blockCpy.TimeVerifierSignatures = []Signature{}
 	blockCpy.TimeVerifiers = []PublicKey{}
 	blockCpy.Timestamp = time.Time{}
-	for i, _ := range block.Transactions {
+	for i := range block.Transactions {
 		blockCpy.Transactions[i].Timestamp = time.Time{}
 	}
 	blockBytes := []byte(fmt.Sprintf("%v", blockCpy))

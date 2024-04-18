@@ -51,7 +51,8 @@ func CreateBlock() (Block, error) {
 	block.PreMiningTimeVerifierSignatures, block.PreMiningTimeVerifiers = RequestTimeVerification(block)
 	Log(fmt.Sprintf("Mining block with difficulty %d", block.Difficulty), false)
 	for hash > maximumUint64/block.Difficulty {
-		for i, transaction := range miningTransactions {
+		i := 0
+		for _, transaction := range miningTransactions {
 			transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
 			transactionBytes := []byte(transactionString)
 			hash := sha256.Sum256(transactionBytes)
@@ -64,6 +65,7 @@ func CreateBlock() (Block, error) {
 				miningTransactions = miningTransactions[:len(miningTransactions)-1]
 				i--
 			}
+			i++
 		}
 		if len(miningTransactions) > 0 {
 			previousBlock, previousBlockFound = GetLastMinedBlock()

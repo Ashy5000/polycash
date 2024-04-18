@@ -48,6 +48,9 @@ func SyncBlockchain() {
 			continue
 		}
 		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			panic(err)
+		}
 		var peerBlockchain []Block
 		err = json.Unmarshal(body, &peerBlockchain)
 		if err != nil {
@@ -93,7 +96,7 @@ func GetBalance(key []byte) float64 {
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
 			if len(blockchain) > 50 {
 				fees := 0.0
-				for _, _ = range block.Transactions {
+				for range block.Transactions {
 					fees += 0.01
 				}
 			}
@@ -127,6 +130,9 @@ func Send(receiver string, amount string) {
 		panic(err)
 	}
 	sigStr, err := json.Marshal(sig)
+	if err != nil {
+		panic(err)
+	}
 	senderStr := EncodePublicKey(key.PublicKey)
 	receiverStr := EncodePublicKey(PublicKey{Y: []byte(receiver)})
 	for _, peer := range GetPeers() {
