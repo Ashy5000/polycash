@@ -1,3 +1,6 @@
+mod read_contract;
+
 fn main() {
-    println!("Hello, world!");
+    let contract_contents = read_contract::read_contract();
+    println!("Contract contents:\n{}", contract_contents);
 }
