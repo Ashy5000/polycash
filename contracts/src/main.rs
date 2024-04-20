@@ -12,5 +12,11 @@ fn main() {
     let mut tree = syntax_tree::build_syntax_tree();
     tree.create(contract_contents);
     let mut buffers: HashMap<String, Buffer> = HashMap::new();
+    buffers.insert(
+        "00000000".to_owned(),
+        Buffer {
+            contents: Vec::new(),
+        }
+    );
     run_vm(tree, &mut buffers);
 }
