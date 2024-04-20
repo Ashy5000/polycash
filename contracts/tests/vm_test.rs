@@ -43,6 +43,13 @@ mod vm_test {
             "12341234".to_owned(),
             Buffer { contents: Vec::new() }
         );
-        contracts::vm::vm_throw_local_error(&mut buffers, "12341234".to_owned())
+        contracts::vm::vm_throw_local_error(&mut buffers, "12341234".to_owned());
+        let mut found_buffer = true;
+        if let Some(x) = buffers.get("12341234") {
+            found_buffer = true;
+            assert_eq!(x.contents.len(), 1);
+            assert_eq!(x.contents[0], 1);
+        }
+        assert!(found_buffer);
     }
 }
