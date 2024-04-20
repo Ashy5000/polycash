@@ -4,4 +4,8 @@ SetCnst 0x00000002 0x12341234 0x00000001 ; Assign a value to the source buffer
 InitBfr 0x00000003 0x00000001 ; Initialize a message buffer
 CpyBfr 0x00000002 0x00000003 0x00000001 ; Copy the source buffer into the message buffer
 Stdout 0x00000003 0x00000001 ; Print the message buffer to stdout
+FreeBfr 0x00000002 0x00000001 ; Free source buffer
+FreeBfr 0x00000003 0x00000001 ; Free message buffer
+FreeBfr 0x00000001 0x00000000 ; Free error buffer last
+; Note: never free pre-allocated error buffer at 0x00000000
 Exit 0x0 ; Exit with code 0
