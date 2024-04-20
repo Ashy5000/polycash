@@ -1,0 +1,34 @@
+use std::collections::HashMap;
+
+use crate::{syntax_tree::SyntaxTree, buffer::Buffer};
+
+pub fn vm_throw_global_error(buffers: &mut HashMap<String, Buffer>) {
+    if let Some(x) = buffers.get_mut(&("00000000".to_owned())) {
+        *x = Buffer{
+            contents: vec![1],
+        };
+    }
+}
+
+pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) {
+    let mut line_number = 0;
+    while line_number < syntax_tree.lines.len() {
+        let line = syntax_tree.lines[line_number].clone();
+        let should_increment = true;
+        match line.command.as_str() {
+            "InitBfr" => {
+                buffers.insert(
+                    line.args[0].clone(),
+                    Buffer{
+                        contents: Vec::new(),
+                    }
+                );
+            },
+            "_" => vm_throw_global_error(buffers),
+            &_ => vm_throw_global_error(buffers),
+        }
+        if should_increment {
+            line_number += 1;
+        }
+    }
+}

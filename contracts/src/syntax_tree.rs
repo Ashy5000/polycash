@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Line {
     pub command: String,
     pub args: Vec<String>,
