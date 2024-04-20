@@ -1,3 +1,4 @@
 InitBfr 0x00000001 0x00000000 ; Initialize a error buffer
 InitBfr 0x00000002 0x00000001 ; Initialize a message buffer
+SetCnst 0x00000002 0x12341234 0x00000001 ; Assign a value to the message buffer
 Stdout 0x00000002 0x00000001 ; Print the message buffer to stdout

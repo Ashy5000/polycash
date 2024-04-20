@@ -47,8 +47,16 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
                 }
-                println!("{:?}", buffers.get(&line.args[1]).unwrap().contents)
+                println!("{:?}", buffers.get(&line.args[0]).unwrap().contents)
             },
+            "SetCnst" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                    vm_throw_local_error(buffers, line.args[2].clone())
+                }
+                if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
+                    x.contents = hex::decode(line.args[1].clone()).expect("Failed to parse raw hex value");
+                }
+            }
             "_" => vm_throw_global_error(buffers),
             &_ => vm_throw_global_error(buffers),
         }
