@@ -33,7 +33,7 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) {
         let should_increment = true;
         match line.command.as_str() {
             "InitBfr" => {
-                if buffers.contains_key(&(line.args[0].clone())) {
+                if vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
                 }
                 buffers.insert(
@@ -42,6 +42,12 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) {
                         contents: Vec::new(),
                     }
                 );
+            },
+            "Stdout" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                println!("{:?}", buffers.get(&line.args[1]).unwrap().contents)
             },
             "_" => vm_throw_global_error(buffers),
             &_ => vm_throw_global_error(buffers),

@@ -1,1 +1,3 @@
-InitBfr 0x00000001 0x00000000 ; Initialize a buffer
+InitBfr 0x00000001 0x00000000 ; Initialize a error buffer
+InitBfr 0x00000002 0x00000001 ; Initialize a message buffer
+Stdout 0x00000002 0x00000001 ; Print the message buffer to stdout
