@@ -43,6 +43,18 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) {
                     }
                 );
             },
+            "CpyBfr" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) || !vm_check_buffer_initialization(buffers, line.args[1].clone()){
+                    vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                let mut src_contents: Vec<u8> = Vec::new();
+                if let Some(src) = buffers.get(&(line.args[0].clone())) {
+                    src_contents = src.contents.clone();
+                }
+                if let Some(dst) = buffers.get_mut(&(line.args[1].clone())) {
+                    dst.contents = src_contents;
+                }
+            },
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
