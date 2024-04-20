@@ -1,7 +1,7 @@
 #[derive(Debug)]
-pub(crate) struct Line {
-    pub(crate) command: String,
-    pub(crate) args: Vec<String>,
+pub struct Line {
+    pub command: String,
+    pub args: Vec<String>,
 }
 
 pub(crate) fn build_line() -> Line {
@@ -12,12 +12,12 @@ pub(crate) fn build_line() -> Line {
 }
 
 #[derive(Debug)]
-pub(crate) struct SyntaxTree {
-    pub(crate) lines: Vec<Line>
+pub struct SyntaxTree {
+    pub lines: Vec<Line>
 }
 
 impl SyntaxTree {
-    pub(crate) fn create(&mut self, contract_contents: String) {
+    pub fn create(&mut self, contract_contents: String) {
         let asm_lines_iter = contract_contents.split("\n");
         for asm_line in asm_lines_iter {
             let parts_iter = asm_line.split(" ");
@@ -47,7 +47,7 @@ impl SyntaxTree {
     }
 }
 
-pub(crate) fn build_syntax_tree() -> SyntaxTree {
+pub fn build_syntax_tree() -> SyntaxTree {
     SyntaxTree {
         lines: Vec::new(),
     }
