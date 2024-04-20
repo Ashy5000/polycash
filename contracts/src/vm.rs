@@ -75,6 +75,16 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                     .remove(&line.args[0].clone())
                     .expect("Failed to free memory");
             }
+            "BfrStat" => {
+                let status = vm_check_buffer_initialization(buffers, line.args[0].clone());
+                if let Some(x) = buffers.get_mut(&(line.args[1].clone())) {
+                    if status {
+                        x.contents = vec![1];
+                    } else {
+                        x.contents = vec![0];
+                    }
+                }
+            }
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())

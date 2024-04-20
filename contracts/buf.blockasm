@@ -7,5 +7,9 @@ Stdout 0x00000003 0x00000001 ; Print the message buffer to stdout
 FreeBfr 0x00000002 0x00000001 ; Free source buffer
 FreeBfr 0x00000003 0x00000001 ; Free message buffer
 FreeBfr 0x00000001 0x00000000 ; Free error buffer last
+InitBfr 0x00000001 0x00000000 ; Initialize a buffer to hold the status of 0x00000000
+BfrStat 0x00000000 0x00000001 ; Get the status of 0x00000000
+Stdout 0x00000001 0x00000001 ; Print the status of 0x00000000 to ensure that it is still allocated
+FreeBfr 0x00000001 0x00000000 ; Free the status buffer
 ; Note: never free pre-allocated error buffer at 0x00000000
 Exit 0x0 ; Exit with code 0
