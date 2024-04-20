@@ -31,7 +31,7 @@ var commands = map[string]func([]string){
 	"addPeer": AddPeerCmd,
 	"bootstrap": BootstrapCmd,
 	"help": 	HelpCmd,
-	"exit": 	ExitCmd,
+	"license": LicenseCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -206,6 +206,14 @@ func HelpCmd(fields []string) {
 	fmt.Println("exit - Exit the console")
 }
 
+func LicenseCmd(fields []string) {
+	license, err := os.ReadFile("COPYING")
+	if err != nil {
+		panic(err);
+	}
+	fmt.Println(string(license))
+}
+
 func RunCmd(input string) {
 	cmds := strings.Split(input, ";")
 	for _, cmd := range cmds {
@@ -214,16 +222,15 @@ func RunCmd(input string) {
 		switch action {
 		case "exit":
 			os.Exit(0)
-		case "license":
-			license, err := os.ReadFile("COPYING")
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(string(license))
 		case "":
 			return
 		default:
-			fmt.Println("Invalid command.")
+			fn, ok := commands[action]
+			if ok {
+				fn(fields)
+			} else {
+				fmt.Println("Invalid command")
+			}
 		}
 	}
 }
