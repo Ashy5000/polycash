@@ -1,5 +1,6 @@
 mod read_contract;
 mod syntax_tree;
+mod buffer;
 
 fn main() {
     let contract_contents = read_contract::read_contract();
