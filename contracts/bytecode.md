@@ -26,5 +26,6 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 | JmpCond | 000E | Loc    | Cond   | ResDst |
 | Stdout  | 000F | Bfr    | ResDst |
 | Stderr  | 0010 | Bfr    | ResDst |
+| SetCnst | 0011 | Bfr    | Val    | ResDst |
 
 `0x00000000` is a pre-initialized buffer.
