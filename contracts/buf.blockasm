@@ -4,3 +4,4 @@ SetCnst 0x00000002 0x12341234 0x00000001 ; Assign a value to the source buffer
 InitBfr 0x00000003 0x00000001 ; Initialize a message buffer
 CpyBfr 0x00000002 0x00000003 0x00000001 ; Copy the source buffer into the message buffer
 Stdout 0x00000003 0x00000001 ; Print the message buffer to stdout
+Exit 0x0 ; Exit with code 0

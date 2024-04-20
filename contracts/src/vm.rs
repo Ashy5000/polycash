@@ -32,6 +32,9 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) {
         let line = syntax_tree.lines[line_number].clone();
         let should_increment = true;
         match line.command.as_str() {
+            "Exit" => {
+                println!("Contract finished with exit code {}", line.args[0]);
+            },
             "InitBfr" => {
                 if vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
