@@ -6,10 +6,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-use actix_web::web;
 use std::net::IpAddr;
-use std::str::FromStr;
 use std::process::Command;
+use std::str::FromStr;
 
 pub fn verify_peer(ip: &String) -> bool {
     // First, check if the IP address is valid

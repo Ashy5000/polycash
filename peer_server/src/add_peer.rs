@@ -6,8 +6,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-use actix_web::{web, Responder};
 use crate::verify_peer::verify_peer;
+use actix_web::Responder;
 
 pub fn add_peer(ip: String) -> impl Responder {
     // Validate the IP address
