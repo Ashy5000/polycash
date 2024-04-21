@@ -97,6 +97,30 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                 line.args[2].clone(),
                 line.args[3].clone(),
             ),
+            "Sub" => execute_math_operation(
+                Subtract {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
+            "Mul" => execute_math_operation(
+                Multiply {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
+            "Div" => execute_math_operation(
+                Divide {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())

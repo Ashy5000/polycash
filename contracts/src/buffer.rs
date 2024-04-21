@@ -6,6 +6,7 @@ pub struct Buffer {
 impl Buffer {
     pub fn as_u64(&self) -> Result<u64, &'static str> {
         if self.contents.len() != 8 {
+            println!("Invalid length. Actual length: {}", self.contents.len());
             return Err("Invalid length");
         }
         let mut result: u64 = 0;

@@ -1,8 +1,13 @@
 InitBfr 0x00000001 0x00000000 ; Initialize a buffer to 0x00000001
-SetCnst 0x00000001 0x0000000000010101 ; Set the buffer at 0x00000001 to hold 0x00010101 (64-bit)
+SetCnst 0x00000001 0x0000000000010101 ; Set the buffer at 0x00000001 to hold 0x10101 (64-bit)
 InitBfr 0x00000002 0x00000000 ; Initialize a buffer to 0x00000002
-SetCnst 0x00000002 0x0000000000000001 ; Set the buffer at 0x00000002 to hold 0x00000001 (64-bit)
+SetCnst 0x00000002 0x0000000000000001 ; Set the buffer at 0x00000002 to hold 0x1 (64-bit)
+Stdout 0x00000001 ; Print the contents of buffer 0x00000001 to the console
 InitBfr 0x00000003 0x00000000 ; Initialize a buffer to 0x00000003 to hold the result
-Stdout 0x00000001 ; Print the contents of buffer 0x00000003 to the console
 Add 0x00000001 0x00000002 0x00000003 0x00000000 ; Add the contents of buffer 0x00000001 and 0x00000002 and store the result in buffer 0x00000003, with errors in buffer 0x00000000
+Stdout 0x00000003 ; Print the contents of buffer 0x00000003 to the console
+SetCnst 0x00000002 0x0000000000000002 ; Set the buffer at 0x00000002 to hold 0x2 (64-bit)
+Mul 0x00000003 0x00000002 0x00000003 0x00000000 ; Multiply the contents of buffer 0x00000003 and 0x00000002 and store the result in buffer 0x00000003, with errors in buffer 0x00000000
+Stdout 0x00000003 ; Print the contents of buffer 0x00000003 to the console
+Div 0x00000003 0x00000002 0x00000003 0x00000000 ; Divide the contents of buffer 0x00000003 by the contents of buffer 0x00000002 and store the result in buffer 0x00000003, with errors in buffer 0x00000000
 Stdout 0x00000003 ; Print the contents of buffer 0x00000003 to the console
