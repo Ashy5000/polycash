@@ -19,11 +19,21 @@ mod buffer_test {
         };
         let buffer_u64 = buffer.as_u64();
         assert_eq!(buffer_u64, Ok(123));
-        
+
         let buffer = contracts::buffer::Buffer {
             contents: vec![0, 0, 0, 0, 0, 0, 1, 0],
         };
         let buffer_u64 = buffer.as_u64();
         assert_eq!(buffer_u64, Ok(256));
+    }
+    #[test]
+    fn test_buffer_load_u64() {
+        let buffer_u64: u64 = 256;
+        let mut buffer = contracts::buffer::Buffer {
+            contents: Vec::new(),
+        };
+        buffer.load_u64(buffer_u64);
+        assert_eq!(buffer.contents.len(), 8);
+        assert_eq!(buffer.as_u64(), Ok(256));
     }
 }
