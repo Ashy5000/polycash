@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Buffer {
     pub contents: Vec<u8>,
 }

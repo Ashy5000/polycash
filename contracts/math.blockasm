@@ -1,0 +1,8 @@
+InitBfr 0x00000001 0x00000000 ; Initialize a buffer to 0x00000001
+SetCnst 0x00000001 0x0000000000010101 ; Set the buffer at 0x00000001 to hold 0x00010101 (64-bit)
+InitBfr 0x00000002 0x00000000 ; Initialize a buffer to 0x00000002
+SetCnst 0x00000002 0x0000000000000001 ; Set the buffer at 0x00000002 to hold 0x00000001 (64-bit)
+InitBfr 0x00000003 0x00000000 ; Initialize a buffer to 0x00000003 to hold the result
+Stdout 0x00000001 ; Print the contents of buffer 0x00000003 to the console
+Add 0x00000001 0x00000002 0x00000003 0x00000000 ; Add the contents of buffer 0x00000001 and 0x00000002 and store the result in buffer 0x00000003, with errors in buffer 0x00000000
+Stdout 0x00000003 ; Print the contents of buffer 0x00000003 to the console

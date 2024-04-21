@@ -1,6 +1,7 @@
+; This is a simple program that demonstrates the use of the buffer management system
 InitBfr 0x00000001 0x00000000 ; Initialize a error buffer
 InitBfr 0x00000002 0x00000001 ; Initialize a source buffer
-SetCnst 0x00000002 0x12341234 0x00000001 ; Assign a value to the source buffer
+SetCnst 0x00000002 0x1234123412341234 0x00000001 ; Assign a value to the source buffer
 InitBfr 0x00000003 0x00000001 ; Initialize a message buffer
 CpyBfr 0x00000002 0x00000003 0x00000001 ; Copy the source buffer into the message buffer
 Stdout 0x00000003 0x00000001 ; Print the message buffer to stdout
