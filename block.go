@@ -50,6 +50,7 @@ type Transaction struct {
 	Amount          float64
 	SenderSignature Signature
 	Timestamp       time.Time
+	Contracts       []Contract
 }
 
 func (i Transaction) MarshalJSON() ([]byte, error) {
@@ -58,7 +59,12 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
 		panic(err)
 	}
 	signature := string(signatureBytes)
-	result := []byte(EncodePublicKey(i.Sender) + ":" + EncodePublicKey(i.Recipient) + ":" + fmt.Sprintf("%f", i.Amount) + ":" + signature + ":" + strconv.FormatInt(i.Timestamp.UnixNano(), 10))
+	contractsBytes, err := json.Marshal(i.Contracts)
+	if err != nil {
+		panic(err)
+	}
+	contracts := string(contractsBytes)
+	result := []byte(EncodePublicKey(i.Sender) + ":" + EncodePublicKey(i.Recipient) + ":" + fmt.Sprintf("%f", i.Amount) + ":" + signature + ":" + strconv.FormatInt(i.Timestamp.UnixNano(), 10) + ":" + contracts)
 	result = []byte(strings.Replace(string(result), `"`, "", -1))
 	result = []byte(`"` + string(result) + `"`)
 	return result, nil
@@ -78,21 +84,26 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	i.Recipient = DecodePublicKey(parts[1])
 	amount, err := strconv.ParseFloat(parts[2], 64)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	i.Amount = amount
 	timestampInt, err := strconv.ParseInt(parts[4], 10, 64)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	i.Timestamp = time.Unix(0, timestampInt)
 	var signature Signature
 	err = json.Unmarshal([]byte(`"`+parts[3]+`"`), &signature)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	i.SenderSignature = signature
+	var contracts []Contract
+	err = json.Unmarshal([]byte(`"`+parts[4]+`"`), &contracts)
+	if err != nil {
+		return err
+	}
+	i.Contracts = contracts
 	return nil
 }
 
