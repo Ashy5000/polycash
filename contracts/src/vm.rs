@@ -188,6 +188,36 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                         hex::decode(line.args[1].clone()).expect("Failed to parse raw hex value");
                 }
             }
+            "Tx" => {
+                let sender_bytes =
+                    vm_access_buffer(buffers, line.args[0].clone(), line.args[3].clone());
+                let sender = match String::from_utf8(sender_bytes) {
+                    Ok(v) => v,
+                    Err(_) => {
+                        vm_throw_local_error(buffers, line.args[3].clone());
+                        "".to_owned()
+                    }
+                };
+                let receiver_bytes =
+                    vm_access_buffer(buffers, line.args[1].clone(), line.args[3].clone());
+                let receiver = match String::from_utf8(receiver_bytes) {
+                    Ok(v) => v,
+                    Err(_) => {
+                        vm_throw_local_error(buffers, line.args[3].clone());
+                        "".to_owned()
+                    }
+                };
+                let amount_bytes =
+                    vm_access_buffer(buffers, line.args[2].clone(), line.args[3].clone());
+                let amount = match String::from_utf8(amount_bytes) {
+                    Ok(v) => v,
+                    Err(_) => {
+                        vm_throw_local_error(buffers, line.args[3].clone());
+                        "".to_owned()
+                    }
+                };
+                println!("TX {} {} {}", sender, receiver, amount);
+            }
             &_ => vm_throw_global_error(buffers),
         }
         if should_increment {
