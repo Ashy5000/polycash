@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     buffer::Buffer,
-    math::{execute_math_operation, Add, Divide, Multiply, Subtract},
+    math::{execute_math_operation, Add, And, Divide, Eq, Multiply, Not, Or, Subtract},
     syntax_tree::SyntaxTree,
 };
 
@@ -120,6 +120,38 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                 line.args[1].clone(),
                 line.args[2].clone(),
                 line.args[3].clone(),
+            ),
+            "Eq" => execute_math_operation(
+                Eq {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
+            "And" => execute_math_operation(
+                And {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
+            "Or" => execute_math_operation(
+                Or {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
+            "Not" => execute_math_operation(
+                Not {},
+                buffers,
+                line.args[0].clone(),
+                "".to_owned(),
+                line.args[1].clone(),
+                line.args[2].clone(),
             ),
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
