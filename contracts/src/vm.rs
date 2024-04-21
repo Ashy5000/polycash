@@ -43,9 +43,10 @@ pub fn vm_throw_local_error(buffers: &mut HashMap<String, Buffer>, loc: String) 
 
 pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) -> i64 {
     let mut line_number = 0;
+    let mut should_increment;
     while line_number < syntax_tree.lines.len() {
         let line = syntax_tree.lines[line_number].clone();
-        let should_increment = true;
+        should_increment = true;
         match line.command.as_str() {
             "Exit" => return line.args[0].parse::<i64>().unwrap(),
             "InitBfr" => {
@@ -153,6 +154,19 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                 line.args[1].clone(),
                 line.args[2].clone(),
             ),
+            "Jmp" => {
+                line_number = line.args[0].parse::<usize>().unwrap() - 1;
+                should_increment = false;
+            }
+            "JmpCond" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                    vm_throw_local_error(buffers, line.args[2].clone())
+                }
+                if buffers.get(&line.args[0]).unwrap().as_u64() != Ok(0) {
+                    line_number = line.args[1].parse::<usize>().unwrap() - 1;
+                    should_increment = false;
+                }
+            }
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
