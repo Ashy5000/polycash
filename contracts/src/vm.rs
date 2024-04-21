@@ -159,6 +159,12 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                 }
                 println!("{:?}", buffers.get(&line.args[0]).unwrap().contents)
             }
+            "Stderr" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                eprintln!("{:?}", buffers.get(&line.args[0]).unwrap().contents)
+            }
             "SetCnst" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[2].clone())
