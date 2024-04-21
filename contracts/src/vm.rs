@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{buffer::Buffer, syntax_tree::SyntaxTree};
+use crate::{
+    buffer::Buffer,
+    math::{execute_math_operation, Add, Divide, Multiply, Subtract},
+    syntax_tree::SyntaxTree,
+};
 
 pub fn vm_access_buffer(
     buffers: &mut HashMap<String, Buffer>,
@@ -85,21 +89,14 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                     }
                 }
             }
-            "Add" => {
-                let status_0 = vm_check_buffer_initialization(buffers, line.args[0].clone());
-                let status_1 = vm_check_buffer_initialization(buffers, line.args[1].clone());
-                let status_2 = vm_check_buffer_initialization(buffers, line.args[2].clone());
-                if !status_0 || !status_1 || !status_2 {
-                    vm_throw_local_error(buffers, line.args[3].clone());
-                }
-                let buffer_0 = buffers.get(&(line.args[0].clone())).unwrap();
-                let buffer_1 = buffers.get(&(line.args[1].clone())).unwrap();
-                let buffer_0_u64 = buffer_0.as_u64().unwrap();
-                let buffer_1_u64 = buffer_1.as_u64().unwrap();
-                let result_u64 = buffer_0_u64 + buffer_1_u64;
-                let buffer_result = buffers.get_mut(&(line.args[2].clone())).unwrap();
-                buffer_result.load_u64(result_u64);
-            }
+            "Add" => execute_math_operation(
+                Add {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())

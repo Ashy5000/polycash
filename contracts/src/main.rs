@@ -1,4 +1,5 @@
 mod buffer;
+mod math;
 mod read_contract;
 mod syntax_tree;
 mod vm;
