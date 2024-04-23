@@ -75,6 +75,21 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		Timestamp:       unmarshaledTimestamp,
 	}
 	miningTransactions = append(miningTransactions, transaction)
+	smartContractTransactions := []Transaction{}
+	for _, transaction := range miningTransactions {
+		if len(transaction.Contracts) > 0 {
+			for _, contract := range transaction.Contracts {
+				executeResult, err := contract.Execute()
+				if err != nil {
+					Warn("Error executing contract: " + err.Error())
+					continue
+				}
+				if executeResult != nil {
+					smartContractTransactions = append(smartContractTransactions, executeResult...)
+				}
+			}
+		}
+	}
 	Log("Broadcasting job to peers...", true)
 	for _, peer := range GetPeers() {
 		// Create a new body
