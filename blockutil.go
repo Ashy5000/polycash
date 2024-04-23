@@ -137,7 +137,11 @@ func Send(receiver string, amount string) {
 	receiverStr := EncodePublicKey(PublicKey{Y: []byte(receiver)})
 	for _, peer := range GetPeers() {
 		Log("Sending transaction to peer: "+peer, false)
-		body := strings.NewReader(fmt.Sprintf("%s:%s:%s:%s:%d", senderStr, receiverStr, amount, sigStr, timestamp))
+		contractsStr, err := json.Marshal(make([]Contract, 0))
+		if err != nil {
+			panic(err)
+		}
+		body := strings.NewReader(fmt.Sprintf("%s:%s:%s:%s:%d:%s", senderStr, receiverStr, amount, sigStr, timestamp, contractsStr))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)
