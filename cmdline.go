@@ -20,18 +20,19 @@ import (
 )
 
 var commands = map[string]func([]string){
-	"sync": 	SyncCmd,
-	"balance": 	BalanceCmd,
-	"send": 	SendCmd,
-	"keygen": 	KeygenCmd,
-	"encrypt": 	EncryptCmd,
-	"decrypt": 	DecryptCmd,
-	"savestate": SaveStateCmd,
-	"loadstate": LoadStateCmd,
-	"addPeer": AddPeerCmd,
-	"bootstrap": BootstrapCmd,
-	"help": 	HelpCmd,
-	"license": LicenseCmd,
+	"sync":                SyncCmd,
+	"balance":             BalanceCmd,
+	"send":                SendCmd,
+	"deploySmartContract": DeploySmartContractCmd,
+	"keygen":              KeygenCmd,
+	"encrypt":             EncryptCmd,
+	"decrypt":             DecryptCmd,
+	"savestate":           SaveStateCmd,
+	"loadstate":           LoadStateCmd,
+	"addPeer":             AddPeerCmd,
+	"bootstrap":           BootstrapCmd,
+	"help":                HelpCmd,
+	"license":             LicenseCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -72,6 +73,15 @@ func SendCmd(fields []string) {
 	Log("Waiting for all workers to finish", true)
 	wg.Wait()
 	Log("All workers have finished", true)
+}
+
+func DeploySmartContractCmd(fields []string) {
+	path := fields[1]
+	err := DeploySmartContract(path)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Smart contract deployed successfully!")
 }
 
 func KeygenCmd(fields []string) {
@@ -158,36 +168,36 @@ func LoadStateCmd(fields []string) {
 }
 
 func AddPeerCmd(fields []string) {
-			if *useLocalPeerList {
-				// Add the peer to the local peer list
-				AddPeer("http://" + fields[1] + ":8080\n")
-				// Add the peer to the peer's peer list
-				peerServer := fields[1]
-				localIp := fields[2]
-				body := strings.NewReader(localIp)
-				req, err := http.NewRequest(http.MethodGet, peerServer+"/addPeer", body)
-				if err != nil {
-					panic(err)
-				}
-				_, err = http.DefaultClient.Do(req)
-				if err != nil {
-					panic(err)
-				}
-			} else {
-				// Get the IP address of the peer
-				ip := fields[1]
-				// Send a request to the peer server to add the peer
-				peerServer := "http://192.168.4.87:8080"
-				req, err := http.NewRequest(http.MethodGet, peerServer+"/add_peer/"+ip, nil)
-				if err != nil {
-					panic(err)
-				}
-				_, err = http.DefaultClient.Do(req)
-				if err != nil {
-					panic(err)
-				}
-			}
-			fmt.Println("Peer added successfully!")
+	if *useLocalPeerList {
+		// Add the peer to the local peer list
+		AddPeer("http://" + fields[1] + ":8080\n")
+		// Add the peer to the peer's peer list
+		peerServer := fields[1]
+		localIp := fields[2]
+		body := strings.NewReader(localIp)
+		req, err := http.NewRequest(http.MethodGet, peerServer+"/addPeer", body)
+		if err != nil {
+			panic(err)
+		}
+		_, err = http.DefaultClient.Do(req)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		// Get the IP address of the peer
+		ip := fields[1]
+		// Send a request to the peer server to add the peer
+		peerServer := "http://192.168.4.87:8080"
+		req, err := http.NewRequest(http.MethodGet, peerServer+"/add_peer/"+ip, nil)
+		if err != nil {
+			panic(err)
+		}
+		_, err = http.DefaultClient.Do(req)
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Println("Peer added successfully!")
 }
 
 func BootstrapCmd(fields []string) {
@@ -209,7 +219,7 @@ func HelpCmd(fields []string) {
 func LicenseCmd(fields []string) {
 	license, err := os.ReadFile("COPYING")
 	if err != nil {
-		panic(err);
+		panic(err)
 	}
 	fmt.Println(string(license))
 }
