@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math"
 	"net/http"
 	"os"
@@ -149,6 +150,54 @@ func Send(receiver string, amount string) {
 		wg.Add(1)
 		go SendRequest(req)
 	}
+}
+
+func DeploySmartContract(contractPath string) error {
+	file, err := ioutil.ReadFile(contractPath)
+	if err != nil {
+		return err
+	}
+	contract := Contract{
+		Contents: string(file),
+		Parties:  make([]ContractParty, 0),
+	}
+	contracts := make([]Contract, 0)
+	contracts = append(contracts, contract)
+	contractsStr, err := json.Marshal(contracts)
+	if err != nil {
+		return err
+	}
+	key := GetKey()
+	deployer := GetKey().PublicKey
+	deployerStr := EncodePublicKey(key.PublicKey)
+	amount := "0"
+	timestamp := time.Now().UnixNano()
+	transactionString := fmt.Sprintf("%s:%s:%s:%d", deployer.Y, deployer.Y, amount, timestamp)
+	fmt.Println([]byte(transactionString))
+	hash := sha256.Sum256([]byte(transactionString))
+	fmt.Println(hash[:])
+	sigBytes, err := key.X.Sign(hash[:])
+	sig := Signature{
+		S: sigBytes,
+	}
+	if err != nil {
+		panic(err)
+	}
+	sigStr, err := json.Marshal(sig)
+	if err != nil {
+		panic(err)
+	}
+	body := strings.NewReader(fmt.Sprintf("%s:%s:%s:%s:%d:%s", deployerStr, deployerStr, amount, sigStr, timestamp, contractsStr))
+	for _, peer := range GetPeers() {
+		Log("Sending smart contract to peer: "+peer, false)
+		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
+		if err != nil {
+			return err
+		}
+		wg.Add(1)
+		go SendRequest(req)
+	}
+	return nil
 }
 
 func GetLastMinedBlock() (Block, bool) {
