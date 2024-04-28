@@ -64,8 +64,8 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		panic(err)
 	}
-	contracts := string(contractsBytes)
-	result := []byte(EncodePublicKey(i.Sender) + ":" + EncodePublicKey(i.Recipient) + ":" + fmt.Sprintf("%f", i.Amount) + ":" + signature + ":" + strconv.FormatInt(i.Timestamp.UnixNano(), 10) + ":" + contracts + ":" + strconv.FormatBool(i.FromSmartContract))
+	contracts := strings.Replace(string(contractsBytes), `"`, "'", -1)
+	result := []byte(EncodePublicKey(i.Sender) + "^" + EncodePublicKey(i.Recipient) + "^" + fmt.Sprintf("%f", i.Amount) + "^" + signature + "^" + strconv.FormatInt(i.Timestamp.UnixNano(), 10) + "^" + contracts + "^" + strconv.FormatBool(i.FromSmartContract))
 	result = []byte(strings.Replace(string(result), `"`, "", -1))
 	result = []byte(`"` + string(result) + `"`)
 	return result, nil
@@ -79,7 +79,7 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	// Substitute \u0026 with &
 	str = strings.Replace(str, "\\u0026", "&", -1)
 	// Split string into parts
-	parts := strings.Split(str, ":")
+	parts := strings.Split(str, "^")
 	// Convert parts to appropriate types
 	i.Sender = DecodePublicKey(parts[0])
 	i.Recipient = DecodePublicKey(parts[1])
@@ -100,7 +100,8 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	}
 	i.SenderSignature = signature
 	var contracts []Contract
-	err = json.Unmarshal([]byte(parts[5]), &contracts)
+	contractsStr := strings.Replace(parts[5], "'", `"`, -1)
+	err = json.Unmarshal([]byte(contractsStr), &contracts)
 	if err != nil {
 		return err
 	}
