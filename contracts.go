@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -21,15 +20,13 @@ type Contract struct {
 }
 
 func (c Contract) Execute() ([]Transaction, error) {
-	fmt.Println("Deploying smart contract.")
 	if err := os.WriteFile("contract.blockasm", []byte(c.Contents), 0666); err != nil {
 		return nil, err
 	}
-	out, err := exec.Command("./contracts/target/debug/contracts contract.blockasm").Output()
+	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm").Output()
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Smart contract output: ", string(out))
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	transactions := make([]Transaction, 0)
 	for scanner.Scan() {
@@ -40,20 +37,24 @@ func (c Contract) Execute() ([]Transaction, error) {
 		if line[:2] != "TX" {
 			continue
 		}
-		fmt.Println("Transaction initiated by contract: ", line)
 		words := strings.Split(line, " ")
-		words = append(words[:1], words[2:]...)
-		var sender PublicKey
-		err = json.Unmarshal([]byte(words[0]), &sender)
+		var senderY []byte
+		err = json.Unmarshal([]byte(words[1]), &senderY)
 		if err != nil {
 			return nil, err
 		}
-		var receiver PublicKey
-		err = json.Unmarshal([]byte(words[1]), &receiver)
+		sender := PublicKey{
+			Y: senderY,
+		}
+		var receiverY []byte
+		err = json.Unmarshal([]byte(words[2]), &receiverY)
 		if err != nil {
 			return nil, err
 		}
-		subdivided_amount, err := strconv.Atoi(words[2])
+		receiver := PublicKey{
+			Y: receiverY,
+		}
+		subdivided_amount, err := strconv.Atoi(words[3])
 		if err != nil {
 			return nil, err
 		}
