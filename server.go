@@ -26,7 +26,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	body := string(bodyBytes)
-	fields := strings.Split(body, ":")
+	fields := strings.Split(body, "$")
 	senderStr := fields[0]
 	senderKey := DecodePublicKey(senderStr)
 	recipientStr := fields[1]
@@ -80,17 +80,15 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	miningTransactions = append(miningTransactions, transaction)
 	smartContractTransactions := []Transaction{}
-	for _, transaction := range miningTransactions {
-		if len(transaction.Contracts) > 0 {
-			for _, contract := range transaction.Contracts {
-				executeResult, err := contract.Execute()
-				if err != nil {
-					Warn("Error executing contract: " + err.Error())
-					continue
-				}
-				if executeResult != nil {
-					smartContractTransactions = append(smartContractTransactions, executeResult...)
-				}
+	if len(transaction.Contracts) > 0 {
+		for _, contract := range transaction.Contracts {
+			executeResult, err := contract.Execute()
+			if err != nil {
+				Warn("Error executing contract: " + err.Error())
+				continue
+			}
+			if executeResult != nil {
+				smartContractTransactions = append(smartContractTransactions, executeResult...)
 			}
 		}
 	}

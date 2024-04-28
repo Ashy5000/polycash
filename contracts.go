@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -20,6 +21,7 @@ type Contract struct {
 }
 
 func (c Contract) Execute() ([]Transaction, error) {
+	fmt.Println("Deploying smart contract.")
 	if err := os.WriteFile("contract.blockasm", []byte(c.Contents), 0666); err != nil {
 		return nil, err
 	}
@@ -27,6 +29,7 @@ func (c Contract) Execute() ([]Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Smart contract output: ", string(out))
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	transactions := make([]Transaction, 0)
 	for scanner.Scan() {
@@ -37,15 +40,16 @@ func (c Contract) Execute() ([]Transaction, error) {
 		if line[:2] != "TX" {
 			continue
 		}
+		fmt.Println("Transaction initiated by contract: ", line)
 		words := strings.Split(line, " ")
 		words = append(words[:1], words[2:]...)
 		var sender PublicKey
-		err = json.Unmarshal([]byte(words[0]), sender)
+		err = json.Unmarshal([]byte(words[0]), &sender)
 		if err != nil {
 			return nil, err
 		}
 		var receiver PublicKey
-		err = json.Unmarshal([]byte(words[1]), receiver)
+		err = json.Unmarshal([]byte(words[1]), &receiver)
 		if err != nil {
 			return nil, err
 		}
