@@ -8,7 +8,7 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 ```
 
 | Command | Code | Param0 | Param1 | Param2 | Param3 |
-|---------|------|--------|--------|--------|--------|
+| ------- | ---- | ------ | ------ | ------ | ------ | ------ |
 | Exit    | 0000 | Status |
 | InitBfr | 0001 | Loc    | ResDst |
 | CpyBfr  | 0002 | Src    | Dst    | ResDst |
@@ -21,12 +21,13 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 | Or      | 0009 | A      | B      | Out    | ResDst |
 | Not     | 000A | A      | ResDst |
 | App     | 000B | A      | B      | Out    | ResDst |
-| Eq      | 000C | A      | B      | Out    | ResDst |
-| Jmp     | 000D | Loc    | ResDst |
-| JmpCond | 000E | Loc    | Cond   | ResDst |
-| Stdout  | 000F | Bfr    | ResDst |
-| Stderr  | 0010 | Bfr    | ResDst |
-| SetCnst | 0011 | Bfr    | Val    | ResDst |
-| Tx      | 0012 | Sndr   | Recvr  | Amount | ResDst |
+| Slice   | 000C | A      | S      | E      | Out    | ResDst |
+| Eq      | 000D | A      | B      | Out    | ResDst |
+| Jmp     | 000E | Loc    | ResDst |
+| JmpCond | 000F | Loc    | Cond   | ResDst |
+| Stdout  | 0010 | Bfr    | ResDst |
+| Stderr  | 0011 | Bfr    | ResDst |
+| SetCnst | 0012 | Bfr    | Val    | ResDst |
+| Tx      | 0013 | Sndr   | Recvr  | Amount | ResDst |
 
 `0x00000000` is a pre-initialized buffer.

@@ -154,6 +154,33 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                 line.args[1].clone(),
                 line.args[2].clone(),
             ),
+            "App" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                let y = vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
+                if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
+                    x.contents.extend(y);
+                }
+            }
+            "Slice" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[2].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[2].clone())
+                }
+                let start_buf = buffers.get(&line.args[1]).unwrap().as_u64().unwrap() as usize;
+                let end_buf = buffers.get(&line.args[2]).unwrap().as_u64().unwrap() as usize;
+                let buf_to_slice =
+                    vm_access_buffer(buffers, line.args[0].clone(), line.args[3].clone());
+                let sliced_buf = buf_to_slice[start_buf..end_buf].to_vec();
+                if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
+                    x.contents = sliced_buf;
+                }
+            }
             "Jmp" => {
                 line_number = line.args[0].parse::<usize>().unwrap() - 1;
                 should_increment = false;
