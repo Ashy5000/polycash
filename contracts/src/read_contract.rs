@@ -1,6 +1,6 @@
 use std::{env, fs};
 
-pub(crate) fn read_contract() -> String {
+pub fn read_contract() -> String {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         panic!("Expected exactly 1 argument, got {}", args.len())
