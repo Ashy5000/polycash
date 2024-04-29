@@ -21,13 +21,15 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 | Or      | 0009 | A      | B      | Out    | ResDst |
 | Not     | 000A | A      | ResDst |
 | App     | 000B | A      | B      | Out    | ResDst |
-| Slice   | 000C | A      | S      | E      | Out    | ResDst |
-| Eq      | 000D | A      | B      | Out    | ResDst |
-| Jmp     | 000E | Loc    | ResDst |
-| JmpCond | 000F | Loc    | Cond   | ResDst |
-| Stdout  | 0010 | Bfr    | ResDst |
-| Stderr  | 0011 | Bfr    | ResDst |
-| SetCnst | 0012 | Bfr    | Val    | ResDst |
-| Tx      | 0013 | Sndr   | Recvr  | Amount | ResDst |
+| Slice   | 000C | In     | S      | E      | Out    | ResDst |
+| Shiftl  | 000D | In     | Bits   | Out    | ResDst |
+| Shiftr  | 000E | In     | Bits   | Out    | ResDst |
+| Eq      | 000F | A      | B      | Out    | ResDst |
+| Jmp     | 0010 | Loc    | ResDst |
+| JmpCond | 0011 | Loc    | Cond   | ResDst |
+| Stdout  | 0012 | Bfr    | ResDst |
+| Stderr  | 0013 | Bfr    | ResDst |
+| SetCnst | 0014 | Bfr    | Val    | ResDst |
+| Tx      | 0015 | Sndr   | Recvr  | Amount | ResDst |
 
 `0x00000000` is a pre-initialized buffer.

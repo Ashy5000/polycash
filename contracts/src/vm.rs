@@ -181,6 +181,38 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                     x.contents = sliced_buf;
                 }
             }
+            "Shiftl" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                let mut buf_to_shift =
+                    vm_access_buffer(buffers, line.args[0].clone(), line.args[2].clone());
+                let shift_amount = buffers.get(&line.args[1]).unwrap().as_u64().unwrap() as usize;
+                buf_to_shift.drain(buf_to_shift.len() - shift_amount..);
+                let zeroes = vec![0; shift_amount];
+                buf_to_shift.extend(zeroes);
+                if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
+                    x.contents = buf_to_shift;
+                }
+            }
+            "Shiftr" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                let mut buf_to_shift =
+                    vm_access_buffer(buffers, line.args[0].clone(), line.args[2].clone());
+                let shift_amount = buffers.get(&line.args[1]).unwrap().as_u64().unwrap() as usize;
+                buf_to_shift.drain(0..shift_amount);
+                let zeroes = vec![0; shift_amount];
+                buf_to_shift.splice(..0, zeroes.iter().cloned());
+                if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
+                    x.contents = buf_to_shift;
+                }
+            }
             "Jmp" => {
                 line_number = line.args[0].parse::<usize>().unwrap() - 1;
                 should_increment = false;
