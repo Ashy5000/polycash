@@ -11,6 +11,7 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -197,4 +198,28 @@ func GetMinVerifiers() int {
 	// Get the minimum number of verifiers
 	minVerifiers := int(float64(lastVerifierCount) * 0.66)
 	return minVerifiers
+}
+
+func VerifySmartContract(contract Contract) bool {
+	contractStr, err := json.Marshal(contract)
+	if err != nil {
+		panic(err)
+	}
+	hash := sha256.Sum256(contractStr)
+	for _, party := range contract.Parties {
+		verifier := oqs.Signature{}
+		sigName := "Dilithium2"
+		if err := verifier.Init(sigName, nil); err != nil {
+			Error("Failed to initialize Dilithium2 verifier", true)
+		}
+		isValid, err := verifier.Verify(hash[:], party.Signature.S, party.PublicKey.Y)
+		if err != nil {
+			panic(err)
+		}
+		if !isValid {
+			Warn("Invalid smart contract signature detected.")
+			return false
+		}
+	}
+	return true
 }
