@@ -11,7 +11,6 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -201,10 +200,7 @@ func GetMinVerifiers() int {
 }
 
 func VerifySmartContract(contract Contract) bool {
-	contractStr, err := json.Marshal(contract)
-	if err != nil {
-		panic(err)
-	}
+	contractStr := contract.Contents
 	hash := sha256.Sum256(contractStr)
 	for _, party := range contract.Parties {
 		verifier := oqs.Signature{}

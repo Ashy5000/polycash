@@ -170,6 +170,14 @@ func DeploySmartContract(contractPath string) error {
 	key := GetKey()
 	deployer := GetKey().PublicKey
 	deployerStr := EncodePublicKey(key.PublicKey)
+	party := ContractParty{
+		PublicKey: deployer,
+	}
+	partySig, err := key.X.Sign([]byte(contract.Contents))
+	party.Signature = Signature{
+		S: partySig,
+	}
+	contract.Parties = append(contract.Parties, party)
 	amount := "0"
 	timestamp := time.Now().UnixNano()
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", deployer.Y, deployer.Y, amount, timestamp)
