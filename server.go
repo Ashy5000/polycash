@@ -92,6 +92,13 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}
+	for _, smartContractTransaction := range smartContractTransactions {
+		miningTransactions = append(miningTransactions, smartContractTransaction)
+		transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(smartContractTransaction.Sender), EncodePublicKey(smartContractTransaction.Recipient), smartContractTransaction.Amount, smartContractTransaction.Timestamp.UnixNano())
+		transactionBytes := []byte(transactionString)
+		hash := sha256.Sum256(transactionBytes)
+		transactionHashes[hash] = 1
+	}
 	Log("Broadcasting job to peers...", true)
 	for _, peer := range GetPeers() {
 		// Create a new body

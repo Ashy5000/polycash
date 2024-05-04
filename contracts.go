@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -45,6 +46,7 @@ func (c Contract) Execute() ([]Transaction, error) {
 		words := strings.Split(line, " ")
 		var senderY []byte
 		err = json.Unmarshal([]byte(words[1]), &senderY)
+		fmt.Println("senderY:", senderY)
 		if err != nil {
 			return nil, err
 		}
