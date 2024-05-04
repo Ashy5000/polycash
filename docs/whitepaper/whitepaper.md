@@ -70,7 +70,7 @@ The buffer at hex address 0x00000000, used for global errors is pre-initialized 
 
 Errors are split into two types: local errors and global errors. Local errors write an error value (hex code 0x1) into a pre-initialized error buffer if an error occurs in an instruction. Global errors write an error value (also hex code 0x1) into the pre-initialized error buffer at 0x00000000. If the error buffer needed to throw a local error is not found, a global error is thrown.
 
-See Polycash VM Spec for extended subsection 5.1.3 on the VM instruction set.
+See [Polycash VM Spec](https://github.com/ashy5000/cryptocurrency/blob/master/docs/whitepaper/instructions.md) for extended subsection 5.1.3 on the VM instruction set.
 
 **6 Transaction Body**
 
