@@ -17,19 +17,20 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 | Add     | 0005 | A      | B      | Out    | ResDst |
 | Sub     | 0006 | A      | B      | Out    | ResDst |
 | Mul     | 0007 | A      | B      | Out    | ResDst |
-| And     | 0008 | A      | B      | Out    | ResDst |
-| Or      | 0009 | A      | B      | Out    | ResDst |
-| Not     | 000A | A      | ResDst |
-| App     | 000B | A      | B      | Out    | ResDst |
-| Slice   | 000C | In     | S      | E      | Out    | ResDst |
-| Shiftl  | 000D | In     | Bits   | Out    | ResDst |
-| Shiftr  | 000E | In     | Bits   | Out    | ResDst |
-| Eq      | 000F | A      | B      | Out    | ResDst |
-| Jmp     | 0010 | Loc    | ResDst |
-| JmpCond | 0011 | Loc    | Cond   | ResDst |
-| Stdout  | 0012 | Bfr    | ResDst |
-| Stderr  | 0013 | Bfr    | ResDst |
-| SetCnst | 0014 | Bfr    | Val    | ResDst |
-| Tx      | 0015 | Sndr   | Recvr  | Amount | ResDst |
+| Div     | 0008 | A      | B      | Out    | ResDst |
+| And     | 0009 | A      | B      | Out    | ResDst |
+| Or      | 000A | A      | B      | Out    | ResDst |
+| Not     | 000B | A      | ResDst |
+| App     | 000C | A      | B      | Out    | ResDst |
+| Slice   | 000D | In     | S      | E      | Out    | ResDst |
+| Shiftl  | 000E | In     | Bits   | Out    | ResDst |
+| Shiftr  | 000F | In     | Bits   | Out    | ResDst |
+| Eq      | 0010 | A      | B      | Out    | ResDst |
+| Jmp     | 0011 | Loc    | ResDst |
+| JmpCond | 0012 | Loc    | Cond   | ResDst |
+| Stdout  | 0013 | Bfr    | ResDst |
+| Stderr  | 0014 | Bfr    | ResDst |
+| SetCnst | 0015 | Bfr    | Val    | ResDst |
+| Tx      | 0016 | Sndr   | Recvr  | Amount | ResDst |
 
 `0x00000000` is a pre-initialized buffer.
