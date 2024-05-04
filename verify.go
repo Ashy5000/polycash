@@ -195,7 +195,7 @@ func GetMinVerifiers() int {
 	// Get the number of verifiers in the last block
 	lastVerifierCount := len(lastBlock.TimeVerifiers)
 	// Get the minimum number of verifiers
-	minVerifiers := int(float64(lastVerifierCount) * 0.66)
+	minVerifiers := int(float64(lastVerifierCount) * 0.75)
 	return minVerifiers
 }
 
