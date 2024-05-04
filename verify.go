@@ -201,7 +201,7 @@ func GetMinVerifiers() int {
 
 func VerifySmartContract(contract Contract) bool {
 	contractStr := contract.Contents
-	hash := sha256.Sum256(contractStr)
+	hash := sha256.Sum256([]byte(contractStr))
 	for _, party := range contract.Parties {
 		verifier := oqs.Signature{}
 		sigName := "Dilithium2"
