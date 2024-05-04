@@ -25,6 +25,7 @@ var commands = map[string]func([]string){
 	"send":                SendCmd,
 	"deploySmartContract": DeploySmartContractCmd,
 	"keygen":              KeygenCmd,
+	"showPublicKey":       ShowPublicKeyCmd,
 	"encrypt":             EncryptCmd,
 	"decrypt":             DecryptCmd,
 	"savestate":           SaveStateCmd,
@@ -121,6 +122,16 @@ func KeygenCmd(fields []string) {
 	//			fmt.Println("Part 3: " + mnemonic3)
 	//			fmt.Println("Part 4: " + mnemonic4)
 	//			fmt.Println("Write down the mnemonic and keep it safe, or better yet memorize it. It is the ONLY WAY to recover your private key.")
+}
+
+func ShowPublicKeyCmd(fields []string) {
+	// Show the public key in the key.json file
+	publicKey := GetKey().PublicKey
+	publicKeyJson, err := json.Marshal(publicKey.Y)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(publicKeyJson))
 }
 
 func EncryptCmd(fields []string) {

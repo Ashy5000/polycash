@@ -161,29 +161,30 @@ func DeploySmartContract(contractPath string) error {
 		Contents: string(file),
 		Parties:  make([]ContractParty, 0),
 	}
-	contracts := make([]Contract, 0)
-	contracts = append(contracts, contract)
-	contractsStr, err := json.Marshal(contracts)
-	if err != nil {
-		return err
-	}
 	key := GetKey()
 	deployer := GetKey().PublicKey
-	deployerStr := EncodePublicKey(key.PublicKey)
+	deployerStr := EncodePublicKey(deployer)
 	party := ContractParty{
-		PublicKey: deployer,
+		PublicKey: PublicKey{
+			Y: deployer.Y,
+		},
 	}
-	partySig, err := key.X.Sign([]byte(contract.Contents))
+	hash := sha256.Sum256([]byte(contract.Contents))
+	partySig, err := key.X.Sign(hash[:])
 	party.Signature = Signature{
 		S: partySig,
 	}
 	contract.Parties = append(contract.Parties, party)
+	contracts := append(make([]Contract, 0), contract)
+	contractsStr, err := json.Marshal(contracts)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(contractsStr))
 	amount := "0"
 	timestamp := time.Now().UnixNano()
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", deployer.Y, deployer.Y, amount, timestamp)
-	fmt.Println([]byte(transactionString))
-	hash := sha256.Sum256([]byte(transactionString))
-	fmt.Println(hash[:])
+	hash = sha256.Sum256([]byte(transactionString))
 	sigBytes, err := key.X.Sign(hash[:])
 	sig := Signature{
 		S: sigBytes,
