@@ -57,6 +57,9 @@ func VerifyMiner(miner PublicKey) bool {
 
 func VerifyTransactions(transactions []Transaction) bool {
 	for _, transaction := range transactions {
+		if transaction.FromSmartContract {
+			return true
+		}
 		if !VerifyTransaction(transaction.Sender, transaction.Recipient, strconv.FormatFloat(transaction.Amount, 'f', -1, 64), transaction.Timestamp, transaction.SenderSignature.S) {
 			Log("Block has invalid transaction/transaction signature. Ignoring block request.", true)
 			return false
@@ -87,6 +90,61 @@ func DetectDuplicateBlock(hashBytes [64]byte) bool {
 		}
 	}
 	return isDuplicate
+}
+
+func VerifySmartContractTransactions(block Block) bool {
+	// Ensure the transactions created by smart contracts are valid
+	// Get the smart contracts
+	var smartContracts []Contract
+	for _, transaction := range block.Transactions {
+		if transaction.Contracts != nil {
+			smartContracts = append(smartContracts, transaction.Contracts...)
+		}
+	}
+	// Validate the smart contracts
+	for _, contract := range smartContracts {
+		if !VerifySmartContract(contract) {
+			Log("Block has invalid smart contract. Ignoring block request.", true)
+			return false
+		}
+	}
+	// Executae the smart contracts
+	var smartContractCreatedTransactions []Transaction
+	for _, contract := range smartContracts {
+		transactions, err := contract.Execute()
+		if err != nil {
+			continue
+		}
+		smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
+	}
+	// Get the smart contract created transactions in the block
+	var smartContractCreatedTransactionsInBlock []Transaction
+	for _, transaction := range block.Transactions {
+		if transaction.FromSmartContract {
+			smartContractCreatedTransactionsInBlock = append(smartContractCreatedTransactionsInBlock, transaction)
+		}
+	}
+	// Check if the two lists are the same
+	if len(smartContractCreatedTransactions) != len(smartContractCreatedTransactionsInBlock) {
+		Warn("Block has invalid smart-contract-created transactions. Ignoring block request.")
+		return false
+	}
+	for _, transaction := range smartContractCreatedTransactions {
+		// Check if transaction is in the block
+		transactionIsInBlock := false
+		for _, transactionInBlock := range smartContractCreatedTransactionsInBlock {
+			transactionString := fmt.Sprintf("%s:%s:%f:%d", transaction.Sender.Y, transaction.Recipient.Y, transaction.Amount, transaction.Timestamp.UnixNano())
+			transactionInBlockString := fmt.Sprintf("%s:%s:%f:%d", transactionInBlock.Sender.Y, transactionInBlock.Recipient.Y, transactionInBlock.Amount, transactionInBlock.Timestamp.UnixNano())
+			if transactionString == transactionInBlockString {
+				transactionIsInBlock = true
+			}
+		}
+		if !transactionIsInBlock {
+			Warn("Block has invalid smart-contract-created transactions. Ignoring block request.")
+			return false
+		}
+	}
+	return true
 }
 
 func VerifyBlock(block Block) bool {
