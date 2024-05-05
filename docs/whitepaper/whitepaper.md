@@ -16,7 +16,7 @@ In the current day, financial institutions have largely become adopted as a medi
 
 &nbsp;&nbsp;&nbsp;&nbsp;To resolve these issues, a new consensus algorithm is needed: the APoW (Adjusted Proof of Work) algorithm. Instead of giving blockchain power directly proportional to mining power, APoW calculates block speed on a per-miner basis. It decreases target time (base 1 minute) by up to 50% for a miner with infinite mining rate, and increases target time by up to 50% for a miner with zero mining rate. This leads to an increase of decentralization in the blockchain and the network, and allows for a lower energy requirement than with a standard PoW blockchain.
 
-    To adapt to the updated algorithm, multiple protocol changes must be put into place to ensure the security and reliability of the APoW blockchain.
+&nbsp;&nbsp;&nbsp;&nbsp;To adapt to the updated algorithm, multiple protocol changes must be put into place to ensure the security and reliability of the APoW blockchain.
 
 **2 Adjusted Proof of Work**
 
