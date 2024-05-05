@@ -308,7 +308,6 @@ pub fn run_vm(
                 };
                 let result =
                     blockutil_interface.get_nth_block_property(block_number as i64, property);
-                println!("Result: {:?}", result);
                 if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
                     x.contents = result.as_bytes().to_vec();
                 }
