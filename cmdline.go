@@ -241,6 +241,8 @@ func GetNthBlockCmd(fields []string) {
 	case "hash":
 		hash := HashBlock(block)
 		fmt.Println(hex.EncodeToString(hash[:]))
+	case "prev_hash":
+		fmt.Println(hex.EncodeToString(block.PreviousBlockHash[:]))
 	default:
 		fmt.Println("Invalid property", property)
 	}
