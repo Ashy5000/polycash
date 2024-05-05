@@ -26,8 +26,9 @@ impl BlockUtilInterface {
         let output = output.trim().to_string();
         // Split the output by the newline character
         let output = output.split("\n").collect::<Vec<&str>>();
-        // Return the last element of the output
+        // Get the last element of the output
         // This is neccessary because the previous lines contain logs
-        output[output.len() - 1].to_string()
+        let output = output[output.len() - 1].to_string();
+        output
     }
 }

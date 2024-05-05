@@ -293,14 +293,9 @@ pub fn run_vm(
                 let block_number = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
                 let property_u64 = buffers.get(&line.args[1]).unwrap().as_u64().unwrap() as usize;
                 let property = match property_u64 {
-                    0 => {
-                        println!("Getting hash.");
-                        "hash".to_string()
-                    }
-                    1 => {
-                        println!("Getting previous block hash.");
-                        "prev_hash".to_string()
-                    }
+                    0 => "hash".to_string(),
+                    1 => "prev_hash".to_string(),
+                    2 => "transaction_count".to_string(),
                     _ => {
                         vm_throw_local_error(buffers, line.args[1].clone());
                         "hash".to_owned()
@@ -308,8 +303,29 @@ pub fn run_vm(
                 };
                 let result =
                     blockutil_interface.get_nth_block_property(block_number as i64, property);
-                if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
-                    x.contents = result.as_bytes().to_vec();
+                match property_u64 {
+                    0 => {
+                        if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
+                            x.contents =
+                                hex::decode(result).expect("Failed to parse raw hex value");
+                        }
+                    }
+                    1 => {
+                        if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
+                            x.contents =
+                                hex::decode(result).expect("Failed to parse raw hex value");
+                        }
+                    }
+                    2 => {
+                        println!("Transaction count: {}", result);
+                        let count_u64 = result.parse::<u64>().unwrap();
+                        if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
+                            x.load_u64(count_u64);
+                        }
+                    }
+                    _ => {
+                        vm_throw_local_error(buffers, line.args[1].clone());
+                    }
                 }
             }
             &_ => vm_throw_global_error(buffers),
