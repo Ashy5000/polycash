@@ -68,4 +68,18 @@ Div [A] [B] [Out] [ResDst]
 
 **And**
 
-The And instruction, represented by the hex instruction code 0x0009,
+The And instruction, represented by the hex instruction code 0x0009, performs a bitwise and operation on two 64-bit values stored at the buffers at the memory locations A and B, storing the result in the buffer stored at Out. If A, B, or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+Div [A] [B] [Out] [ResDst]
+
+**Or**
+
+The Or instruction, represented by the hex instruction code 0x000A, performs a bitwise or operation on two 64-bit values stored at the buffers at the memory locations A and B, storing the result in the buffer stored at Out. If A, B, or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+Or [A] [B] [Out] [ResDst]
+
+**Not**
+
+The Not instruction, represented by the hex instruction code 0x000B, stores 0x0000000000000001 in Out if A is equal to 0x0000000000000000, and 0x0000000000000000 otherwise. If A or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+Not [A] [Out] [ResDst]
