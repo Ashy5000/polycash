@@ -171,8 +171,27 @@ func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func HandleIdentifyRequest(w http.ResponseWriter, _ *http.Request) {
-	_, err := io.WriteString(w, string(GetKey().PublicKey.Y))
+func HandleIdentifyRequest(w http.ResponseWriter, req *http.Request) {
+	// Get body of request
+	bodyBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+	// Hash data
+	hash := sha256.Sum256(bodyBytes)
+	// Initialize AuthenticationProof
+	proof := AuthenticationProof{
+		PublicKey: GetKey().PublicKey,
+		Data:      hash[:],
+	}
+	// Sign the proof
+	SignAuthenticationProof(&proof)
+	// Send the proof
+	proofBytes, err := json.Marshal(proof)
+	if err != nil {
+		panic(err)
+	}
+	_, err = io.WriteString(w, string(proofBytes))
 	if err != nil {
 		panic(err)
 	}

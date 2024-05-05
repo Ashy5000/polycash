@@ -9,6 +9,7 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
@@ -276,4 +277,25 @@ func VerifySmartContract(contract Contract) bool {
 		}
 	}
 	return true
+}
+
+func VerifyAuthenticationProof(proof *AuthenticationProof, data []byte) bool {
+	// Check that data matches the proof data
+	if !bytes.Equal(proof.Data, data) {
+		Log("Data does not match proof data.", true)
+		return false
+	}
+	// Hash the data
+	hash := sha256.Sum256(data)
+	// Verify the proof
+	verifier := oqs.Signature{}
+	sigName := "Dilithium2"
+	if err := verifier.Init(sigName, nil); err != nil {
+		Error("Failed to initialize Dilithium2 verifier", true)
+	}
+	isValid, err := verifier.Verify(hash[:], proof.Signature.S, proof.PublicKey.Y)
+	if err != nil {
+		panic(err)
+	}
+	return isValid
 }

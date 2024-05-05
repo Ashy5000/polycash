@@ -25,24 +25,11 @@ func RequestTimeVerification(block Block) ([]Signature, []PublicKey) {
 		panic(err)
 	}
 	for _, peer := range GetPeers() {
-		// Verify that the peer has mined a block (only miners can be time verifiers)
-		req, err := http.NewRequest(http.MethodGet, peer+"/identify", nil)
-		if err != nil {
-			panic(err)
-		}
-		res, err := http.DefaultClient.Do(req)
-		if err != nil {
-			Log("Peer down.", true)
+		// Get the peer's public key
+		peerKey, validSig := RequestAuthentication(peer)
+		if !validSig {
+			Log("Peer has invalid signature.", true)
 			continue
-		}
-		// Get the response body
-		respBody, err := io.ReadAll(res.Body)
-		if err != nil {
-			panic(err)
-		}
-		// Construct a PublicKey
-		peerKey := PublicKey{
-			Y: respBody,
 		}
 		// Verify that the peer has mined a block
 		if IsNewMiner(peerKey, len(blockchain)+1) {
@@ -51,11 +38,11 @@ func RequestTimeVerification(block Block) ([]Signature, []PublicKey) {
 		}
 		// Ask to verify the time
 		body := strings.NewReader(string(bodyChars))
-		req, err = http.NewRequest(http.MethodGet, peer+"/verifyTime", body)
+		req, err := http.NewRequest(http.MethodGet, peer+"/verifyTime", body)
 		if err != nil {
 			panic(err)
 		}
-		res, err = http.DefaultClient.Do(req)
+		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			Log("Peer down.", true)
 			continue
