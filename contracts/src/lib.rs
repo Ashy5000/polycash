@@ -1,3 +1,4 @@
+mod blockutil;
 pub mod buffer;
 pub mod math;
 pub mod read_contract;

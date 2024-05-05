@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
+    blockutil::BlockUtilInterface,
     buffer::Buffer,
     math::{execute_math_operation, Add, And, Divide, Eq, Multiply, Not, Or, Subtract},
     syntax_tree::SyntaxTree,
@@ -41,7 +42,11 @@ pub fn vm_throw_local_error(buffers: &mut HashMap<String, Buffer>, loc: String) 
     }
 }
 
-pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) -> i64 {
+pub fn run_vm(
+    syntax_tree: SyntaxTree,
+    buffers: &mut HashMap<String, Buffer>,
+    blockutil_interface: BlockUtilInterface,
+) -> i64 {
     let mut line_number = 0;
     let mut should_increment;
     while line_number < syntax_tree.lines.len() {
@@ -276,6 +281,29 @@ pub fn run_vm(syntax_tree: SyntaxTree, buffers: &mut HashMap<String, Buffer>) ->
                     }
                 };
                 println!("TX {} {} {}", sender, receiver, amount);
+            }
+            "GetNthBlk" => {
+                // Get a property of the nth block in the chain
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[2].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                let block_number = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
+                let property_u64 = buffers.get(&line.args[1]).unwrap().as_u64().unwrap() as usize;
+                let property = match property_u64 {
+                    0 => "hash".to_string(),
+                    _ => {
+                        vm_throw_local_error(buffers, line.args[1].clone());
+                        "hash".to_owned()
+                    }
+                };
+                let result =
+                    blockutil_interface.get_nth_block_property(block_number as i64, property);
+                if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
+                    x.contents = result.as_bytes().to_vec();
+                }
             }
             &_ => vm_throw_global_error(buffers),
         }

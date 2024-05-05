@@ -10,10 +10,12 @@ package main
 
 import (
 	"bufio"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/open-quantum-safe/liboqs-go/oqs"
@@ -34,6 +36,7 @@ var commands = map[string]func([]string){
 	"bootstrap":           BootstrapCmd,
 	"help":                HelpCmd,
 	"license":             LicenseCmd,
+	"getNthBlock":         GetNthBlockCmd, // Get a property of the nth block
 }
 
 func SyncCmd(fields []string) {
@@ -110,18 +113,6 @@ func KeygenCmd(fields []string) {
 		panic(err)
 	}
 	// TODO: Implement mnemonics for Dilithium2
-	//			mnemonic0 := GetMnemonic(*privateKey.X)
-	//			mnemonic1 := GetMnemonic(*privateKey.PublicKey.Y)
-	//			mnemonic2 := GetMnemonic(*privateKey.PublicKey.Parameters.P)
-	//			mnemonic3 := GetMnemonic(*privateKey.PublicKey.Parameters.Q)
-	//			mnemonic4 := GetMnemonic(*privateKey.PublicKey.Parameters.G)
-	//			fmt.Println("Mnemonic:")
-	//			fmt.Println("Part 0: " + mnemonic0)
-	//			fmt.Println("Part 1: " + mnemonic1)
-	//			fmt.Println("Part 2: " + mnemonic2)
-	//			fmt.Println("Part 3: " + mnemonic3)
-	//			fmt.Println("Part 4: " + mnemonic4)
-	//			fmt.Println("Write down the mnemonic and keep it safe, or better yet memorize it. It is the ONLY WAY to recover your private key.")
 }
 
 func ShowPublicKeyCmd(fields []string) {
@@ -233,6 +224,26 @@ func LicenseCmd(fields []string) {
 		panic(err)
 	}
 	fmt.Println(string(license))
+}
+
+func GetNthBlockCmd(fields []string) {
+	n64, err := strconv.ParseInt(fields[1]+".0", 10, 32)
+	if err == nil {
+		panic("Invalid block number " + fields[1])
+	}
+	n := int(n64)
+	if len(blockchain)-1 < n || n < 0 {
+		panic("Block out of range")
+	}
+	block := blockchain[n]
+	property := fields[2]
+	switch property {
+	case "hash":
+		hash := HashBlock(block)
+		fmt.Println(hex.EncodeToString(hash[:]))
+	default:
+		fmt.Println("Invalid property", property)
+	}
 }
 
 func RunCmd(input string) {

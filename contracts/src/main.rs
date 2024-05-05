@@ -1,3 +1,4 @@
+mod blockutil;
 mod buffer;
 mod math;
 mod read_contract;
@@ -19,6 +20,7 @@ fn main() -> ExitCode {
             contents: Vec::new(),
         },
     );
-    let exit_code = run_vm(tree, &mut buffers);
+    let blockutil_interface = blockutil::BlockUtilInterface::new();
+    let exit_code = run_vm(tree, &mut buffers, blockutil_interface);
     ExitCode::from(exit_code as u8)
 }
