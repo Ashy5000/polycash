@@ -142,7 +142,7 @@ func Send(receiver string, amount string) {
 		if err != nil {
 			panic(err)
 		}
-		body := strings.NewReader(fmt.Sprintf("%s:%s:%s:%s:%d:%s", senderStr, receiverStr, amount, sigStr, timestamp, contractsStr))
+		body := strings.NewReader(fmt.Sprintf("%s$%s$%s$%s$%d$%s", senderStr, receiverStr, amount, sigStr, timestamp, contractsStr))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)
