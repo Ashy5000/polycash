@@ -2,6 +2,7 @@ mod blockutil;
 mod buffer;
 mod math;
 mod read_contract;
+mod sanitization;
 mod syntax_tree;
 mod vm;
 

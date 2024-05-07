@@ -288,7 +288,7 @@ pub fn run_vm(
                     || !vm_check_buffer_initialization(buffers, line.args[1].clone())
                     || !vm_check_buffer_initialization(buffers, line.args[2].clone())
                 {
-                    vm_throw_local_error(buffers, line.args[1].clone())
+                    vm_throw_local_error(buffers, line.args[3].clone())
                 }
                 let block_number = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
                 let property_u64 = buffers.get(&line.args[1]).unwrap().as_u64().unwrap() as usize;
@@ -297,12 +297,15 @@ pub fn run_vm(
                     1 => "prev_hash".to_string(),
                     2 => "transaction_count".to_string(),
                     _ => {
-                        vm_throw_local_error(buffers, line.args[1].clone());
+                        vm_throw_local_error(buffers, line.args[3].clone());
                         "hash".to_owned()
                     }
                 };
-                let result =
+                let (result, success) =
                     blockutil_interface.get_nth_block_property(block_number as i64, property);
+                if !success {
+                    vm_throw_local_error(buffers, line.args[3].clone());
+                }
                 match property_u64 {
                     0 => {
                         if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
