@@ -36,7 +36,8 @@ var commands = map[string]func([]string){
 	"bootstrap":           BootstrapCmd,
 	"help":                HelpCmd,
 	"license":             LicenseCmd,
-	"getNthBlock":         GetNthBlockCmd, // Get a property of the nth block
+	"getNthBlock":         GetNthBlockCmd,       // Get a property of the nth block
+	"getNthTransaction":   GetNthTransactionCmd, // Get a property of the nth transaction in the nth block
 }
 
 func SyncCmd(fields []string) {
@@ -247,6 +248,25 @@ func GetNthBlockCmd(fields []string) {
 		fmt.Println(len(block.Transactions))
 	default:
 		fmt.Println("Invalid property", property)
+	}
+}
+
+func GetNthTransactionCmd(fields []string) {
+	blockPos, err := strconv.ParseInt(fields[1], 10, 32)
+	if err != nil {
+		panic(err)
+	}
+	txPos, err := strconv.ParseInt(fields[2], 10, 32)
+	block := blockchain[blockPos]
+	tx := block.Transactions[txPos]
+	property := fields[3]
+	switch property {
+	case "sender":
+		fmt.Println(hex.EncodeToString(tx.Sender.Y[:]))
+	case "recipient":
+		fmt.Println(hex.EncodeToString(tx.Recipient.Y[:]))
+	case "amount":
+		fmt.Println(tx.Amount)
 	}
 }
 

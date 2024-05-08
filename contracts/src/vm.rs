@@ -331,6 +331,60 @@ pub fn run_vm(
                     }
                 }
             }
+            "GetNthTx" => {
+                // Get a property of the nth transaction in the nth block in the chain
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[2].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[3].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[4].clone())
+                }
+                let block_number = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
+                let transaction_number =
+                    buffers.get(&line.args[1]).unwrap().as_u64().unwrap() as usize;
+                let property_u64 = buffers.get(&line.args[2]).unwrap().as_u64().unwrap() as usize;
+                let property = match property_u64 {
+                    0 => "sender".to_string(),
+                    1 => "receiver".to_string(),
+                    2 => "amount".to_string(),
+                    _ => {
+                        vm_throw_local_error(buffers, line.args[4].clone());
+                        "sender".to_owned()
+                    }
+                };
+                let (result, success) = blockutil_interface.get_nth_transaction_property(
+                    block_number as i64,
+                    transaction_number as i64,
+                    property,
+                );
+                if !success {
+                    vm_throw_local_error(buffers, line.args[4].clone());
+                }
+                match property_u64 {
+                    0 => {
+                        if let Some(x) = buffers.get_mut(&(line.args[3].clone())) {
+                            x.contents =
+                                hex::decode(result).expect("Failed to parse raw hex value");
+                        }
+                    }
+                    1 => {
+                        if let Some(x) = buffers.get_mut(&(line.args[3].clone())) {
+                            x.contents =
+                                hex::decode(result).expect("Failed to parse raw hex value");
+                        }
+                    }
+                    2 => {
+                        let amount_u64 = result.parse::<u64>().unwrap();
+                        if let Some(x) = buffers.get_mut(&(line.args[3].clone())) {
+                            x.load_u64(amount_u64);
+                        }
+                    }
+                    _ => {
+                        vm_throw_local_error(buffers, line.args[2].clone());
+                    }
+                }
+            }
             &_ => vm_throw_global_error(buffers),
         }
         if should_increment {
