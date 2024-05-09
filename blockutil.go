@@ -258,5 +258,9 @@ func GetMinerCount(maxBlockPosition int) int64 {
 
 func GetMaxMiners() int64 {
 	x := float64(len(blockchain))
-	return int64(math.Ceil(x / 20.0))
+	res := int64(math.Ceil(x / 20.0))
+	if res > 0 {
+		return res
+	}
+	return 1
 }

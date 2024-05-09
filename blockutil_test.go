@@ -9,9 +9,10 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetKey(t *testing.T) {
@@ -124,15 +125,15 @@ func TestGetMaxMiners(t *testing.T) {
 		// Assert
 		assert.Equal(t, int64(1), maxMiners)
 	})
-	t.Run("It returns 11 when the length of the blockchain is 50", func(t *testing.T) {
+	t.Run("It returns 2 when the length of the blockchain is 40", func(t *testing.T) {
 		// Arrange
 		blockchain = nil
-		for i := 0; i < 50; i++ {
+		for i := 0; i < 40; i++ {
 			Append(Block{})
 		}
 		// Act
 		maxMiners := GetMaxMiners()
 		// Assert
-		assert.Equal(t, int64(11), maxMiners)
+		assert.Equal(t, int64(2), maxMiners)
 	})
 }
