@@ -66,3 +66,7 @@ See [Polycash VM Spec](https://github.com/ashy5000/cryptocurrency/blob/master/do
 
 To allow data to be sent through the blockchain, a body may be attached to each transaction containing data of any form. A data fee is paid to the miner of that block of a size proportional to the amount of data transferred, in bytes.
 &nbsp;&nbsp;&nbsp;&nbsp;This transaction body feature allows for the system to be used to create new tokens, implement two-factor authentication, or to permanently and reliably store data, while utilizing the security and reliability of the blockchain.
+
+**7 Conclusion**
+
+We have seen that using an alternative consensus algorithm, APoW, with the help of the time verification protocol increases decentralization and decreases energy usage when compared to traditional PoW blockchains. It also avoids the security issues present in PoS or PoH blockchains, where controlling 1/3 of stake in the blockchain can cause the network to fail. We have outlined a new blockchain, Polycash, that implements these features alongside a smart contract system in order to enable secure digital transactions and decentralized applications.
