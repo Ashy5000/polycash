@@ -83,3 +83,29 @@ Or [A] [B] [Out] [ResDst]
 The Not instruction, represented by the hex instruction code 0x000B, stores 0x0000000000000001 in Out if A is equal to 0x0000000000000000, and 0x0000000000000000 otherwise. If A or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
 
 Not [A] [Out] [ResDst]
+
+5.1.3.4 Binary Instructions
+
+**App**
+
+The App instruction, represented by the hex instruction code 0x000C, appends the binary values of the buffers stored at memory locations A and B, storing the result in the buffer at Out. If A, B, or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+App [A] [B] [Out] [ResDst]
+
+**Slice**
+
+The Slice instruction, represented by the hex instruction code 0x000D, gets the contents of the registers at locations S and E, converts them to unsigned 64-bit integers, and uses them as the start and end indexes of a range of bits from In. The contents of this range is copied to Out. If In, S, E, or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+Slice [In] [S] [E] [Out] [ResDst]
+
+**Shiftl**
+
+The Shiftl instruction, represented by the hex instruction code 0x000E, applies the left binary shift operation to the buffer located at In by a number of bits specified by an unsigned 64-bit integer located in the buffer at memory location Bits. The result is stored in Out. If In, Bits, or Out o not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+Shiftl [In] [Bits] [Out] [ResDst]
+
+**Shiftr**
+
+The Shiftr instruction, represented by the hex instruction code 0x000F, applies the right binary shift operation to the buffer located at In by a number of bits specified by an unsigned 64-bit integer located in the buffer at memory location Bits. The result is stored in Out. If In, Bits, or Out o not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+Shiftr [In] [Bits] [Out] [ResDst]
