@@ -15,7 +15,6 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-	"unsafe"
 
 	"github.com/open-quantum-safe/liboqs-go/oqs"
 )
@@ -150,7 +149,6 @@ func VerifySmartContractTransactions(block Block) bool {
 
 func VerifyBlock(block Block) bool {
 	isValid := true
-	isValid = unsafe.Sizeof(block) <= uintptr(maxBlockSize) && isValid
 	isValid = VerifyTransactions(block.Transactions) && isValid
 	hashBytes := HashBlock(block)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.

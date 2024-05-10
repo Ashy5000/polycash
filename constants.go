@@ -13,7 +13,6 @@ var initialBlockDifficulty = uint64(50000)
 var minimumBlockDifficulty = uint64(50000)
 var maximumUint64 = ^uint64(0)
 var blocksBeforeSpendable = 3
-var maxBlockSize = 10000000
 
 // Mining power is measured in difficulty points per minute (DPM).
 const dpm = 1
