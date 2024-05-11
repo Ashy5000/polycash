@@ -91,7 +91,7 @@ func DeploySmartContractCmd(fields []string) {
 
 func KeygenCmd(fields []string) {
 	var privateKey PrivateKey
-	sigName := "Dilithium2"
+	sigName := "Dilithium3"
 	signer := oqs.Signature{}
 	if err := signer.Init(sigName, nil); err != nil {
 		Error("Could not initialize Dilithium2 signer", true)

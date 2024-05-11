@@ -62,7 +62,7 @@ func (i *PrivateKey) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	privKey := oqs.Signature{}
-	sigName := "Dilithium2"
+	sigName := "Dilithium3"
 	if err := privKey.Init(sigName, privKeyBytes); err != nil {
 		panic(err)
 	}

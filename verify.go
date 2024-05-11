@@ -27,7 +27,7 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", senderKey.Y, recipientKey.Y, amount, timestamp.UnixNano())
 	hash := sha256.Sum256([]byte(transactionString))
 	verifier := oqs.Signature{}
-	sigName := "Dilithium2"
+	sigName := "Dilithium3"
 	if err := verifier.Init(sigName, nil); err != nil {
 		Error("Failed to initialize Dilithium2 verifier", true)
 	}
@@ -195,7 +195,7 @@ func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signat
 		return false
 	}
 	oqsVerifier := oqs.Signature{}
-	sigName := "Dilithium2"
+	sigName := "Dilithium3"
 	if err := oqsVerifier.Init(sigName, nil); err != nil {
 		Error("Failed to initialize Dilithium2 verifier", true)
 	}
@@ -261,7 +261,7 @@ func VerifySmartContract(contract Contract) bool {
 	hash := sha256.Sum256([]byte(contractStr))
 	for _, party := range contract.Parties {
 		verifier := oqs.Signature{}
-		sigName := "Dilithium2"
+		sigName := "Dilithium3"
 		if err := verifier.Init(sigName, nil); err != nil {
 			Error("Failed to initialize Dilithium2 verifier", true)
 		}
@@ -287,7 +287,7 @@ func VerifyAuthenticationProof(proof *AuthenticationProof, data []byte) bool {
 	hash := sha256.Sum256(data)
 	// Verify the proof
 	verifier := oqs.Signature{}
-	sigName := "Dilithium2"
+	sigName := "Dilithium3"
 	if err := verifier.Init(sigName, nil); err != nil {
 		Error("Failed to initialize Dilithium2 verifier", true)
 	}
