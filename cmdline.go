@@ -267,6 +267,8 @@ func GetNthTransactionCmd(fields []string) {
 		fmt.Println(hex.EncodeToString(tx.Recipient.Y[:]))
 	case "amount":
 		fmt.Println(tx.Amount)
+	case "body":
+		fmt.Println(hex.EncodeToString(tx.Body))
 	}
 }
 

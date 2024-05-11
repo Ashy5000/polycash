@@ -348,6 +348,7 @@ pub fn run_vm(
                     0 => "sender".to_string(),
                     1 => "receiver".to_string(),
                     2 => "amount".to_string(),
+                    3 => "body".to_string(),
                     _ => {
                         vm_throw_local_error(buffers, line.args[4].clone());
                         "sender".to_owned()
@@ -378,6 +379,12 @@ pub fn run_vm(
                         let amount_u64 = result.parse::<u64>().unwrap();
                         if let Some(x) = buffers.get_mut(&(line.args[3].clone())) {
                             x.load_u64(amount_u64);
+                        }
+                    }
+                    3 => {
+                        if let Some(x) = buffers.get_mut(&(line.args[3].clone())) {
+                            x.contents =
+                                hex::decode(result).expect("Failed to parse raw hex value");
                         }
                     }
                     _ => {
