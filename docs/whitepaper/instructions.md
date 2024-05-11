@@ -109,3 +109,23 @@ Shiftl [In] [Bits] [Out] [ResDst]
 The Shiftr instruction, represented by the hex instruction code 0x000F, applies the right binary shift operation to the buffer located at In by a number of bits specified by an unsigned 64-bit integer located in the buffer at memory location Bits. The result is stored in Out. If In, Bits, or Out o not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
 
 Shiftr [In] [Bits] [Out] [ResDst]
+
+**Eq**
+
+The Eq instruction, represented by the hex instruction code 0x0010, checks if the buffers at memory locations A and B are equal. If they are, the value 0x0000000000000001 is stored in the buffer Out. Otherwise, 0x0000000000000000 is stored. if A, B, or Out do not exist, a local error is thrown into ResDst.
+
+Eq [A] [B] [Out] [ResDst]
+
+**5.1.3.5** Control Flow Instructions
+
+**Jmp**
+
+The Jmp instruction, represented by the hex instruction code 0x0011, jumps to the instruction specified by the line number stored in the buffer at Loc. If Loc does not exist, a local error is thrown into ResDst.
+
+Jmp [Loc] [ResDst]
+
+**JmpCond**
+
+The JmpCond instruction, represented by the hex instruction code 0x0012, jumps to the instruction specified by the line number stored in the buffer at Loc if the buffer at Cond stores a value other than 0x0000000000000000. If Loc or Cond do not exist, a local error is thrown into ResDst.
+
+JmpCond [Loc] [Cond] [ResDst]
