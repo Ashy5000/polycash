@@ -52,6 +52,7 @@ type Transaction struct {
 	Timestamp         time.Time
 	Contracts         []Contract
 	FromSmartContract bool
+	Body              []byte
 }
 
 func (i Transaction) MarshalJSON() ([]byte, error) {
@@ -65,7 +66,11 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
 		panic(err)
 	}
 	contracts := strings.Replace(string(contractsBytes), `"`, "'", -1)
-	result := []byte(EncodePublicKey(i.Sender) + "^" + EncodePublicKey(i.Recipient) + "^" + fmt.Sprintf("%f", i.Amount) + "^" + signature + "^" + strconv.FormatInt(i.Timestamp.UnixNano(), 10) + "^" + contracts + "^" + strconv.FormatBool(i.FromSmartContract))
+	bodyBytes, err := json.Marshal(i.Body)
+	if err != nil {
+		panic(err)
+	}
+	result := []byte(EncodePublicKey(i.Sender) + "^" + EncodePublicKey(i.Recipient) + "^" + fmt.Sprintf("%f", i.Amount) + "^" + signature + "^" + strconv.FormatInt(i.Timestamp.UnixNano(), 10) + "^" + contracts + "^" + strconv.FormatBool(i.FromSmartContract) + "^" + string(bodyBytes))
 	result = []byte(strings.Replace(string(result), `"`, "", -1))
 	result = []byte(`"` + string(result) + `"`)
 	return result, nil
@@ -110,6 +115,7 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+	i.Body, err = json.Marshal(parts[7])
 	return nil
 }
 
