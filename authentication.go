@@ -36,6 +36,8 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool) {
 	if err != nil {
 		panic(err)
 	}
+	// Get the hash of the data
+	digest := sha256.Sum256(data)
 	// Request the signature from the peer
 	req, err := http.NewRequest("GET", peer_ip+"/sign", bytes.NewBuffer(data))
 	if err != nil {
@@ -54,7 +56,7 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool) {
 	var proof AuthenticationProof
 	err = json.Unmarshal(body, &proof)
 	// Verify the signature
-	isValid := VerifyAuthenticationProof(&proof, data)
+	isValid := VerifyAuthenticationProof(&proof, digest[:])
 	if !isValid {
 		return PublicKey{}, false
 	}
