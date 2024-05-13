@@ -32,6 +32,7 @@ func HashBlock(block Block) [64]byte {
 	blockCpy.Timestamp = time.Time{}
 	for i := range block.Transactions {
 		blockCpy.Transactions[i].Timestamp = time.Time{}
+		blockCpy.Transactions[i].Body = []byte{}
 	}
 	blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
 	sum := sha3.Sum512(blockBytes)

@@ -295,5 +295,8 @@ func VerifyAuthenticationProof(proof *AuthenticationProof, data []byte) bool {
 	if err != nil {
 		panic(err)
 	}
+	if !isValid {
+		Warn("Invalid authentication proof signature detected.")
+	}
 	return isValid
 }

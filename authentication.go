@@ -39,7 +39,7 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool) {
 	// Get the hash of the data
 	digest := sha256.Sum256(data)
 	// Request the signature from the peer
-	req, err := http.NewRequest("GET", peer_ip+"/sign", bytes.NewBuffer(data))
+	req, err := http.NewRequest("GET", peer_ip+"/identify", bytes.NewBuffer(data))
 	if err != nil {
 		panic(err)
 	}
