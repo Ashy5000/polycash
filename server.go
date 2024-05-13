@@ -172,6 +172,7 @@ func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
 }
 
 func HandleIdentifyRequest(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Handling identify request")
 	// Get body of request
 	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -179,6 +180,7 @@ func HandleIdentifyRequest(w http.ResponseWriter, req *http.Request) {
 	}
 	// Hash data
 	hash := sha256.Sum256(bodyBytes)
+	fmt.Println("Hash ", hash[:])
 	// Initialize AuthenticationProof
 	proof := AuthenticationProof{
 		PublicKey: GetKey().PublicKey,
