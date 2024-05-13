@@ -8,11 +8,20 @@ You should have received a copy of the GNU General Public License along with thi
 */
 package main
 
+// Security level
 var securityLevel = 0
+
+// Difficulty
 var initialBlockDifficulty = uint64(50000)
 var minimumBlockDifficulty = uint64(50000)
 var maximumUint64 = ^uint64(0)
+
+// Rewards
 var blocksBeforeSpendable = 3
+var blockReward = 1.0
+var transactionFee = 0.0001
+var bodyFeePerByte = 0.000001
+var smartContractFeePerByte = 0.00001
 
 // Mining power is measured in difficulty points per minute (DPM).
 const dpm = 1

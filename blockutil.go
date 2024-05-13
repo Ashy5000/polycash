@@ -83,8 +83,11 @@ func GetBalance(key []byte) float64 {
 		for _, transaction := range block.Transactions {
 			if bytes.Equal(transaction.Sender.Y, key) {
 				total -= transaction.Amount
-				if len(blockchain) > 50 {
-					fee := 0.01
+				if len(blockchain) > 50 { // Fees start after 50 blocks
+					fee := transactionFee + (bodyFeePerByte * float64(len(transaction.Body)))
+					for _, contract := range transaction.Contracts {
+						fee += smartContractFeePerByte * float64(len(contract.Contents))
+					}
 					total -= fee
 				}
 			} else if bytes.Equal(transaction.Recipient.Y, key) {
@@ -92,13 +95,20 @@ func GetBalance(key []byte) float64 {
 			}
 		}
 		if bytes.Equal(block.Miner.Y, key) {
-			miningTotal += 1.0
+			miningTotal += blockReward
 			lastBlock := blockchain[i-1]
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
-			if len(blockchain) > 50 {
+			if len(blockchain) > 50 { // Fees start after 50 blocks
 				fees := 0.0
-				for range block.Transactions {
-					fees += 0.01
+				for _, transaction := range block.Transactions {
+					fees += transactionFee
+					fees += bodyFeePerByte * float64(len(transaction.Body))
+					for _, contract := range transaction.Contracts {
+						fees += smartContractFeePerByte * float64(len(contract.Contents))
+						// TODO: Add fees for executing smart contracts
+						// Should be based on the number of operations and the complexity of the operations
+						// This should be added in addition to the fee per byte
+					}
 				}
 			}
 		}
