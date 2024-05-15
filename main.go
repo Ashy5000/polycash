@@ -10,21 +10,21 @@ package main
 
 import (
 	"flag"
+	. "cryptocurrency/node_util"
 )
 
-var useLocalPeerList *bool = &[]bool{true}[0]
-var verbose *bool = &[]bool{true}[0]
+
 
 func main() {
 	mine := flag.Bool("mine", false, "Set to true to start node as miner")
 	serve := flag.Bool("serve", *mine, "Set to true to start node as server")
 	port := flag.String("port", "8080", "Port to listen on (server only)")
 	command := flag.String("command", "exit", "Run a command and exit")
-	useLocalPeerList = flag.Bool("useLocalPeerList", true, "Set to true to use local peer list and fully decentralize (slower, but more secure)")
-	verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
+	UseLocalPeerList = flag.Bool("useLocalPeerList", true, "Set to true to use local peer list and fully decentralize (slower, but more secure)")
+	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
 	flag.Parse()
 	Append(GenesisBlock())
-	ApplySecurityLevel(securityLevel)
+	ApplySecurityLevel(CurrentSecurityLevel)
 	if *serve {
 		if *mine {
 			go Mine()
