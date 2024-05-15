@@ -51,3 +51,25 @@ func TestSeperateL2Transactions(t *testing.T) {
 	// Assert
 	assert.Equal(t, expected, result)
 }
+
+func TestGetL2TokenBalances(t *testing.T) {
+	// Arrange
+	// Add some transactions to the blockchain
+	key := PublicKey{}
+	keyStr, err := json.Marshal(key)
+	if err != nil {
+		panic(err)
+	}
+	block := Block{
+		Transactions: []Transaction{
+			{
+				Body: []byte("== BEGIN L2 TRANSACTION ==\n" + string(keyStr) + "\n" + string(keyStr) + "\n" + "1\n"),
+			},
+		},
+	}
+	Blockchain = append(Blockchain, block)
+	// Act
+	result := GetL2TokenBalances()
+	// Assert
+	assert.Equal(t, map[string]uint64{string(keyStr): 0}, result)
+}

@@ -51,7 +51,7 @@ func BodyContainsL2Transactions(body string) bool {
 }
 
 func GetL2TokenBalances() map[string]uint64 {
-	balances := map[string]uint64{}
+	balances := make(map[string]uint64)
 	for _, block := range Blockchain {
 		for _, transaction := range block.Transactions {
 			body := transaction.Body
@@ -75,6 +75,12 @@ func GetL2TokenBalances() map[string]uint64 {
 				amount, err = strconv.ParseUint(lines[2], 10, 64)
 				if err != nil {
 					panic(err)
+				}
+				if _, ok := balances[lines[0]]; !ok {
+					balances[lines[0]] = 0
+				}
+				if _, ok := balances[lines[1]]; !ok {
+					balances[lines[1]] = 0
 				}
 				if balances[lines[0]] < amount {
 					continue
