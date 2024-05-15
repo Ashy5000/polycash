@@ -18,7 +18,7 @@ import (
 func TestGetKey(t *testing.T) {
 	t.Run("It returns a PrivateKey when the key.json file is found", func(t *testing.T) {
 		// Act
-		key := GetKey()
+		key := GetKey("")
 		// Assert
 		assert.NotNil(t, key)
 	})
@@ -94,7 +94,7 @@ func TestGetLastMinedBlock(t *testing.T) {
 		// Arrange
 		Blockchain = nil
 		Append(GenesisBlock())
-		key := GetKey().PublicKey
+		key := GetKey("").PublicKey
 		block := Block{
 			Miner: key,
 		}

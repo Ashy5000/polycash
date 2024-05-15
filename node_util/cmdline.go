@@ -49,7 +49,7 @@ func SyncCmd(fields []string) {
 
 func BalanceCmd(fields []string) {
 	if len(fields) == 1 {
-		publicKey := GetKey().PublicKey.Y
+		publicKey := GetKey("").PublicKey.Y
 		balance := GetBalance(publicKey)
 		fmt.Println(fmt.Sprintf("Balance: %f", balance))
 		return
@@ -118,7 +118,7 @@ func KeygenCmd(fields []string) {
 
 func ShowPublicKeyCmd(fields []string) {
 	// Show the public key in the key.json file
-	publicKey := GetKey().PublicKey
+	publicKey := GetKey("").PublicKey
 	publicKeyJson, err := json.Marshal(publicKey.Y)
 	if err != nil {
 		panic(err)

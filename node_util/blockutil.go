@@ -25,8 +25,11 @@ import (
 
 var wg sync.WaitGroup
 
-func GetKey() PrivateKey {
-	keyJson, err := os.ReadFile("key.json")
+func GetKey(path string) PrivateKey {
+	if path == "" {
+		path = "key.json"
+	}
+	keyJson, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
@@ -129,7 +132,7 @@ func SendRequest(req *http.Request) {
 }
 
 func Send(receiver string, amount string) {
-	key := GetKey()
+	key := GetKey("")
 	sender := key.PublicKey.Y
 	timestamp := time.Now().UnixNano()
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", sender, receiver, amount, timestamp)))
@@ -171,8 +174,8 @@ func DeploySmartContract(contractPath string) error {
 		Contents: string(file),
 		Parties:  make([]ContractParty, 0),
 	}
-	key := GetKey()
-	deployer := GetKey().PublicKey
+	key := GetKey("")
+	deployer := GetKey("").PublicKey
 	deployerStr := EncodePublicKey(deployer)
 	party := ContractParty{
 		PublicKey: PublicKey{
@@ -220,7 +223,7 @@ func DeploySmartContract(contractPath string) error {
 }
 
 func GetLastMinedBlock() (Block, bool) {
-	pubKey := GetKey().PublicKey.Y
+	pubKey := GetKey("").PublicKey.Y
 	for i := len(Blockchain) - 1; i > 0; i-- {
 		block := Blockchain[i]
 		if bytes.Equal(block.Miner.Y, pubKey) {

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/open-quantum-safe/liboqs-go/oqs"
 )
 
 func CreateL2Transaction(sender PublicKey, recipient PublicKey, amount uint64) (string, error) {
@@ -75,6 +77,25 @@ func GetL2TokenBalances() map[string]uint64 {
 				amount, err = strconv.ParseUint(lines[2], 10, 64)
 				if err != nil {
 					panic(err)
+				}
+				// Verify the body signature
+				verifier := oqs.Signature{}
+				sigName := "Dilithium3"
+				verifier.Init(sigName, nil)
+				foundValidSignature := false
+				for _, signature := range transaction.BodySignatures {
+					// Check if the signature is valid using the sender's public key
+					isValid, err := verifier.Verify(transaction.Body, signature.S, sender.Y)
+					if err != nil {
+						panic(err)
+					}
+					if isValid {
+						foundValidSignature = true
+						break
+					}
+				}
+				if !foundValidSignature {
+					continue
 				}
 				if _, ok := balances[lines[0]]; !ok {
 					balances[lines[0]] = 0

@@ -27,7 +27,7 @@ func SignAuthenticationProof(a *AuthenticationProof) error {
 	// Hash the data so the node requesting the signature can't sign arbitrary data
 	digest := sha256.Sum256(a.Data)
 	// Sign the hash
-	key := GetKey()
+	key := GetKey("")
 	signature, err := key.X.Sign(digest[:])
 	if err != nil {
 		return err

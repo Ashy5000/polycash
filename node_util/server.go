@@ -183,7 +183,7 @@ func HandleIdentifyRequest(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Hash ", hash[:])
 	// Initialize AuthenticationProof
 	proof := AuthenticationProof{
-		PublicKey: GetKey().PublicKey,
+		PublicKey: GetKey("").PublicKey,
 		Data:      hash[:],
 	}
 	// Sign the proof
@@ -272,7 +272,7 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	// Sign the time with the time verifier's (this node's) private key
-	key := GetKey()
+	key := GetKey("")
 	var s []byte
 	if block.MiningTime > 0 {
 		s, err = key.X.Sign([]byte(fmt.Sprintf("%d", block.Timestamp.Add(block.MiningTime).UnixNano())))

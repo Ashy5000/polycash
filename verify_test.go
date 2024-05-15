@@ -20,7 +20,7 @@ import (
 
 func TestVerifyTransaction(t *testing.T) {
 	t.Run("It should return true if the transaction is valid", func(t *testing.T) {
-		key := GetKey()
+		key := GetKey("")
 		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey.Y
@@ -36,7 +36,7 @@ func TestVerifyTransaction(t *testing.T) {
 		assert.True(t, result)
 	})
 	t.Run("It should return false if the transaction double spends", func(t *testing.T) {
-		key := GetKey()
+		key := GetKey("")
 		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey.Y
@@ -51,7 +51,7 @@ func TestVerifyTransaction(t *testing.T) {
 		assert.False(t, result)
 	})
 	t.Run("It should return false if the transaction signature is invalid", func(t *testing.T) {
-		key := GetKey()
+		key := GetKey("")
 		Blockchain = nil
 		Append(GenesisBlock())
 		amount := "1"
@@ -67,14 +67,14 @@ func TestVerifyTransaction(t *testing.T) {
 
 func TestVerifyMiner(t *testing.T) {
 	t.Run("It should return true if the miner is valid", func(t *testing.T) {
-		key := GetKey()
+		key := GetKey("")
 		Blockchain = nil
 		Append(GenesisBlock())
 		result := VerifyMiner(key.PublicKey)
 		assert.True(t, result)
 	})
 	t.Run("It should return false if there are too many miners", func(t *testing.T) {
-		key := GetKey()
+		key := GetKey("")
 		miner := key.PublicKey
 		miner.Y = []byte("123")
 		Blockchain = nil
@@ -92,7 +92,7 @@ func TestVerifyMiner(t *testing.T) {
 
 func TestVerifyBlock(t *testing.T) {
 	t.Run("It should return true if the block is valid", func(t *testing.T) {
-		key := GetKey()
+		key := GetKey("")
 		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey
@@ -124,7 +124,7 @@ func TestVerifyBlock(t *testing.T) {
 		assert.True(t, result)
 	})
 	t.Run("It should return false if the block has an invalid transaction", func(t *testing.T) {
-		key := GetKey()
+		key := GetKey("")
 		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey

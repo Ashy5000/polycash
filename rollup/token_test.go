@@ -55,15 +55,27 @@ func TestSeperateL2Transactions(t *testing.T) {
 func TestGetL2TokenBalances(t *testing.T) {
 	// Arrange
 	// Add some transactions to the blockchain
-	key := PublicKey{}
+	key := GetKey("../key.json").PublicKey
 	keyStr, err := json.Marshal(key)
+	if err != nil {
+		panic(err)
+	}
+	body := []byte("== BEGIN L2 TRANSACTION ==\n" + string(keyStr) + "\n" + string(keyStr) + "\n" + "1\n")
+	// Sign the body
+	privateKey := GetKey("../key.json")
+	signature, err := privateKey.X.Sign(body)
 	if err != nil {
 		panic(err)
 	}
 	block := Block{
 		Transactions: []Transaction{
 			{
-				Body: []byte("== BEGIN L2 TRANSACTION ==\n" + string(keyStr) + "\n" + string(keyStr) + "\n" + "1\n"),
+				Body: body,
+				BodySignatures: []Signature{
+					{
+						S: signature,
+					},
+				},
 			},
 		},
 	}

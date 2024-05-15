@@ -31,7 +31,7 @@ func CreateBlock() (Block, error) {
 		previousBlock.MiningTime = time.Minute
 	}
 	block := Block{
-		Miner:                  GetKey().PublicKey,
+		Miner:                  GetKey("").PublicKey,
 		Transactions:           miningTransactions,
 		Nonce:                  0,
 		Difficulty:             GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
