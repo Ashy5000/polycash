@@ -28,3 +28,23 @@ func TestCreateL2Transaction(t *testing.T) {
 	// Assert
 	assert.Equal(t, expected, result)
 }
+
+func TestCombineL2Transactions(t *testing.T) {
+	// Arrange
+	transactions := []string{"a\n", "b\n", "c\n"}
+	expected := "a\nb\nc\n"
+	// Act
+	result := CombineL2Transactions(transactions)
+	// Assert
+	assert.Equal(t, expected, result)
+}
+
+func TestSeperateL2Transactions(t *testing.T) {
+	// Arrange
+	transactionsStr := "== BEGIN L2 TRANSACTION ==\na\nb\n== BEGIN L2 TRANSACTION ==\nc\nd"
+	expected := []string{"a\nb\n", "c\nd\n"}
+	// Act
+	result := SeperateL2Transactions(transactionsStr)
+	// Assert
+	assert.Equal(t, expected, result)
+}
