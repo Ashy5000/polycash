@@ -30,6 +30,6 @@ func TestAppend(t *testing.T) {
 		// Act
 		Append(block)
 		// Assert
-		assert.Equal(t, 1, len(blockchain))
+		assert.Equal(t, 1, len(Blockchain))
 	})
 }

@@ -40,8 +40,8 @@ func CreateBlock() (Block, error) {
 		TimeVerifiers:          []PublicKey{},
 		MiningTime:             0,
 	}
-	if len(blockchain) > 0 {
-		block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
+	if len(Blockchain) > 0 {
+		block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1])
 	} else {
 		block.PreviousBlockHash = [64]byte{}
 	}
@@ -73,8 +73,8 @@ func CreateBlock() (Block, error) {
 				previousBlock.Difficulty = InitialBlockDifficulty
 				previousBlock.MiningTime = time.Minute
 			}
-			if len(blockchain) > 0 {
-				block.PreviousBlockHash = HashBlock(blockchain[len(blockchain)-1])
+			if len(Blockchain) > 0 {
+				block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1])
 			} else {
 				block.PreviousBlockHash = [64]byte{}
 			}
@@ -91,7 +91,7 @@ func CreateBlock() (Block, error) {
 	block.MiningTime = time.Since(start)
 	// Ask for time verifiers
 	block.TimeVerifierSignatures, block.TimeVerifiers = RequestTimeVerification(block)
-	if int64(len(block.TimeVerifiers)) < GetMinerCount(len(blockchain))/5 {
+	if int64(len(block.TimeVerifiers)) < GetMinerCount(len(Blockchain))/5 {
 		Warn("Not enough time verifiers.")
 		return Block{}, errors.New("lost block")
 	}

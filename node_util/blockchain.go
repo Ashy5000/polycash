@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var blockchain []Block
+var Blockchain []Block
 
 func GenesisBlock() Block {
 	return Block{
@@ -29,5 +29,5 @@ func GenesisBlock() Block {
 }
 
 func Append(block Block) {
-	blockchain = append(blockchain, block)
+	Blockchain = append(Blockchain, block)
 }

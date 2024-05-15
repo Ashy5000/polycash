@@ -68,14 +68,14 @@ func SyncBlockchain() {
 	}
 	Log("Blockchain successfully synced!", false)
 	Log(fmt.Sprintf("%d out of %d peers responded.", len(GetPeers())-errCount, len(GetPeers())), false)
-	blockchain = longestBlockchain
+	Blockchain = longestBlockchain
 }
 
 func GetBalance(key []byte) float64 {
 	total := 0.0
 	miningTotal := 0.0
 	isGenesis := true
-	for i, block := range blockchain {
+	for i, block := range Blockchain {
 		if isGenesis {
 			isGenesis = false
 			continue
@@ -83,7 +83,7 @@ func GetBalance(key []byte) float64 {
 		for _, transaction := range block.Transactions {
 			if bytes.Equal(transaction.Sender.Y, key) {
 				total -= transaction.Amount
-				if len(blockchain) > 50 { // Fees start after 50 blocks
+				if len(Blockchain) > 50 { // Fees start after 50 blocks
 					fee := TransactionFee + (BodyFeePerByte * float64(len(transaction.Body)))
 					for _, contract := range transaction.Contracts {
 						fee += SmartContractFeePerByte * float64(len(contract.Contents))
@@ -96,9 +96,9 @@ func GetBalance(key []byte) float64 {
 		}
 		if bytes.Equal(block.Miner.Y, key) {
 			miningTotal += BlockReward
-			lastBlock := blockchain[i-1]
+			lastBlock := Blockchain[i-1]
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
-			if len(blockchain) > 50 { // Fees start after 50 blocks
+			if len(Blockchain) > 50 { // Fees start after 50 blocks
 				fees := 0.0
 				for _, transaction := range block.Transactions {
 					fees += TransactionFee
@@ -221,8 +221,8 @@ func DeploySmartContract(contractPath string) error {
 
 func GetLastMinedBlock() (Block, bool) {
 	pubKey := GetKey().PublicKey.Y
-	for i := len(blockchain) - 1; i > 0; i-- {
-		block := blockchain[i]
+	for i := len(Blockchain) - 1; i > 0; i-- {
+		block := Blockchain[i]
 		if bytes.Equal(block.Miner.Y, pubKey) {
 			return block, true
 		}
@@ -232,7 +232,7 @@ func GetLastMinedBlock() (Block, bool) {
 
 func IsNewMiner(miner PublicKey, maxBlockPosition int) bool {
 	isGenesis := true
-	for i, block := range blockchain {
+	for i, block := range Blockchain {
 		if isGenesis {
 			isGenesis = false
 			continue
@@ -251,7 +251,7 @@ func GetMinerCount(maxBlockPosition int) int64 {
 	var result int64
 	result = 0
 	isGenesis := true
-	for i, block := range blockchain {
+	for i, block := range Blockchain {
 		if i > maxBlockPosition {
 			break
 		}
@@ -267,7 +267,7 @@ func GetMinerCount(maxBlockPosition int) int64 {
 }
 
 func GetMaxMiners() int64 {
-	x := float64(len(blockchain))
+	x := float64(len(Blockchain))
 	res := int64(math.Ceil(x / 20.0))
 	if res > 0 {
 		return res

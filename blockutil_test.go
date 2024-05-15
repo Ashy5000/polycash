@@ -27,12 +27,12 @@ func TestGetKey(t *testing.T) {
 func TestSyncBlockchain(t *testing.T) {
 	t.Run("It sets the blockchain to the longest blockchain from the peers or panics", func(t *testing.T) {
 		// Arrange
-		blockchain = nil
+		Blockchain = nil
 		// Act
 		defer func() {
 			// Assert
 			if r := recover(); r == nil {
-				assert.NotNil(t, blockchain)
+				assert.NotNil(t, Blockchain)
 			}
 		}()
 		SyncBlockchain()
@@ -42,7 +42,7 @@ func TestSyncBlockchain(t *testing.T) {
 func TestGetBalance(t *testing.T) {
 	t.Run("It returns 0 when the blockchain is empty", func(t *testing.T) {
 		// Arrange
-		blockchain = nil
+		Blockchain = nil
 		var key []byte
 		// Act
 		balance := GetBalance(key)
@@ -51,7 +51,7 @@ func TestGetBalance(t *testing.T) {
 	})
 	t.Run("It returns the correct balance of a key", func(t *testing.T) {
 		// Arrange
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		key := []byte("123")
 		sender := PublicKey{
@@ -92,7 +92,7 @@ func TestSendRequest(t *testing.T) {
 func TestGetLastMinedBlock(t *testing.T) {
 	t.Run("It returns the last block mined by the key", func(t *testing.T) {
 		// Arrange
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		key := GetKey().PublicKey
 		block := Block{
@@ -107,7 +107,7 @@ func TestGetLastMinedBlock(t *testing.T) {
 	})
 	t.Run("It returns false when the key has not mined any blocks", func(t *testing.T) {
 		// Arrange
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		// Act
 		_, found := GetLastMinedBlock()
@@ -119,7 +119,7 @@ func TestGetLastMinedBlock(t *testing.T) {
 func TestGetMaxMiners(t *testing.T) {
 	t.Run("It returns 1 when the length of the blockchain is 0", func(t *testing.T) {
 		// Arrange
-		blockchain = nil
+		Blockchain = nil
 		// Act
 		maxMiners := GetMaxMiners()
 		// Assert
@@ -127,7 +127,7 @@ func TestGetMaxMiners(t *testing.T) {
 	})
 	t.Run("It returns 2 when the length of the blockchain is 40", func(t *testing.T) {
 		// Arrange
-		blockchain = nil
+		Blockchain = nil
 		for i := 0; i < 40; i++ {
 			Append(Block{})
 		}

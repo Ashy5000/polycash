@@ -44,7 +44,7 @@ func SyncCmd(fields []string) {
 	Log("Syncing blockchain...", false)
 	SyncBlockchain()
 	Log("Blockchain successfully synced!", false)
-	Log(fmt.Sprintf("Length: %d", len(blockchain)), false)
+	Log(fmt.Sprintf("Length: %d", len(Blockchain)), false)
 }
 
 func BalanceCmd(fields []string) {
@@ -147,7 +147,7 @@ func DecryptCmd(fields []string) {
 }
 
 func SaveStateCmd(fields []string) {
-	blockchainJson, err := json.Marshal(blockchain)
+	blockchainJson, err := json.Marshal(Blockchain)
 	// Save the blockchain to a file
 	if err != nil {
 		panic(err)
@@ -164,7 +164,7 @@ func LoadStateCmd(fields []string) {
 	if err != nil {
 		panic(err)
 	}
-	err = json.Unmarshal(blockchainJson, &blockchain)
+	err = json.Unmarshal(blockchainJson, &Blockchain)
 	if err != nil {
 		panic(err)
 	}
@@ -233,10 +233,10 @@ func GetNthBlockCmd(fields []string) {
 		panic("Invalid block number " + fields[1])
 	}
 	n := int(n64)
-	if len(blockchain)-1 < n || n < 0 {
+	if len(Blockchain)-1 < n || n < 0 {
 		panic("Block out of range")
 	}
-	block := blockchain[n]
+	block := Blockchain[n]
 	property := fields[2]
 	switch property {
 	case "hash":
@@ -257,7 +257,7 @@ func GetNthTransactionCmd(fields []string) {
 		panic(err)
 	}
 	txPos, err := strconv.ParseInt(fields[2], 10, 32)
-	block := blockchain[blockPos]
+	block := Blockchain[blockPos]
 	tx := block.Transactions[txPos]
 	property := fields[3]
 	switch property {

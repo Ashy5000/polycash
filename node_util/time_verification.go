@@ -32,7 +32,7 @@ func RequestTimeVerification(block Block) ([]Signature, []PublicKey) {
 			continue
 		}
 		// Verify that the peer has mined a block
-		if IsNewMiner(peerKey, len(blockchain)+1) {
+		if IsNewMiner(peerKey, len(Blockchain)+1) {
 			Log("Peer has not mined a block.", true)
 			continue
 		}

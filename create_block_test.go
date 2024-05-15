@@ -10,8 +10,9 @@ package main
 
 import (
 	"encoding/binary"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateBlock(t *testing.T) {
@@ -27,7 +28,7 @@ func TestCreateBlock(t *testing.T) {
 		}
 		var amount float64
 		amount = 123
-		blockchain = nil
+		Blockchain = nil
 		transactionHashes[[32]byte{}] = 1
 		// Act
 		miningTransactions = []Transaction{

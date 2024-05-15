@@ -47,8 +47,8 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 }
 
 func VerifyMiner(miner PublicKey) bool {
-	if IsNewMiner(miner, len(blockchain)) && GetMinerCount(len(blockchain)) >= GetMaxMiners() {
-		Log(fmt.Sprintf("Miner count: %d", GetMinerCount(len(blockchain))), true)
+	if IsNewMiner(miner, len(Blockchain)) && GetMinerCount(len(Blockchain)) >= GetMaxMiners() {
+		Log(fmt.Sprintf("Miner count: %d", GetMinerCount(len(Blockchain))), true)
 		Log(fmt.Sprintf("Maximum miner count: %d", GetMaxMiners()), true)
 		return false
 	}
@@ -69,7 +69,7 @@ func VerifyTransactions(transactions []Transaction) bool {
 }
 
 func DetectFork(block Block) bool {
-	for _, b := range blockchain {
+	for _, b := range Blockchain {
 		if b.PreviousBlockHash == block.PreviousBlockHash {
 			Warn("Block creates a fork.")
 			Log("The node software is designed to handle this edge case, so operations can continue as normal.", false)
@@ -84,7 +84,7 @@ func DetectFork(block Block) bool {
 
 func DetectDuplicateBlock(hashBytes [64]byte) bool {
 	isDuplicate := false
-	for _, b := range blockchain {
+	for _, b := range Blockchain {
 		if HashBlock(b) == hashBytes {
 			isDuplicate = true
 		}
@@ -155,7 +155,7 @@ func VerifyBlock(block Block) bool {
 	isValid = hash <= MaximumUint64/block.Difficulty && isValid
 	isValid = !DetectDuplicateBlock(hashBytes) && isValid
 	isValid = !DetectFork(block) && isValid
-	if len(blockchain) > 0 && block.PreviousBlockHash != HashBlock(blockchain[len(blockchain)-1]) {
+	if len(Blockchain) > 0 && block.PreviousBlockHash != HashBlock(Blockchain[len(Blockchain)-1]) {
 		Log("Block has invalid previous block hash. Ignoring block request.", true)
 		Log("The block could be on a different fork.", true)
 		Log("The blockchain will be re-synced to stay on the longest chain.", true)
@@ -233,7 +233,7 @@ func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signat
 	}
 	// Ensure all verifiers are miners
 	for _, verifier := range verifiers {
-		if IsNewMiner(verifier, len(blockchain)+1) {
+		if IsNewMiner(verifier, len(Blockchain)+1) {
 			Log("Time verifier is not a miner.", true)
 			return false
 		}
@@ -248,7 +248,7 @@ func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signat
 
 func GetMinVerifiers() int {
 	// Get the last block
-	lastBlock := blockchain[len(blockchain)-1]
+	lastBlock := Blockchain[len(Blockchain)-1]
 	// Get the number of verifiers in the last block
 	lastVerifierCount := len(lastBlock.TimeVerifiers)
 	// Get the minimum number of verifiers

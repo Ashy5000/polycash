@@ -24,7 +24,10 @@ func TestCreateL2Transaction(t *testing.T) {
 	}
 	expected := "== BEGIN L2 TRANSACTION ==\n" + string(senderJson) + "\n" + string(recipientJson) + "\n" + fmt.Sprint(amount) + "\n"
 	// Act
-	result := CreateL2Transaction(sender, recipient, amount)
+	result, err := CreateL2Transaction(sender, recipient, amount)
+	if err != nil {
+		panic(err)
+	}
 	// Assert
 	assert.Equal(t, expected, result)
 }

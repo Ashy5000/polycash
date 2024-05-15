@@ -161,7 +161,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 }
 
 func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
-	blockchainChars, err := json.Marshal(blockchain)
+	blockchainChars, err := json.Marshal(Blockchain)
 	if err != nil {
 		panic(err)
 	}

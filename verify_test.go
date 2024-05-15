@@ -21,7 +21,7 @@ import (
 func TestVerifyTransaction(t *testing.T) {
 	t.Run("It should return true if the transaction is valid", func(t *testing.T) {
 		key := GetKey()
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey.Y
 		receiver := key.PublicKey.Y
@@ -37,7 +37,7 @@ func TestVerifyTransaction(t *testing.T) {
 	})
 	t.Run("It should return false if the transaction double spends", func(t *testing.T) {
 		key := GetKey()
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey.Y
 		receiver := key.PublicKey.Y
@@ -52,7 +52,7 @@ func TestVerifyTransaction(t *testing.T) {
 	})
 	t.Run("It should return false if the transaction signature is invalid", func(t *testing.T) {
 		key := GetKey()
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		amount := "1"
 		message := []byte{1, 2, 3, 4}
@@ -68,7 +68,7 @@ func TestVerifyTransaction(t *testing.T) {
 func TestVerifyMiner(t *testing.T) {
 	t.Run("It should return true if the miner is valid", func(t *testing.T) {
 		key := GetKey()
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		result := VerifyMiner(key.PublicKey)
 		assert.True(t, result)
@@ -77,7 +77,7 @@ func TestVerifyMiner(t *testing.T) {
 		key := GetKey()
 		miner := key.PublicKey
 		miner.Y = []byte("123")
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		Append(Block{
 			Transactions:      []Transaction{},
@@ -93,7 +93,7 @@ func TestVerifyMiner(t *testing.T) {
 func TestVerifyBlock(t *testing.T) {
 	t.Run("It should return true if the block is valid", func(t *testing.T) {
 		key := GetKey()
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey
 		receiver := key.PublicKey
@@ -125,7 +125,7 @@ func TestVerifyBlock(t *testing.T) {
 	})
 	t.Run("It should return false if the block has an invalid transaction", func(t *testing.T) {
 		key := GetKey()
-		blockchain = nil
+		Blockchain = nil
 		Append(GenesisBlock())
 		sender := key.PublicKey
 		receiver := key.PublicKey
