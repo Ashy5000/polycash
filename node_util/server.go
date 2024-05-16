@@ -49,6 +49,13 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	contractsStr := fields[5]
 	var contracts []Contract
 	err = json.Unmarshal([]byte(contractsStr), &contracts)
+	transactionBody := []byte(fields[6])
+	transactionBodySignaturesStr := fields[7]
+	var transactionBodySignatures []Signature
+	err = json.Unmarshal([]byte(transactionBodySignaturesStr), &transactionBodySignatures)
+	if err != nil {
+		panic(err)
+	}
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", senderStr, recipientStr, amount, timestamp.UnixNano())))
 	if transactionHashes[hash] > 0 {
 		Log("No new job. Ignoring mine request.", true)
@@ -77,6 +84,8 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		SenderSignature: s,
 		Timestamp:       unmarshaledTimestamp,
 		Contracts:       contracts,
+		Body:            transactionBody,
+		BodySignatures:  transactionBodySignatures,
 	}
 	miningTransactions = append(miningTransactions, transaction)
 	smartContractTransactions := []Transaction{}
