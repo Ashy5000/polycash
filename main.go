@@ -9,11 +9,11 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
-	"flag"
 	. "cryptocurrency/node_util"
+	. "cryptocurrency/rollup"
+	"flag"
+	"net/http"
 )
-
-
 
 func main() {
 	mine := flag.Bool("mine", false, "Set to true to start node as miner")
@@ -29,6 +29,7 @@ func main() {
 		if *mine {
 			go Mine()
 		}
+		http.HandleFunc("/l2Transaction", HandleTransactionRequest)
 		Serve(*mine, *port)
 	} else {
 		if *command == "exit" {
