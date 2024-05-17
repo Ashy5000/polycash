@@ -45,6 +45,10 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 				panic(err)
 			}
 			signature := string(signatureBytes)
+			if signature == "invalid" {
+				Log("Peer declared transactions to be invalid", true)
+				return // TODO: Remove invalid transactions and request new signatures
+			}
 			nextTransactionSignatures = append(nextTransactionSignatures, signature)
 		}
 		// Create L2 transaction rollup

@@ -10,6 +10,7 @@ package node_util
 
 import (
 	"crypto/sha256"
+	. "cryptocurrency/rollup"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -341,5 +342,6 @@ func Serve(mine bool, port string) {
 	http.HandleFunc("/verifyTime", HandleVerifyTimeRequest)
 	http.HandleFunc("/peers", HandlePeersRequest)
 	http.HandleFunc("/addPeer", HandleAddPeerRequest)
+	http.HandleFunc("")
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
