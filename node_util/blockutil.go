@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-var wg sync.WaitGroup
+var Wg sync.WaitGroup
 
 func GetKey(path string) PrivateKey {
 	if path == "" {
@@ -125,10 +125,10 @@ func GetBalance(key []byte) float64 {
 func SendRequest(req *http.Request) {
 	_, err := http.DefaultClient.Do(req)
 	if err != nil {
-		wg.Done()
+		Wg.Done()
 		return
 	}
-	wg.Done()
+	Wg.Done()
 }
 
 func Send(receiver string, amount string) {
@@ -160,7 +160,7 @@ func Send(receiver string, amount string) {
 		if err != nil {
 			panic(err)
 		}
-		wg.Add(1)
+		Wg.Add(1)
 		go SendRequest(req)
 	}
 }
@@ -216,7 +216,7 @@ func DeploySmartContract(contractPath string) error {
 		if err != nil {
 			return err
 		}
-		wg.Add(1)
+		Wg.Add(1)
 		go SendRequest(req)
 	}
 	return nil

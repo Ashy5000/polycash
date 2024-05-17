@@ -6,10 +6,12 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-package node_util
+package node_interface
 
 import (
 	"bufio"
+	. "cryptocurrency/node_util"
+	. "cryptocurrency/rollup"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -25,6 +27,7 @@ var commands = map[string]func([]string){
 	"sync":                SyncCmd,
 	"balance":             BalanceCmd,
 	"send":                SendCmd,
+	"sendL2":              SendL2Cmd,
 	"deploySmartContract": DeploySmartContractCmd,
 	"keygen":              KeygenCmd,
 	"showPublicKey":       ShowPublicKeyCmd,
@@ -76,8 +79,28 @@ func SendCmd(fields []string) {
 	amount := fields[len(fields)-1]
 	Send(string(receiver), amount)
 	Log("Waiting for all workers to finish", true)
-	wg.Wait()
+	Wg.Wait()
 	Log("All workers have finished", true)
+}
+
+func SendL2Cmd(fields []string) {
+	receiverStrFields := fields[1 : len(fields)-1]
+	receiverStr := strings.Join(receiverStrFields, " ")
+	var receiver []byte
+	err := json.Unmarshal([]byte(receiverStr), &receiver)
+	if err != nil {
+		panic(err)
+	}
+	recieverPubKey := PublicKey{
+		Y: receiver,
+	}
+	amountStr := fields[len(fields)-1]
+	amountFloat, err := strconv.ParseFloat(amountStr, 64)
+	if err != nil {
+		panic(err)
+	}
+	amount := uint64(amountFloat * 1000000)
+	SendL2Transaction(GetKey("").PublicKey, recieverPubKey, amount)
 }
 
 func DeploySmartContractCmd(fields []string) {

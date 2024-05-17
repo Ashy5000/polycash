@@ -82,7 +82,7 @@ func TestSendRequest(t *testing.T) {
 		// Arrange
 		req := &http.Request{}
 		// Act & Assert
-		wg.Add(1)
+		Wg.Add(1)
 		assert.NotPanics(t, func() {
 			SendRequest(req)
 		})
