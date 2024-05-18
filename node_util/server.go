@@ -29,6 +29,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	fields := strings.Split(body, "$")
 	senderStr := fields[0]
 	senderKey := DecodePublicKey(senderStr)
+	fmt.Println(senderStr)
 	recipientStr := fields[1]
 	recipientKey := DecodePublicKey(recipientStr)
 	amount, err := strconv.ParseFloat(fields[2], 64)
