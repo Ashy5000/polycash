@@ -24,6 +24,7 @@ func SendL2Transaction(sender PublicKey, recipient PublicKey, amount uint64) {
 		if err != nil {
 			panic(err)
 		}
+		Wg.Add(1)
 		go SendRequest(req)
 	}
 	// Listen for signing requests if not already listening
@@ -80,5 +81,9 @@ func HandleSignL2TransactionRequest(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	// Send signature
-	w.Write(signature)
+	marshaledSignature, err := json.Marshal(signature)
+	if err != nil {
+		panic(err)
+	}
+	w.Write(marshaledSignature)
 }
