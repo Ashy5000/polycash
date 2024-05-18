@@ -1,6 +1,7 @@
 package rollup
 
 import (
+	"bytes"
 	"crypto/sha256"
 	. "cryptocurrency/node_util"
 	"encoding/json"
@@ -13,9 +14,10 @@ import (
 
 var nextTransactions = []string{}
 var nextTransactionPeerIps = []string{}
-var nextTransactionSignatures = []string{}
+var nextTransactionSignatures = [][]byte{}
 
 func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
+	fmt.Println("Handling L2 transaction request.")
 	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		panic(err)
@@ -24,9 +26,16 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 	// Add transaction to nextTransactions
 	nextTransactions = append(nextTransactions, transaction)
 	// Get IP address of requester
-	peerIp := req.RemoteAddr + ":8080"
+	peerIp := req.RemoteAddr
+	// Remove port number
+	peerIp = strings.Split(peerIp, ":")[0]
+	// Add :8080 to IP address
+	peerIp += ":8080"
+	// Add http:// to IP address
+	peerIp = "http://" + peerIp
+	fmt.Println(peerIp)
 	nextTransactionPeerIps = append(nextTransactionPeerIps, peerIp)
-	if len(nextTransactions) >= 5 {
+	if len(nextTransactions) >= 1 {
 		// Combine transactions
 		combinedTransactions := CombineL2Transactions(nextTransactions)
 		// Request requesters to sign combined transactions
@@ -40,21 +49,21 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 				Log("Peer is down.", true)
 			}
 			// Get signature
-			signatureBytes, err := io.ReadAll(res.Body)
+			signature, err := io.ReadAll(res.Body)
 			if err != nil {
 				panic(err)
 			}
-			signature := string(signatureBytes)
-			if signature == "invalid" {
-				Log("Peer declared transactions to be invalid", true)
+			if bytes.Equal(signature, []byte("invalid")) {
+				fmt.Println("Peer sent invalid signature.")
 				return // TODO: Remove invalid transactions and request new signatures
 			}
 			nextTransactionSignatures = append(nextTransactionSignatures, signature)
 		}
+		fmt.Println("All signatures received.")
 		// Create L2 transaction rollup
 		rollup := ""
 		key := GetKey("")
-		keyBytes, err := json.Marshal(key)
+		keyBytes := EncodePublicKey(key.PublicKey)
 		if err != nil {
 			panic(err)
 		}
@@ -70,13 +79,14 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		sigStr, err := json.Marshal(sigBytes)
+		signature := Signature{S: sigBytes}
+		signatureStr, err := json.Marshal(signature)
 		if err != nil {
 			panic(err)
 		}
-		rollup += string(sigStr)
+		rollup += string(signatureStr)
 		rollup += "$"
-		rollup += string(timestamp)
+		rollup += fmt.Sprint(timestamp)
 		rollup += "$"
 		rollup += "[]"
 		rollup += "$"
@@ -86,18 +96,27 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 		}
 		rollup += string(bodyStr)
 		rollup += "$"
-		transactionsStr, err := json.Marshal(nextTransactionSignatures)
+		signatures := []Signature{}
+		for _, signature := range nextTransactionSignatures {
+			signature := Signature{S: signature}
+			signatures = append(signatures, signature)
+		}
+		signaturesStr, err := json.Marshal(signatures)
 		if err != nil {
 			panic(err)
 		}
-		rollup += string(transactionsStr)
+		rollup += string(signaturesStr)
 		// Send rollup to all peers
+		fmt.Println("Sending rollup to peers...")
 		for _, peer := range GetPeers() {
 			req, err := http.NewRequest(http.MethodGet, peer+"/mine", strings.NewReader(rollup))
 			if err != nil {
 				panic(err)
 			}
-			go SendRequest(req)
+			_, err = http.DefaultClient.Do(req)
+			if err != nil {
+				Log("Peer is down.", true)
+			}
 		}
 	}
 }
