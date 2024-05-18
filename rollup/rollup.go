@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -74,21 +75,21 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 		rollup += "0.0"
 		rollup += "$"
 		timestamp := time.Now().UnixNano()
-		hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", key.PublicKey.Y, key.PublicKey.Y, "0.0", timestamp)))
+		transactionStr := fmt.Sprintf("%s:%s:%f:%d", key.PublicKey.Y, key.PublicKey.Y, 0.0, timestamp)
+		hash := sha256.Sum256([]byte(transactionStr))
+		fmt.Println("Hash:", hash)
 		sigBytes, err := key.X.Sign(hash[:])
 		if err != nil {
 			panic(err)
 		}
-		sig := Signature{sigBytes}
+		sig := Signature{S: sigBytes}
 		sigStr, err := json.Marshal(sig)
-		signature := Signature{S: sigBytes}
-		signatureStr, err := json.Marshal(signature)
 		if err != nil {
 			panic(err)
 		}
-		rollup += string(signatureStr)
+		rollup += string(sigStr)
 		rollup += "$"
-		rollup += fmt.Sprint(timestamp)
+		rollup += strconv.FormatInt(timestamp, 10)
 		rollup += "$"
 		rollup += "[]"
 		rollup += "$"
