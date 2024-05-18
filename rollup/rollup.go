@@ -70,7 +70,8 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		sigStr, err := json.Marshal(sigBytes)
+		sig := Signature{sigBytes}
+		sigStr, err := json.Marshal(sig)
 		if err != nil {
 			panic(err)
 		}
