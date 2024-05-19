@@ -26,12 +26,15 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 	}
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", senderKey.Y, recipientKey.Y, amount, timestamp.UnixNano())
 	hash := sha256.Sum256([]byte(transactionString))
+	fmt.Println("transactionString: ", transactionString)
 	verifier := oqs.Signature{}
 	sigName := "Dilithium3"
 	if err := verifier.Init(sigName, nil); err != nil {
 		Error("Failed to initialize Dilithium2 verifier", true)
 	}
 	isValid, err := verifier.Verify(hash[:], sig, senderKey.Y)
+	// args := fmt.Sprintf("%s%s%s", string(hash[:]), string(sig), string(senderKey.Y))
+	// fmt.Println(args)
 	if err != nil {
 		panic(err)
 	}

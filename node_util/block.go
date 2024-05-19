@@ -71,9 +71,17 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	bodySignaturesBytes, err := json.Marshal(i.BodySignatures)
-	if err != nil {
-		return nil, err
+	bodySignaturesBytes := []byte{}
+	for n, signature := range i.BodySignatures {
+		signatureBytes, err := json.Marshal(signature)
+		if err != nil {
+			return nil, err
+		}
+		signatureStr := `"` + string(signatureBytes) + `"`
+		if n != len(i.BodySignatures)-1 {
+			signatureStr += "#"
+		}
+		bodySignaturesBytes = append(bodySignaturesBytes, []byte(signatureStr)...)
 	}
 	bodySignatures := string(bodySignaturesBytes)
 	result := []byte(EncodePublicKey(i.Sender) + "^" + EncodePublicKey(i.Recipient) + "^" + fmt.Sprintf("%f", i.Amount) + "^" + signature + "^" + strconv.FormatInt(i.Timestamp.UnixNano(), 10) + "^" + contracts + "^" + strconv.FormatBool(i.FromSmartContract) + "^" + string(bodyBytes) + "^" + bodySignatures)
@@ -96,6 +104,7 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	i.Recipient = DecodePublicKey(parts[1])
 	amount, err := strconv.ParseFloat(parts[2], 64)
 	if err != nil {
+		fmt.Println("Error parsing float")
 		return err
 	}
 	i.Amount = amount
@@ -107,6 +116,7 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	var signature Signature
 	err = json.Unmarshal([]byte(`"`+parts[3]+`"`), &signature)
 	if err != nil {
+		fmt.Println("Error unmarshalling signature")
 		return err
 	}
 	i.SenderSignature = signature
@@ -114,20 +124,29 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	contractsStr := strings.Replace(parts[5], "'", `"`, -1)
 	err = json.Unmarshal([]byte(contractsStr), &contracts)
 	if err != nil {
+		fmt.Println("Error unmarshalling contracts")
 		return err
 	}
 	i.Contracts = contracts
 	i.FromSmartContract, err = strconv.ParseBool(parts[6])
 	if err != nil {
+		fmt.Println("Error parsing bool")
 		return err
 	}
 	i.Body, err = json.Marshal(parts[7])
 	var bodySignatures []Signature
-	err = json.Unmarshal([]byte(parts[8]), &bodySignatures)
-	if err != nil {
-		return err
+	bodySignaturesStr := parts[8]
+	signatureStrs := strings.Split(bodySignaturesStr, "#")
+	for _, signatureStr := range signatureStrs {
+		var signature Signature
+		_ = json.Unmarshal([]byte(signatureStr), &signature)
+		if err != nil {
+			fmt.Println("Error unmarshalling signature")
+			return err
+		}
+		bodySignatures = append(bodySignatures, signature)
 	}
-	i.BodySignatures = bodySignatures
+	// i.BodySignatures = bodySignatures
 	return nil
 }
 

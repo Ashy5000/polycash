@@ -68,16 +68,16 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		rollup += string(keyBytes)
+		rollup += keyBytes
 		rollup += "$"
-		rollup += string(keyBytes)
+		rollup += keyBytes
 		rollup += "$"
 		rollup += "0.0"
 		rollup += "$"
 		timestamp := time.Now().UnixNano()
-		transactionStr := fmt.Sprintf("%s:%s:%f:%d", key.PublicKey.Y, key.PublicKey.Y, 0.0, timestamp)
+		transactionStr := fmt.Sprintf("%s:%s:%s:%d", key.PublicKey.Y, key.PublicKey.Y, "0", timestamp)
 		hash := sha256.Sum256([]byte(transactionStr))
-		fmt.Println("Hash:", hash)
+		fmt.Println(transactionStr)
 		sigBytes, err := key.X.Sign(hash[:])
 		if err != nil {
 			panic(err)
