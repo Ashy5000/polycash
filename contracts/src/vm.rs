@@ -46,14 +46,18 @@ pub fn run_vm(
     syntax_tree: SyntaxTree,
     buffers: &mut HashMap<String, Buffer>,
     blockutil_interface: BlockUtilInterface,
-) -> i64 {
+) -> (i64, f64) {
     let mut line_number = 0;
     let mut should_increment;
+    let mut gas_used = 0.0;
     while line_number < syntax_tree.lines.len() {
         let line = syntax_tree.lines[line_number].clone();
         should_increment = true;
         match line.command.as_str() {
-            "Exit" => return line.args[0].parse::<i64>().unwrap(),
+            "Exit" => {
+                gas_used += 1.0;
+                return (line.args[0].parse::<i64>().unwrap(), gas_used);
+            }
             "InitBfr" => {
                 if vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
@@ -64,6 +68,8 @@ pub fn run_vm(
                         contents: Vec::new(),
                     },
                 );
+                gas_used += 2.0;
+                gas_used += line.args[0].len() as f64 / 10.0;
             }
             "CpyBfr" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
@@ -74,8 +80,10 @@ pub fn run_vm(
                 let src_contents: Vec<u8> =
                     vm_access_buffer(buffers, line.args[0].clone(), line.args[2].clone());
                 if let Some(dst) = buffers.get_mut(&(line.args[1].clone())) {
-                    dst.contents = src_contents;
+                    dst.contents = src_contents.clone();
+                    gas_used += src_contents.len() as f64 / 10.0;
                 }
+                gas_used += 2.0;
             }
             "FreeBfr" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
@@ -84,6 +92,7 @@ pub fn run_vm(
                 buffers
                     .remove(&line.args[0].clone())
                     .expect("Failed to free memory");
+                gas_used += 2.0;
             }
             "BfrStat" => {
                 let status = vm_check_buffer_initialization(buffers, line.args[0].clone());
@@ -94,71 +103,96 @@ pub fn run_vm(
                         x.contents = vec![0];
                     }
                 }
+                gas_used += 1.0;
             }
-            "Add" => execute_math_operation(
-                Add {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            ),
-            "Sub" => execute_math_operation(
-                Subtract {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            ),
-            "Mul" => execute_math_operation(
-                Multiply {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            ),
-            "Div" => execute_math_operation(
-                Divide {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            ),
-            "Eq" => execute_math_operation(
-                Eq {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            ),
-            "And" => execute_math_operation(
-                And {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            ),
-            "Or" => execute_math_operation(
-                Or {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            ),
-            "Not" => execute_math_operation(
-                Not {},
-                buffers,
-                line.args[0].clone(),
-                "".to_owned(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-            ),
+            "Add" => {
+                execute_math_operation(
+                    Add {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 0.5;
+            }
+            "Sub" => {
+                execute_math_operation(
+                    Subtract {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 0.5;
+            }
+            "Mul" => {
+                execute_math_operation(
+                    Multiply {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 1.0;
+            }
+            "Div" => {
+                execute_math_operation(
+                    Divide {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 1.0;
+            }
+            "Eq" => {
+                execute_math_operation(
+                    Eq {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 0.5;
+            }
+            "And" => {
+                execute_math_operation(
+                    And {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 1.0;
+            }
+            "Or" => {
+                execute_math_operation(
+                    Or {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 1.0;
+            }
+            "Not" => {
+                execute_math_operation(
+                    Not {},
+                    buffers,
+                    line.args[0].clone(),
+                    "".to_owned(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                );
+                gas_used += 0.5
+            }
             "App" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
                     || !vm_check_buffer_initialization(buffers, line.args[1].clone())
@@ -168,7 +202,9 @@ pub fn run_vm(
                 let y = vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
                 if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
                     x.contents.extend(y);
+                    gas_used += x.contents.len() as f64 / 10.0;
                 }
+                gas_used += 2.0;
             }
             "Slice" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
@@ -184,7 +220,9 @@ pub fn run_vm(
                 let sliced_buf = buf_to_slice[start_buf..end_buf].to_vec();
                 if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
                     x.contents = sliced_buf;
+                    gas_used += x.contents.len() as f64 / 10.0;
                 }
+                gas_used += 2.0;
             }
             "Shiftl" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
@@ -201,6 +239,7 @@ pub fn run_vm(
                 if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
                     x.contents = buf_to_shift;
                 }
+                gas_used += 2.0;
             }
             "Shiftr" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
@@ -217,10 +256,12 @@ pub fn run_vm(
                 if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
                     x.contents = buf_to_shift;
                 }
+                gas_used += 2.0;
             }
             "Jmp" => {
                 line_number = line.args[0].parse::<usize>().unwrap() - 1;
                 should_increment = false;
+                gas_used += 0.8;
             }
             "JmpCond" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
@@ -230,18 +271,21 @@ pub fn run_vm(
                     line_number = line.args[1].parse::<usize>().unwrap() - 1;
                     should_increment = false;
                 }
+                gas_used += 1.0;
             }
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
                 }
-                println!("{:?}", buffers.get(&line.args[0]).unwrap().contents)
+                println!("{:?}", buffers.get(&line.args[0]).unwrap().contents);
+                gas_used += 0.5;
             }
             "Stderr" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
                 }
-                eprintln!("{:?}", buffers.get(&line.args[0]).unwrap().contents)
+                eprintln!("{:?}", buffers.get(&line.args[0]).unwrap().contents);
+                gas_used += 0.5;
             }
             "SetCnst" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
@@ -250,7 +294,9 @@ pub fn run_vm(
                 if let Some(x) = buffers.get_mut(&(line.args[0].clone())) {
                     x.contents =
                         hex::decode(line.args[1].clone()).expect("Failed to parse raw hex value");
+                    gas_used += x.contents.len() as f64 / 10.0;
                 }
+                gas_used += 2.0;
             }
             "Tx" => {
                 let sender_bytes =
@@ -281,6 +327,7 @@ pub fn run_vm(
                     }
                 };
                 println!("TX {} {} {}", sender, receiver, amount);
+                gas_used += 4.0;
             }
             "GetNthBlk" => {
                 // Get a property of the nth block in the chain
@@ -330,6 +377,7 @@ pub fn run_vm(
                         vm_throw_local_error(buffers, line.args[1].clone());
                     }
                 }
+                gas_used += 3.0;
             }
             "GetNthTx" => {
                 // Get a property of the nth transaction in the nth block in the chain
@@ -391,6 +439,7 @@ pub fn run_vm(
                         vm_throw_local_error(buffers, line.args[2].clone());
                     }
                 }
+                gas_used += 3.0;
             }
             &_ => vm_throw_global_error(buffers),
         }
@@ -398,5 +447,5 @@ pub fn run_vm(
             line_number += 1;
         }
     }
-    return 0;
+    return (0, gas_used);
 }

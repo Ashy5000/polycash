@@ -22,6 +22,7 @@ fn main() -> ExitCode {
         },
     );
     let blockutil_interface = blockutil::BlockUtilInterface::new();
-    let exit_code = run_vm(tree, &mut buffers, blockutil_interface);
+    let (exit_code, gas_used) = run_vm(tree, &mut buffers, blockutil_interface);
+    println!("Gas used: {}", gas_used);
     ExitCode::from(exit_code as u8)
 }
