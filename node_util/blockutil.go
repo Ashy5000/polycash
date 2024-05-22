@@ -98,7 +98,6 @@ func GetBalance(key []byte) float64 {
 			}
 		}
 		if bytes.Equal(block.Miner.Y, key) {
-			miningTotal += BlockReward
 			lastBlock := Blockchain[i-1]
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
 			if len(Blockchain) > 50 { // Fees start after 50 blocks
@@ -114,6 +113,10 @@ func GetBalance(key []byte) float64 {
 					}
 				}
 			}
+			// Get number of miners at the time of mining
+			minerCount := GetMinerCount(i)
+			reward := CalculateBlockReward(minerCount)
+			miningTotal += reward
 		}
 	}
 	if int(miningTotal) > BlocksBeforeSpendable { // A miner must mine n blocks before they can spend their mining rewards
