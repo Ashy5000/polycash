@@ -76,6 +76,17 @@ To allow data to be sent through the blockchain, a body may be attached to each 
 
 &nbsp;&nbsp;&nbsp;&nbsp;This transaction body feature allows for the system to be used to create new tokens, implement two-factor authentication, or to permanently and reliably store data, while utilizing the security and reliability of the blockchain.
 
-**7 Conclusion**
+**7 Hashrate Forking Prevention**
+
+It is crucial to prevent miners from forking their hashrate through multiple wallet addresses, circumventing the difficulty adjustment algorithm. Three major strategies are applied to this issue.
+
+1. Maximum Miner Count
+   Maximum miner count, as addressed previously, can limit the number of miners in the network and thus the number of wallet addresses miners can fork their mining power into.
+2. Block Reward Locking
+   Block reward locking prevents miners gaining block rewards until they have mined at least 3 blocks, lowering the efficiency of mining rate forking.
+3. Block Reward Adjustment
+   Block Reward Adjustment decreases the block reward for each new miner that mines a block by 1% in order to impose a net loss of profits on miners that fork their hashrate. This is the most effective approach.
+
+**Conclusion**
 
 We have seen that using an alternative consensus algorithm, APoW, with the help of the time verification protocol increases decentralization and decreases energy usage when compared to traditional PoW blockchains. It also avoids the security issues present in PoS or PoH blockchains, where controlling 1/3 of stake in the blockchain can cause the network to fail. We have outlined a new blockchain, Polycash, that implements these features alongside a smart contract system in order to enable secure digital transactions and decentralized applications.
