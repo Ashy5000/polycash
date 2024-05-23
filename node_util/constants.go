@@ -17,7 +17,7 @@ var MinimumBlockDifficulty = uint64(50000)
 var MaximumUint64 = ^uint64(0)
 
 // Rewards
-var BlocksBeforeSpendable = 3
+var BlocksBeforeReward = 3
 var BlockReward = 1.0
 var TransactionFee = 0.0001
 var BodyFeePerByte = 0.000001

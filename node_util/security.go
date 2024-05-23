@@ -12,7 +12,7 @@ type SecurityLevel struct {
 	Level                  int
 	MinimumDifficulty      uint64
 	InitialBlockDifficulty uint64
-	BlocksBeforeSpendable  int
+	BlocksBeforeReward     int
 }
 
 var securityLevels = []SecurityLevel{
@@ -26,7 +26,7 @@ func ApplySecurityLevel(level int) {
 		if securityLevel.Level == level {
 			InitialBlockDifficulty = securityLevel.InitialBlockDifficulty
 			MinimumBlockDifficulty = securityLevel.MinimumDifficulty
-			BlocksBeforeSpendable = securityLevel.BlocksBeforeSpendable
+			BlocksBeforeReward = securityLevel.BlocksBeforeReward
 		}
 	}
 }

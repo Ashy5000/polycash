@@ -78,6 +78,7 @@ func GetBalance(key []byte) float64 {
 	total := 0.0
 	miningTotal := 0.0
 	isGenesis := true
+	blocksMined := 0
 	for i, block := range Blockchain {
 		if isGenesis {
 			isGenesis = false
@@ -117,9 +118,10 @@ func GetBalance(key []byte) float64 {
 			minerCount := GetMinerCount(i)
 			reward := CalculateBlockReward(minerCount)
 			miningTotal += reward
+			blocksMined++
 		}
 	}
-	if int(miningTotal) > BlocksBeforeSpendable { // A miner must mine n blocks before they can spend their mining rewards
+	if blocksMined > BlocksBeforeReward {
 		total += miningTotal
 	}
 	return total
