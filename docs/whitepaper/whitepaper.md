@@ -87,6 +87,10 @@ It is crucial to prevent miners from forking their hashrate through multiple wal
 3. Block Reward Adjustment
    Block Reward Adjustment decreases the block reward for each new miner that mines a block by 1% in order to impose a net loss of profits on miners that fork their hashrate. This is the most effective approach.
 
+**7.1 Block Reward Adjustment**
+
+In order to create a net loss of tokens for miners forking their hashrate, a block reward adjustment system is used. For each new miner that joins the network, the block reward decreases by 1%. This change makes miners lose profit when forking their hashrate, instead of gaining tokens.
+
 **Conclusion**
 
 We have seen that using an alternative consensus algorithm, APoW, with the help of the time verification protocol increases decentralization and decreases energy usage when compared to traditional PoW blockchains. It also avoids the security issues present in PoS or PoH blockchains, where controlling 1/3 of stake in the blockchain can cause the network to fail. We have outlined a new blockchain, Polycash, that implements these features alongside a smart contract system in order to enable secure digital transactions and decentralized applications.
