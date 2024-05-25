@@ -92,7 +92,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	smartContractTransactions := []Transaction{}
 	if len(transaction.Contracts) > 0 {
 		for _, contract := range transaction.Contracts {
-			executeResult, err := contract.Execute()
+			executeResult, gas_used, err := contract.Execute()
 			if err != nil {
 				Warn("Error executing contract: " + err.Error())
 				continue
@@ -100,6 +100,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			if executeResult != nil {
 				smartContractTransactions = append(smartContractTransactions, executeResult...)
 			}
+			contract.GasUsed = gas_used
 		}
 	}
 	for _, smartContractTransaction := range smartContractTransactions {

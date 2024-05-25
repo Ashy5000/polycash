@@ -19,28 +19,36 @@ type ContractParty struct {
 type Contract struct {
 	Contents string
 	Parties  []ContractParty
+	GasUsed  int
 }
 
-func (c Contract) Execute() ([]Transaction, error) {
+func (c Contract) Execute() ([]Transaction, int, error) {
 	if !VerifySmartContract(c) {
 		Warn("Invalid contract detected.")
-		return make([]Transaction, 0), nil
+		return make([]Transaction, 0), 0, nil
 	}
 	if err := os.WriteFile("contract.blockasm", []byte(c.Contents), 0666); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm").Output()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	transactions := make([]Transaction, 0)
+	gas_used := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		if len(line) < 3 {
 			continue
 		}
 		if line[:2] != "TX" {
+			if line[:9] == "Gas used:" {
+				gas_used, err = strconv.Atoi(line[10:])
+				if err != nil {
+					return nil, 0, err
+				}
+			}
 			continue
 		}
 		words := strings.Split(line, " ")
@@ -48,7 +56,7 @@ func (c Contract) Execute() ([]Transaction, error) {
 		err = json.Unmarshal([]byte(words[1]), &senderY)
 		fmt.Println("senderY:", senderY)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		senderIsParty := false
 		for _, party := range c.Parties {
@@ -59,7 +67,7 @@ func (c Contract) Execute() ([]Transaction, error) {
 		}
 		if !senderIsParty {
 			Warn("Invalid sender detected.")
-			return nil, nil
+			return nil, 0, nil
 		}
 		sender := PublicKey{
 			Y: senderY,
@@ -67,14 +75,14 @@ func (c Contract) Execute() ([]Transaction, error) {
 		var receiverY []byte
 		err = json.Unmarshal([]byte(words[2]), &receiverY)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		receiver := PublicKey{
 			Y: receiverY,
 		}
 		subdivided_amount, err := strconv.Atoi(words[3])
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		amount := float64(subdivided_amount * 1000000)
 		transaction := Transaction{
@@ -85,5 +93,5 @@ func (c Contract) Execute() ([]Transaction, error) {
 		}
 		transactions = append(transactions, transaction)
 	}
-	return transactions, nil
+	return transactions, gas_used, nil
 }

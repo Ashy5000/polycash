@@ -111,14 +111,18 @@ func VerifySmartContractTransactions(block Block) bool {
 			return false
 		}
 	}
-	// Executae the smart contracts
+	// Execute the smart contracts
 	var smartContractCreatedTransactions []Transaction
 	for _, contract := range smartContracts {
-		transactions, err := contract.Execute()
+		transactions, gas_used, err := contract.Execute()
 		if err != nil {
 			continue
 		}
 		smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
+		if gas_used != contract.GasUsed {
+			Warn("Block has invalid smart contract gas usage. Ignoring block request.")
+			return false
+		}
 	}
 	// Get the smart contract created transactions in the block
 	var smartContractCreatedTransactionsInBlock []Transaction
