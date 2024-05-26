@@ -40,7 +40,7 @@ func Bootstrap() {
 		for _, peerPeer := range peerPeers {
 			if !PeerKnown(peerPeer) {
 				// Add the peer's peers to the list of peers
-				AddPeer(peerPeer)
+				ConnectToPeer(peerPeer)
 			}
 		}
 	}

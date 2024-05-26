@@ -10,6 +10,7 @@ package node_util
 
 import (
 	"bufio"
+	"encoding/json"
 	"io"
 	"net/http"
 	"os"
@@ -94,4 +95,35 @@ func PeerKnown(ip string) bool {
 		}
 	}
 	return false
+}
+
+func ConnectToPeer(ip string) {
+	// Add peer to list
+	AddPeer(ip)
+	// Get IP address of self
+	type IP struct {
+		Query string
+	}
+	ipReq, err := http.Get("http://ip-api.com/json/")
+	if err != nil {
+		panic(err)
+	}
+	defer ipReq.Body.Close()
+
+	body, err := io.ReadAll(ipReq.Body)
+	if err != nil {
+		panic(err)
+	}
+	var myIp IP
+	err = json.Unmarshal(body, &myIp)
+	if err != nil {
+		panic(err)
+	}
+	ipStr := "http://" + myIp.Query + ":8080"
+	requestBody := strings.NewReader(ipStr)
+	req, err := http.NewRequest(http.MethodGet, ip+"/addPeer", requestBody)
+	_, err = http.DefaultClient.Do(req)
+	if err != nil {
+		Log("Failed to connect to peer.", true)
+	}
 }
