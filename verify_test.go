@@ -15,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	. "cryptocurrency/node_util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -105,7 +106,7 @@ func TestVerifyBlock(t *testing.T) {
 			panic(err)
 		}
 
-		miningTransactions = []Transaction{
+		MiningTransactions = []Transaction{
 			{
 				Sender:    sender,
 				Recipient: receiver,

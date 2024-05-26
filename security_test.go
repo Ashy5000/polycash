@@ -9,28 +9,29 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	. "cryptocurrency/node_util"
 )
 
 func TestApplySecurityLevel(t *testing.T) {
 	t.Run("It sets the correct parameters for security level 0", func(t *testing.T) {
 		ApplySecurityLevel(0)
-		assert.Equal(t, initialBlockDifficulty, securityLevels[0].InitialBlockDifficulty)
-		assert.Equal(t, minimumBlockDifficulty, securityLevels[0].MinimumDifficulty)
-		assert.Equal(t, blocksBeforeSpendable, securityLevels[0].BlocksBeforeSpendable)
+		assert.Equal(t, InitialBlockDifficulty, SecurityLevels[0].InitialBlockDifficulty)
+		assert.Equal(t, MinimumBlockDifficulty, SecurityLevels[0].MinimumDifficulty)
+		assert.Equal(t, BlocksBeforeReward, SecurityLevels[0].BlocksBeforeReward)
 	})
 	t.Run("It sets the correct parameters for security level 1", func(t *testing.T) {
 		ApplySecurityLevel(1)
-		assert.Equal(t, initialBlockDifficulty, securityLevels[1].InitialBlockDifficulty)
-		assert.Equal(t, minimumBlockDifficulty, securityLevels[1].MinimumDifficulty)
-		assert.Equal(t, blocksBeforeSpendable, securityLevels[1].BlocksBeforeSpendable)
+		assert.Equal(t, InitialBlockDifficulty, SecurityLevels[1].InitialBlockDifficulty)
+		assert.Equal(t, MinimumBlockDifficulty, SecurityLevels[1].MinimumDifficulty)
+		assert.Equal(t, BlocksBeforeReward, SecurityLevels[1].BlocksBeforeReward)
 	})
 	t.Run("It sets the correct parameters for security level 2", func(t *testing.T) {
 		ApplySecurityLevel(2)
-		assert.Equal(t, initialBlockDifficulty, securityLevels[2].InitialBlockDifficulty)
-		assert.Equal(t, minimumBlockDifficulty, securityLevels[2].MinimumDifficulty)
-		assert.Equal(t, blocksBeforeSpendable, securityLevels[2].BlocksBeforeSpendable)
+		assert.Equal(t, InitialBlockDifficulty, SecurityLevels[2].InitialBlockDifficulty)
+		assert.Equal(t, MinimumBlockDifficulty, SecurityLevels[2].MinimumDifficulty)
+		assert.Equal(t, BlocksBeforeReward, SecurityLevels[2].BlocksBeforeReward)
 	})
 }

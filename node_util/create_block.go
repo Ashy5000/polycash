@@ -16,12 +16,12 @@ import (
 	"time"
 )
 
-// transactionHashes is a map of transaction hashes to their current status. 0 means the transaction is unmined, 1 means the transaction is being mined, and 2 means the transaction has been mined.
-var transactionHashes = make(map[[32]byte]int)
-var miningTransactions []Transaction
+// TransactionHashes is a map of transaction hashes to their current status. 0 means the transaction is unmined, 1 means the transaction is being mined, and 2 means the transaction has been mined.
+var TransactionHashes = make(map[[32]byte]int)
+var MiningTransactions []Transaction
 
 func CreateBlock() (Block, error) {
-	if len(miningTransactions) == 0 {
+	if len(MiningTransactions) == 0 {
 		return Block{}, errors.New("pool dry")
 	}
 	start := time.Now()
@@ -32,7 +32,7 @@ func CreateBlock() (Block, error) {
 	}
 	block := Block{
 		Miner:                  GetKey("").PublicKey,
-		Transactions:           miningTransactions,
+		Transactions:           MiningTransactions,
 		Nonce:                  0,
 		Difficulty:             GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
 		Timestamp:              time.Now(),
@@ -52,22 +52,22 @@ func CreateBlock() (Block, error) {
 	Log(fmt.Sprintf("Mining block with difficulty %d", block.Difficulty), false)
 	for hash > MaximumUint64/block.Difficulty {
 		i := 0
-		for _, transaction := range miningTransactions {
+		for _, transaction := range MiningTransactions {
 			transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
 			transactionBytes := []byte(transactionString)
 			hash := sha256.Sum256(transactionBytes)
-			if transactionHashes[hash] > 1 {
-				if i > len(miningTransactions)-1 {
+			if TransactionHashes[hash] > 1 {
+				if i > len(MiningTransactions)-1 {
 					Error("Transaction index out of range.", false)
 					return Block{}, errors.New("transaction index out of range")
 				}
-				miningTransactions[i] = miningTransactions[len(miningTransactions)-1]
-				miningTransactions = miningTransactions[:len(miningTransactions)-1]
+				MiningTransactions[i] = MiningTransactions[len(MiningTransactions)-1]
+				MiningTransactions = MiningTransactions[:len(MiningTransactions)-1]
 				i--
 			}
 			i++
 		}
-		if len(miningTransactions) > 0 {
+		if len(MiningTransactions) > 0 {
 			previousBlock, previousBlockFound = GetLastMinedBlock()
 			if !previousBlockFound {
 				previousBlock.Difficulty = InitialBlockDifficulty
@@ -79,7 +79,7 @@ func CreateBlock() (Block, error) {
 				block.PreviousBlockHash = [64]byte{}
 			}
 			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty)
-			block.Transactions = miningTransactions
+			block.Transactions = MiningTransactions
 			block.Nonce++
 			hashBytes = HashBlock(block)
 			hash = binary.BigEndian.Uint64(hashBytes[:])
@@ -95,6 +95,6 @@ func CreateBlock() (Block, error) {
 		Warn("Not enough time verifiers.")
 		return Block{}, errors.New("lost block")
 	}
-	miningTransactions = []Transaction{}
+	MiningTransactions = []Transaction{}
 	return block, nil
 }

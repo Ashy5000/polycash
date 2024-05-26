@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"testing"
 
+	. "cryptocurrency/node_util"
 	"github.com/stretchr/testify/assert"
 )
 

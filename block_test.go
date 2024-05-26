@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	. "cryptocurrency/node_util"
 	"github.com/stretchr/testify/assert"
 )
 

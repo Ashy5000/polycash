@@ -61,7 +61,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", senderStr, recipientStr, amount, timestamp.UnixNano())))
 	fmt.Println("Hash:", hash)
-	if transactionHashes[hash] > 0 {
+	if TransactionHashes[hash] > 0 {
 		Log("No new job. Ignoring mine request.", true)
 		return
 	}
@@ -70,7 +70,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	Log("New job.", false)
-	transactionHashes[hash] = 1
+	TransactionHashes[hash] = 1
 	// Create a copy of the timestamp
 	marshaledTimestamp, err := json.Marshal(timestamp)
 	if err != nil {
@@ -91,7 +91,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		Body:            transactionBody,
 		BodySignatures:  transactionBodySignatures,
 	}
-	miningTransactions = append(miningTransactions, transaction)
+	MiningTransactions = append(MiningTransactions, transaction)
 	smartContractTransactions := []Transaction{}
 	if len(transaction.Contracts) > 0 {
 		for _, contract := range transaction.Contracts {
@@ -107,11 +107,11 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		}
 	}
 	for _, smartContractTransaction := range smartContractTransactions {
-		miningTransactions = append(miningTransactions, smartContractTransaction)
+		MiningTransactions = append(MiningTransactions, smartContractTransaction)
 		transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(smartContractTransaction.Sender), EncodePublicKey(smartContractTransaction.Recipient), smartContractTransaction.Amount, smartContractTransaction.Timestamp.UnixNano())
 		transactionBytes := []byte(transactionString)
 		hash := sha256.Sum256(transactionBytes)
-		transactionHashes[hash] = 1
+		TransactionHashes[hash] = 1
 	}
 	Log("Broadcasting job to peers...", true)
 	for _, peer := range GetPeers() {
@@ -149,7 +149,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		// Get hash of transaction
 		hash := sha256.Sum256(transactionBytes)
 		// Mark transaction as completed
-		transactionHashes[hash] = 2
+		TransactionHashes[hash] = 2
 	}
 	Append(block)
 	Log("Block appended to local blockchain!", true)

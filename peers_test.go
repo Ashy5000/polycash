@@ -8,7 +8,10 @@ You should have received a copy of the GNU General Public License along with thi
 */
 package main
 
-import "testing"
+import (
+	. "cryptocurrency/node_util"
+	"testing"
+)
 
 func TestGetPeers(t *testing.T) {
 	// Test the GetPeers function

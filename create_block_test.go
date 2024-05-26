@@ -12,6 +12,7 @@ import (
 	"encoding/binary"
 	"testing"
 
+	. "cryptocurrency/node_util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,9 +30,9 @@ func TestCreateBlock(t *testing.T) {
 		var amount float64
 		amount = 123
 		Blockchain = nil
-		transactionHashes[[32]byte{}] = 1
+		TransactionHashes[[32]byte{}] = 1
 		// Act
-		miningTransactions = []Transaction{
+		MiningTransactions = []Transaction{
 			{
 				Sender:    senderPublicKey,
 				Recipient: recipientPublicKey,
@@ -61,9 +62,9 @@ func TestCreateBlock(t *testing.T) {
 		amount = 123
 		var maxHash uint64
 		maxHash = 0x1000000000000000
-		transactionHashes[[32]byte{}] = 1
+		TransactionHashes[[32]byte{}] = 1
 		// Act
-		miningTransactions = []Transaction{
+		MiningTransactions = []Transaction{
 			{
 				Sender:    senderPublicKey,
 				Recipient: recipientPublicKey,

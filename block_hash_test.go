@@ -9,6 +9,7 @@ You should have received a copy of the GNU General Public License along with thi
 package main
 
 import (
+	. "cryptocurrency/node_util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

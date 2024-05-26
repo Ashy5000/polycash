@@ -15,14 +15,14 @@ type SecurityLevel struct {
 	BlocksBeforeReward     int
 }
 
-var securityLevels = []SecurityLevel{
+var SecurityLevels = []SecurityLevel{
 	{0, 40000, 50000, 3},
 	{1, 100000, 120000, 5},
 	{2, 500000, 500000, 7},
 }
 
 func ApplySecurityLevel(level int) {
-	for _, securityLevel := range securityLevels {
+	for _, securityLevel := range SecurityLevels {
 		if securityLevel.Level == level {
 			InitialBlockDifficulty = securityLevel.InitialBlockDifficulty
 			MinimumBlockDifficulty = securityLevel.MinimumDifficulty

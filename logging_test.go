@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	. "cryptocurrency/node_util"
 	"github.com/stretchr/testify/assert"
 )
 
