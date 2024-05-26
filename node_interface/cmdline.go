@@ -280,6 +280,9 @@ func GetNthTransactionCmd(fields []string) {
 		panic(err)
 	}
 	txPos, err := strconv.ParseInt(fields[2], 10, 32)
+	if err != nil {
+		panic(err)
+	}
 	block := Blockchain[blockPos]
 	tx := block.Transactions[txPos]
 	property := fields[3]

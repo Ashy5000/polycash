@@ -63,6 +63,9 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool) {
 	// Unmarshal the response
 	var proof AuthenticationProof
 	err = json.Unmarshal(body, &proof)
+	if err != nil {
+		panic(err)
+	}
 	// Verify the signature
 	isValid := VerifyAuthenticationProof(&proof, digest[:])
 	if !isValid {

@@ -13,9 +13,9 @@ import (
 	"time"
 )
 
-var nextTransactions = []string{}
-var nextTransactionPeerIps = []string{}
-var nextTransactionSignatures = [][]byte{}
+var nextTransactions []string
+var nextTransactionPeerIps []string
+var nextTransactionSignatures [][]byte
 
 func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 	fmt.Println("Handling L2 transaction request.")
@@ -48,6 +48,7 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 			res, err := http.DefaultClient.Do(req)
 			if err != nil {
 				Log("Peer is down.", true)
+				continue
 			}
 			// Get signature
 			signature, err := io.ReadAll(res.Body)
@@ -65,9 +66,6 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 		rollup := ""
 		key := GetKey("")
 		keyBytes := EncodePublicKey(key.PublicKey)
-		if err != nil {
-			panic(err)
-		}
 		rollup += keyBytes
 		rollup += "$"
 		rollup += keyBytes
@@ -99,7 +97,7 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 		}
 		rollup += string(bodyStr)
 		rollup += "$"
-		signatures := []Signature{}
+		var signatures []Signature
 		for _, signature := range nextTransactionSignatures {
 			signature := Signature{S: signature}
 			signatures = append(signatures, signature)

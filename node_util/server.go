@@ -49,6 +49,9 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	contractsStr := fields[5]
 	var contracts []Contract
 	err = json.Unmarshal([]byte(contractsStr), &contracts)
+	if err != nil {
+		panic(err)
+	}
 	transactionBody := []byte(fields[6])
 	transactionBodySignaturesStr := fields[7]
 	var transactionBodySignatures []Signature
