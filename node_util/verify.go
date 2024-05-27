@@ -114,7 +114,7 @@ func VerifySmartContractTransactions(block Block) bool {
 	// Execute the smart contracts
 	var smartContractCreatedTransactions []Transaction
 	for _, contract := range smartContracts {
-		transactions, gas_used, err := contract.Execute()
+		transactions, _, gas_used, err := contract.Execute()
 		if err != nil {
 			continue
 		}
