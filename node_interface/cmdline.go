@@ -41,6 +41,7 @@ var commands = map[string]func([]string){
 	"license":             LicenseCmd,
 	"getNthBlock":         GetNthBlockCmd,       // Get a property of the nth block
 	"getNthTransaction":   GetNthTransactionCmd, // Get a property of the nth transaction in the nth block
+	"getFromState":        GetFromStateCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -229,6 +230,18 @@ func AddPeerCmd(fields []string) {
 func BootstrapCmd(fields []string) {
 	Bootstrap()
 	fmt.Println("Bootstrap complete!")
+}
+
+func GetFromStateCmd(fields []string) {
+	address := fields[1]
+	address_uint64, err := strconv.ParseUint(address, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	state := CalculateCurrentState()
+	dataBytes := state.Data[address_uint64]
+	dataHex := hex.EncodeToString(dataBytes)
+	fmt.Println("Data:", dataHex)
 }
 
 func HelpCmd(fields []string) {
