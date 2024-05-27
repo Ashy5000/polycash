@@ -218,7 +218,7 @@ func DeploySmartContract(contractPath string) error {
 	if err != nil {
 		panic(err)
 	}
-	body := strings.NewReader(fmt.Sprintf("%s$%s$%s$%s$%d$%s", deployerStr, deployerStr, amount, sigStr, timestamp, contractsStr))
+	body := strings.NewReader(fmt.Sprintf("%s$%s$%s$%s$%d$%s$[]$[]", deployerStr, deployerStr, amount, sigStr, timestamp, contractsStr))
 	for _, peer := range GetPeers() {
 		Log("Sending smart contract to peer: "+peer, false)
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)

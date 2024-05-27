@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+var NextTransitions = make(map[[32]byte]StateTransition)
+
 func Mine() {
 	for {
 		block, err := CreateBlock()

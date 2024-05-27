@@ -13,6 +13,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -113,16 +114,25 @@ func VerifySmartContractTransactions(block Block) bool {
 	}
 	// Execute the smart contracts
 	var smartContractCreatedTransactions []Transaction
+	var fullTransition StateTransition
 	for _, contract := range smartContracts {
-		transactions, _, gas_used, err := contract.Execute()
+		transactions, transition, gasUsed, err := contract.Execute()
 		if err != nil {
 			continue
 		}
 		smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
-		if gas_used != contract.GasUsed {
+		if gasUsed != contract.GasUsed {
 			Warn("Block has invalid smart contract gas usage. Ignoring block request.")
 			return false
 		}
+		// Add transition to fullTransition
+		for location, value := range transition.UpdatedData {
+			fullTransition.UpdatedData[location] = value
+		}
+	}
+	if !reflect.DeepEqual(fullTransition, block.Transition) {
+		Warn("Block has invalid state transition. Ignoring block request.")
+		return false
 	}
 	// Get the smart contract created transactions in the block
 	var smartContractCreatedTransactionsInBlock []Transaction

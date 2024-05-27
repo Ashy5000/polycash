@@ -51,6 +51,12 @@ func CreateBlock() (Block, error) {
 	block.PreMiningTimeVerifierSignatures, block.PreMiningTimeVerifiers = RequestTimeVerification(block)
 	Log(fmt.Sprintf("Mining block with difficulty %d", block.Difficulty), false)
 	for hash > MaximumUint64/block.Difficulty {
+		block.Transition = StateTransition{}
+		for _, PartialStateTransition := range NextTransitions {
+			for address, data := range PartialStateTransition.UpdatedData {
+				block.Transition.UpdatedData[address] = data
+			}
+		}
 		i := 0
 		for _, transaction := range MiningTransactions {
 			transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
@@ -95,6 +101,7 @@ func CreateBlock() (Block, error) {
 		Warn("Not enough time verifiers.")
 		return Block{}, errors.New("lost block")
 	}
-	MiningTransactions = []Transaction{}
+	MiningTransactions = nil
+	NextTransitions = nil
 	return block, nil
 }

@@ -38,7 +38,9 @@ func (c Contract) Execute() ([]Transaction, StateTransition, int, error) {
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	transactions := make([]Transaction, 0)
 	gasUsed := 0
-	transition := StateTransition{}
+	transition := StateTransition{
+		UpdatedData: make(map[uint64][]byte),
+	}
 	for scanner.Scan() {
 		line := scanner.Text()
 		if len(line) < 3 {
@@ -47,7 +49,8 @@ func (c Contract) Execute() ([]Transaction, StateTransition, int, error) {
 		if line[:2] != "TX" {
 			if line[:9] != "Gas used:" {
 				if line[:14] == "State change: " {
-					stateChangeString := line[15:]
+					stateChangeString := line[14:]
+					fmt.Println(stateChangeString)
 					parts := strings.Split(stateChangeString, "|")
 					address := parts[0]
 					addressUint64, err := strconv.ParseUint(address, 10, 32)
