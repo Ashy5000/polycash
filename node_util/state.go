@@ -1,11 +1,11 @@
 package node_util
 
 type State struct {
-	Data map[string][]byte
+	Data map[uint64][]byte
 }
 
 type StateTransition struct {
-	UpdatedData map[string][]byte
+	UpdatedData map[uint64][]byte
 }
 
 func TransitionState(state State, transition StateTransition) State {

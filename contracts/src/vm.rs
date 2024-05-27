@@ -449,6 +449,16 @@ pub fn run_vm(
                 }
                 gas_used += 3.0;
             }
+            "UpdateState" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone()) {
+                    vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
+                let contents_vec_u8 = vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
+                let contents_hex = hex::encode(contents_vec_u8);
+                println!("State change: {}|{}", location, contents_hex);
+            }
             &_ => vm_throw_global_error(buffers),
         }
         if should_increment {
