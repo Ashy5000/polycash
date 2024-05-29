@@ -51,7 +51,9 @@ func CreateBlock() (Block, error) {
 	block.PreMiningTimeVerifierSignatures, block.PreMiningTimeVerifiers = RequestTimeVerification(block)
 	Log(fmt.Sprintf("Mining block with difficulty %d", block.Difficulty), false)
 	for hash > MaximumUint64/block.Difficulty {
-		block.Transition = StateTransition{}
+		block.Transition = StateTransition{
+			UpdatedData: make(map[uint64][]byte),
+		}
 		for _, PartialStateTransition := range NextTransitions {
 			for address, data := range PartialStateTransition.UpdatedData {
 				block.Transition.UpdatedData[address] = data

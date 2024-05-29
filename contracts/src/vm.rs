@@ -63,7 +63,7 @@ pub fn run_vm(
         should_increment = true;
         match line.command.as_str() {
             "Exit" => {
-                gas_used += 1.0;
+                gas_used += 1;
                 return (line.args[0].parse::<i64>().unwrap(), gas_used);
             }
             "InitBfr" => {

@@ -20,10 +20,10 @@ type ContractParty struct {
 type Contract struct {
 	Contents string
 	Parties  []ContractParty
-	GasUsed  int
+	GasUsed  float64
 }
 
-func (c Contract) Execute() ([]Transaction, StateTransition, int, error) {
+func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 	if !VerifySmartContract(c) {
 		Warn("Invalid contract detected.")
 		return make([]Transaction, 0), StateTransition{}, 0, nil
@@ -37,7 +37,7 @@ func (c Contract) Execute() ([]Transaction, StateTransition, int, error) {
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	transactions := make([]Transaction, 0)
-	gasUsed := 0
+	gasUsed := 0.0
 	transition := StateTransition{
 		UpdatedData: make(map[uint64][]byte),
 	}
@@ -63,12 +63,14 @@ func (c Contract) Execute() ([]Transaction, StateTransition, int, error) {
 						return nil, StateTransition{}, 0, err
 					}
 					transition.UpdatedData[addressUint64] = valueBytes
+					continue
 				}
 			}
-			gasUsed, err = strconv.Atoi(line[10:])
+			gasUsed, err = strconv.ParseFloat(line[10:], 64)
 			if err != nil {
 				return nil, StateTransition{}, 0, err
 			}
+			continue
 		}
 		words := strings.Split(line, " ")
 		var senderY []byte
