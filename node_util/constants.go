@@ -21,7 +21,7 @@ var BlocksBeforeReward = 3
 var BlockReward = 1.0
 var TransactionFee = 0.0001
 var BodyFeePerByte = 0.000001
-var SmartContractFeePerByte = 0.00001
+var GasPrice = 0.000001
 
 // Mining power is measured in difficulty points per minute (DPM).
 const Dpm = 1

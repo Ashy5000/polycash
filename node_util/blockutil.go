@@ -90,7 +90,7 @@ func GetBalance(key []byte) float64 {
 				if len(Blockchain) > 50 { // Fees start after 50 blocks
 					fee := TransactionFee + (BodyFeePerByte * float64(len(transaction.Body)))
 					for _, contract := range transaction.Contracts {
-						fee += SmartContractFeePerByte * float64(len(contract.Contents))
+						fee += GasPrice * contract.GasUsed
 					}
 					total -= fee
 				}
@@ -107,10 +107,7 @@ func GetBalance(key []byte) float64 {
 					fees += TransactionFee
 					fees += BodyFeePerByte * float64(len(transaction.Body))
 					for _, contract := range transaction.Contracts {
-						fees += SmartContractFeePerByte * float64(len(contract.Contents))
-						// TODO: Add fees for executing smart contracts
-						// Should be based on the number of operations and the complexity of the operations
-						// This should be added in addition to the fee per byte
+						fees += GasPrice * contract.GasUsed
 					}
 				}
 			}
