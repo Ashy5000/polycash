@@ -18,7 +18,7 @@ async fn collect_peer_list(ip: web::Path<String>) -> impl Responder {
 
 #[get("/get_peers")]
 async fn serve_peer_list() -> impl Responder {
-    // Read the list of peers from peers.txt
+    // Read the list of peers from peers.txt  WAHYGaYQCDO1Rxedc8MTK/t1+/wLVKV31/in5ZOSv6PtX2PCarefEZMv6eKBLE7u
     let peers = std::fs::read_to_string("peers.txt").unwrap();
     peers
 }

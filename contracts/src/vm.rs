@@ -63,7 +63,7 @@ pub fn run_vm(
         should_increment = true;
         match line.command.as_str() {
             "Exit" => {
-                gas_used += 1;
+                gas_used += 1.0;
                 return (line.args[0].parse::<i64>().unwrap(), gas_used);
             }
             "InitBfr" => {
@@ -458,6 +458,19 @@ pub fn run_vm(
                 let contents_vec_u8 = vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
                 let contents_hex = hex::encode(contents_vec_u8);
                 println!("State change: {}|{}", location, contents_hex);
+            }
+            "GetFromState" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone()) {
+                    vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap();
+                let (contents_vec_u8, success) = blockutil_interface.get_from_state(location);
+                if !success {
+                    vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
+                dst_buffer.contents = contents_vec_u8;
             }
             &_ => vm_throw_global_error(buffers),
         }

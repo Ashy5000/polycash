@@ -1,3 +1,4 @@
+use std::process::Command;
 // Copyright 2024, Asher Wrobel
 /*
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -31,7 +32,7 @@ impl BlockUtilInterface {
             println!("Forbidden command");
             return ("".to_string(), false);
         }
-        let output = std::process::Command::new(self.node_executable_path.clone())
+        let output = Command::new(self.node_executable_path.clone())
             .arg("--command")
             .arg(command)
             .output();
@@ -61,7 +62,7 @@ impl BlockUtilInterface {
             println!("Forbidden command");
             return ("".to_string(), false);
         }
-        let output = std::process::Command::new(self.node_executable_path.clone())
+        let output = Command::new(self.node_executable_path.clone())
             .arg("--command")
             .arg(command)
             .output();
@@ -75,5 +76,26 @@ impl BlockUtilInterface {
         // This is neccessary because the previous lines contain logs
         let output = output[output.len() - 1].to_string();
         (output, true)
+    }
+    pub fn get_from_state(&self, property: u64) -> (Vec<u8>, bool) {
+        let command = format!("sync;getFromState {}", property);
+        if !sanitize_node_console_command(&command) {
+            println!("Forbidden command");
+            return (vec![], false);
+        }
+        let output = Command::new(self.node_executable_path.clone())
+            .arg("--command")
+            .arg(command)
+            .output();
+        let output =
+            String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+        let output = output.trim().to_string();
+        let output = output.split("\n").collect::<Vec<&str>>();
+        let output = output[output.len() - 1].to_string();
+        println!("output: {}", output);
+        let data_hex: String = output.chars().skip(6).collect();
+        println!("data_hex: {}", data_hex);
+        let data = hex::decode(data_hex).expect("Decoding failed");
+        (data, true)
     }
 }
