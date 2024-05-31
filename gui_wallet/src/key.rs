@@ -17,7 +17,7 @@ pub(crate) fn get_public_key() -> Result<String, PublicKeyError> {
         .arg("..")
         .arg("./builds/node/node_linux-amd64")
         .arg("-command")
-        .arg("getpubkey")
+        .arg("showPublicKey")
         .output()
         .expect("Failed to run node executable");
     let s = match String::from_utf8(output.stdout) {
