@@ -118,7 +118,9 @@ func GetBalance(key []byte) float64 {
 			blocksMined++
 		}
 	}
-	if blocksMined > BlocksBeforeReward {
+	if blocksMined > BlocksBeforeReward && len(Blockchain) > 50 {
+		total += miningTotal - float64(BlocksBeforeReward)
+	} else if len(Blockchain) < 50 {
 		total += miningTotal
 	}
 	return total
