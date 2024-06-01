@@ -26,7 +26,9 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 		panic(err)
 	}
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", senderKey.Y, recipientKey.Y, amount, timestamp.UnixNano())
+	fmt.Println("Done creating transaction string.")
 	hash := sha256.Sum256([]byte(transactionString))
+	fmt.Println("Done hashing transaction string.")
 	fmt.Println("transactionString: ", transactionString)
 	verifier := oqs.Signature{}
 	sigName := "Dilithium3"
@@ -34,6 +36,7 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 		Error("Failed to initialize Dilithium2 verifier", true)
 	}
 	isValid, err := verifier.Verify(hash[:], sig, senderKey.Y)
+	fmt.Println("Done verifying signature.")
 	// args := fmt.Sprintf("%s%s%s", string(hash[:]), string(sig), string(senderKey.Y))
 	// fmt.Println(args)
 	if err != nil {
@@ -47,6 +50,7 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 		Log("Double-spending detected.", true)
 		return false
 	}
+	fmt.Println("Done verifying!")
 	return true
 }
 

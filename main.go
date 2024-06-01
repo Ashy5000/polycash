@@ -24,8 +24,7 @@ func main() {
 	UseLocalPeerList = flag.Bool("useLocalPeerList", true, "Set to true to use local peer list and fully decentralize (slower, but more secure)")
 	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
 	flag.Parse()
-	Append(GenesisBlock())
-	ApplySecurityLevel(CurrentSecurityLevel)
+	LoadStateCmd(nil)
 	if *serve {
 		if *mine {
 			go Mine()
