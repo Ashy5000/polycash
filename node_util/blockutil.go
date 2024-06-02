@@ -71,7 +71,9 @@ func SyncBlockchain() {
 	}
 	Log("Blockchain successfully synced!", false)
 	Log(fmt.Sprintf("%d out of %d peers responded.", len(GetPeers())-errCount, len(GetPeers())), false)
-	Blockchain = longestBlockchain
+	if longestLength > len(Blockchain) {
+		Blockchain = longestBlockchain
+	}
 }
 
 func GetBalance(key []byte) float64 {

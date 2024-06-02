@@ -25,6 +25,7 @@ func main() {
 	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
 	flag.Parse()
 	LoadStateCmd(nil)
+	SyncBlockchain()
 	if *serve {
 		if *mine {
 			go Mine()
