@@ -77,7 +77,10 @@ func VerifyTransactions(transactions []Transaction) bool {
 }
 
 func DetectFork(block Block) bool {
-	for _, b := range Blockchain {
+	for i, b := range Blockchain {
+		if i == len(Blockchain)-1 {
+			break
+		}
 		if b.PreviousBlockHash == block.PreviousBlockHash {
 			Warn("Block creates a fork.")
 			Log("The node software is designed to handle this edge case, so operations can continue as normal.", false)
