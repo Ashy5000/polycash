@@ -67,7 +67,8 @@ func SyncBlockchain() {
 		}
 	}
 	if errCount >= len(GetPeers()) {
-		panic("Could not sync blockchain. All peers down.")
+		Log("Failed to sync blockchain with any peers.", true)
+		return
 	}
 	Log("Blockchain successfully synced!", false)
 	Log(fmt.Sprintf("%d out of %d peers responded.", len(GetPeers())-errCount, len(GetPeers())), false)

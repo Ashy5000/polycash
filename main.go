@@ -26,6 +26,9 @@ func main() {
 	flag.Parse()
 	LoadStateCmd(nil)
 	SyncBlockchain()
+	if len(Blockchain) == 0 {
+		Append(GenesisBlock())
+	}
 	if *serve {
 		if *mine {
 			go Mine()
