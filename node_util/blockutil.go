@@ -11,6 +11,7 @@ package node_util
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -61,6 +62,38 @@ func SyncBlockchain() {
 			panic(err)
 		}
 		length := len(peerBlockchain)
+		// Check to ensure proof of work is valid
+		for i, block := range peerBlockchain {
+			if i == 0 {
+				continue
+			}
+			previousBlockHash := HashBlock(peerBlockchain[i-1])
+			if !bytes.Equal(block.PreviousBlockHash[:], previousBlockHash[:]) {
+				Log("Invalid blockchain received from peer.", true)
+				continue
+			}
+			blockHash := HashBlock(block)
+			if binary.BigEndian.Uint64(blockHash[:]) > MaximumUint64/block.Difficulty {
+				Log("Invalid blockchain received from peer.", true)
+				continue
+			}
+			// Get the correct difficulty for the block
+			lastMinedBlock := peerBlockchain[i-1]
+			var lastTime time.Duration
+			var lastDifficulty uint64
+			if i == 1 {
+				lastTime = time.Minute
+				lastDifficulty = MinimumBlockDifficulty
+			} else {
+				lastTime = lastMinedBlock.MiningTime
+				lastDifficulty = lastMinedBlock.Difficulty
+			}
+			correctDifficulty := GetDifficulty(lastTime, lastDifficulty)
+			if block.Difficulty != correctDifficulty || block.Difficulty < MinimumBlockDifficulty {
+				Log("Invalid blockchain received from peer.", true)
+				continue
+			}
+		}
 		if length > longestLength {
 			longestLength = length
 			longestBlockchain = peerBlockchain
