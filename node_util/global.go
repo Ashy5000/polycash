@@ -8,5 +8,4 @@ You should have received a copy of the GNU General Public License along with thi
 */
 package node_util
 
-var UseLocalPeerList = &[]bool{true}[0]
 var Verbose = &[]bool{true}[0]

@@ -155,23 +155,21 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	}
 	Append(block)
 	Log("Block appended to local blockchain!", true)
-	if *UseLocalPeerList {
-		// Broadcast block to peers
-		Log("Broadcasting block to peers...", true)
-		bodyChars, err := json.Marshal(&block)
+	// Broadcast block to peers
+	Log("Broadcasting block to peers...", true)
+	bodyChars, err := json.Marshal(&block)
+	if err != nil {
+		panic(err)
+	}
+	for _, peer := range GetPeers() {
+		body := strings.NewReader(string(bodyChars))
+		req, err := http.NewRequest(http.MethodGet, peer+"/block", body)
 		if err != nil {
 			panic(err)
 		}
-		for _, peer := range GetPeers() {
-			body := strings.NewReader(string(bodyChars))
-			req, err := http.NewRequest(http.MethodGet, peer+"/block", body)
-			if err != nil {
-				panic(err)
-			}
-			_, err = http.DefaultClient.Do(req)
-			if err != nil {
-				Log("Peer is down.", true)
-			}
+		_, err = http.DefaultClient.Do(req)
+		if err != nil {
+			Log("Peer is down.", true)
 		}
 	}
 }

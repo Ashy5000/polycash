@@ -21,7 +21,6 @@ func main() {
 	serve := flag.Bool("serve", *mine, "Set to true to start node as server")
 	port := flag.String("port", "8080", "Port to listen on (server only)")
 	command := flag.String("command", "exit", "Run a command and exit")
-	UseLocalPeerList = flag.Bool("useLocalPeerList", true, "Set to true to use local peer list and fully decentralize (slower, but more secure)")
 	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
 	flag.Parse()
 	LoadStateCmd(nil)
