@@ -7,8 +7,8 @@ XXXX XXXXXXXX  XXXXXXXX  XXXXXXXX  ... XXXXXXXX  10101010
 CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 ```
 
-| Command   | Code | Param0 | Param1 | Param2 | Param3 |
-| --------- | ---- | ------ | ------ | ------ | ------ | ------ |
+| Command   | Code | Param0 | Param1 | Param2 | Param3 | Param4 |
+|-----------|------|--------|--------|--------|--------|--------|
 | Exit      | 0000 | Status |
 | InitBfr   | 0001 | Loc    | ResDst |
 | CpyBfr    | 0002 | Src    | Dst    | ResDst |
