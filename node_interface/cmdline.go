@@ -10,6 +10,7 @@ package node_interface
 
 import (
 	"bufio"
+	. "cryptocurrency/analysis"
 	. "cryptocurrency/node_util"
 	. "cryptocurrency/rollup"
 	"encoding/hex"
@@ -24,24 +25,25 @@ import (
 )
 
 var commands = map[string]func([]string){
-	"sync":                SyncCmd,
-	"balance":             BalanceCmd,
-	"send":                SendCmd,
-	"sendL2":              SendL2Cmd,
-	"deploySmartContract": DeploySmartContractCmd,
-	"keygen":              KeygenCmd,
-	"showPublicKey":       ShowPublicKeyCmd,
-	"encrypt":             EncryptCmd,
-	"decrypt":             DecryptCmd,
-	"savestate":           SaveStateCmd,
-	"loadstate":           LoadStateCmd,
-	"addPeer":             AddPeerCmd,
-	"bootstrap":           BootstrapCmd,
-	"help":                HelpCmd,
-	"license":             LicenseCmd,
-	"getNthBlock":         GetNthBlockCmd,       // Get a property of the nth block
-	"getNthTransaction":   GetNthTransactionCmd, // Get a property of the nth transaction in the nth block
-	"getFromState":        GetFromStateCmd,
+	"sync":                 SyncCmd,
+	"balance":              BalanceCmd,
+	"send":                 SendCmd,
+	"sendL2":               SendL2Cmd,
+	"deploySmartContract":  DeploySmartContractCmd,
+	"keygen":               KeygenCmd,
+	"showPublicKey":        ShowPublicKeyCmd,
+	"encrypt":              EncryptCmd,
+	"decrypt":              DecryptCmd,
+	"savestate":            SaveStateCmd,
+	"loadstate":            LoadStateCmd,
+	"addPeer":              AddPeerCmd,
+	"bootstrap":            BootstrapCmd,
+	"help":                 HelpCmd,
+	"license":              LicenseCmd,
+	"getNthBlock":          GetNthBlockCmd,       // Get a property of the nth block
+	"getNthTransaction":    GetNthTransactionCmd, // Get a property of the nth transaction in the nth block
+	"getFromState":         GetFromStateCmd,
+	"startAnalysisConsole": StartAnalysisConsoleCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -294,6 +296,10 @@ func GetNthTransactionCmd(fields []string) {
 	case "body":
 		fmt.Println(hex.EncodeToString(tx.Body))
 	}
+}
+
+func StartAnalysisConsoleCmd(fields []string) {
+	StartAnalysisCmdline()
 }
 
 func RunCmd(input string) {
