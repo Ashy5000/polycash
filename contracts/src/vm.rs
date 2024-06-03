@@ -449,6 +449,14 @@ pub fn run_vm(
                 }
                 gas_used += 3.0;
             }
+            "ChainLen" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                    vm_throw_local_error(buffers, line.args[1].clone());
+                }
+                let buf = buffers.get_mut(&line.args[0]).unwrap();
+                let len = blockutil_interface.get_blockchain_len();
+                buf.load_u64(len);
+            }
             "UpdateState" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
                     || !vm_check_buffer_initialization(buffers, line.args[1].clone()) {

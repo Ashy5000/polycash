@@ -45,6 +45,7 @@ var commands = map[string]func([]string){
 	"getFromState":         GetFromStateCmd,
 	"startAnalysisConsole": StartAnalysisConsoleCmd,
 	"sendWithBody":         SendWithBodyCmd,
+	"getBlockchainLen":     GetBlockchainLenCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -318,6 +319,10 @@ func GetNthTransactionCmd(fields []string) {
 
 func StartAnalysisConsoleCmd(fields []string) {
 	StartAnalysisCmdline()
+}
+
+func GetBlockchainLenCmd(fields []string) {
+	fmt.Println(len(Blockchain))
 }
 
 func RunCmd(input string) {

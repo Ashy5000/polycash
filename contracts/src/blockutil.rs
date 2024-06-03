@@ -98,4 +98,18 @@ impl BlockUtilInterface {
         let data = hex::decode(data_hex).expect("Decoding failed");
         (data, true)
     }
+    pub fn get_blockchain_len(&self) -> u64 {
+        let command = "sync;getBlockchainLen";
+        let output = Command::new(self.node_executable_path.clone())
+            .arg("--command")
+            .arg(command)
+            .output();
+        let output =
+            String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+        let output = output.trim().to_string();
+        let output = output.split("\n").collect::<Vec<&str>>();
+        let output = output[output.len() - 1].to_string();
+        let len = output.parse::<u64>().unwrap(); // Long Live the Turbofish.
+        len
+    }
 }
