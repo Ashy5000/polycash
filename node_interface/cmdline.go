@@ -44,6 +44,7 @@ var commands = map[string]func([]string){
 	"getNthTransaction":    GetNthTransactionCmd, // Get a property of the nth transaction in the nth block
 	"getFromState":         GetFromStateCmd,
 	"startAnalysisConsole": StartAnalysisConsoleCmd,
+	"sendWithBody":         SendWithBodyCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -80,7 +81,24 @@ func SendCmd(fields []string) {
 		panic(err)
 	}
 	amount := fields[len(fields)-1]
-	Send(string(receiver), amount)
+	var transactionBody []byte
+	Send(string(receiver), amount, transactionBody)
+	Log("Waiting for all workers to finish", true)
+	Wg.Wait()
+	Log("All workers have finished", true)
+}
+
+func SendWithBodyCmd(fields []string) {
+	receiverStrFields := fields[2 : len(fields)-1]
+	receiverStr := strings.Join(receiverStrFields, " ")
+	var receiver []byte
+	err := json.Unmarshal([]byte(receiverStr), &receiver)
+	if err != nil {
+		panic(err)
+	}
+	amount := fields[len(fields)-1]
+	transactionBody := []byte(fields[1])
+	Send(string(receiver), amount, transactionBody)
 	Log("Waiting for all workers to finish", true)
 	Wg.Wait()
 	Log("All workers have finished", true)

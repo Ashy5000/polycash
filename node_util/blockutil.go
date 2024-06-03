@@ -171,7 +171,7 @@ func SendRequest(req *http.Request) {
 	Wg.Done()
 }
 
-func Send(receiver string, amount string) {
+func Send(receiver string, amount string, transactionBody []byte) {
 	key := GetKey("")
 	sender := key.PublicKey.Y
 	timestamp := time.Now().UnixNano()
@@ -190,13 +190,14 @@ func Send(receiver string, amount string) {
 	}
 	senderStr := EncodePublicKey(key.PublicKey)
 	receiverStr := EncodePublicKey(PublicKey{Y: []byte(receiver)})
+	transactionBodyMarshaled, err := json.Marshal(transactionBody)
 	for _, peer := range GetPeers() {
 		Log("Sending transaction to peer: "+peer, false)
 		contractsStr, err := json.Marshal(make([]Contract, 0))
 		if err != nil {
 			panic(err)
 		}
-		body := strings.NewReader(fmt.Sprintf("%s$%s$%s$%s$%d$%s$[]$[]", senderStr, receiverStr, amount, sigStr, timestamp, contractsStr))
+		body := strings.NewReader(fmt.Sprintf("%s$%s$%s$%s$%d$%s$%s$[]", senderStr, receiverStr, amount, sigStr, timestamp, contractsStr, string(transactionBodyMarshaled)))
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
 			panic(err)
