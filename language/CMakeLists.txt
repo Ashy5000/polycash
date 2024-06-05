@@ -12,4 +12,6 @@ add_executable(plc src/main.cpp
         src/Parser.h
         src/BlockasmGenerator.cpp
         src/BlockasmGenerator.h
+        src/ExpressionBlockasmGenerator.cpp
+        src/ExpressionBlockasmGenerator.h
 )

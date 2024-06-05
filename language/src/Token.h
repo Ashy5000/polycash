@@ -4,7 +4,7 @@
 
 #ifndef TOKEN_H
 #define TOKEN_H
-#include <optional>
+#include <vector>
 #include <string>
 
 #include "TokenType.h"
@@ -13,10 +13,12 @@
 class Token {
 public:
     TokenType type = TokenType::type_placeholder;
-    std::optional<std::string> value;
+    std::string value;
+    std::vector<Token> children;
     Token(TokenType type_p, std::string value_p) {
         type = type_p;
         value = value_p;
+        children = {};
     }
 };
 
