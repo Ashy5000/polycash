@@ -71,6 +71,9 @@ std::vector<Token> Parser::parse_tokens(std::string input) {
         if(c == ';') {
             tokens.emplace_back(Token{TokenType::semi, {}});
         }
+        if(c == '\n') {
+            tokens.emplace_back(Token{TokenType::newline, {}});
+        }
     }
     return tokens;
 }

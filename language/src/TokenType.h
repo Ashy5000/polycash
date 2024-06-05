@@ -16,6 +16,7 @@ enum class TokenType {
     int_lit,
     semi,
     expr,
+    newline,
 };
 
 

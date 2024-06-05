@@ -39,6 +39,15 @@ std::string BlockasmGenerator::GenerateBlockasm(std::vector<Token> tokens) {
             blockasm << expressionBlockasm << std::endl;
             blockasm << "Exit 0x" << std::hex << nextAllocatedLocation << std::endl;
             nextAllocatedLocation++;
+            Token semiToken = tokens[i + 5];
+            if(semiToken.type != TokenType::semi) {
+                std::cerr << "Expected semicolon." << std::endl;
+            }
+            Token newlineToken = tokens[i + 6];
+            if(newlineToken.type != TokenType::newline) {
+                std::cerr << "Unexpected token after semicolon." << std::endl;
+            }
+            i += 6;
         }
     }
     return blockasm.str();
