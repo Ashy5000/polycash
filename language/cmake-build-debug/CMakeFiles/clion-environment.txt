@@ -1,4 +1,0 @@
-ToolSet: 1.0 (local)Ninja: 1.12.0@/home/ashy5000/.local/share/JetBrains/Toolbox/apps/clion-nova/bin/ninja/linux/x64/ninja
-Options: 
-
-Options:

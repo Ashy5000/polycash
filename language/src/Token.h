@@ -11,9 +11,9 @@
 
 
 class Token {
+public:
     TokenType type = TokenType::type_placeholder;
     std::optional<std::string> value;
-public:
     Token(TokenType type_p, std::string value_p) {
         type = type_p;
         value = value_p;

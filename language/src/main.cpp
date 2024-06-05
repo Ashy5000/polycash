@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 
+#include "BlockasmGenerator.h"
 #include "Parser.h"
 
 int main(int argc, char* argv[]) {
@@ -23,5 +24,14 @@ int main(int argc, char* argv[]) {
     std::string contents = contents_stream.str();
     Parser parser;
     std::vector<Token> tokens = parser.parse_tokens(contents);
+    BlockasmGenerator generator;
+    std::string blockasm = generator.GenerateBlockasm(tokens);
+    std::ofstream targetAsm("out.blockasm");
+    if (targetAsm.is_open()) {
+        targetAsm << blockasm << std::endl;
+        targetAsm.close();
+    } else {
+        std::cerr << "Error opening target file." << std::endl;
+    }
     return 0;
 }

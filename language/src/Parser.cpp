@@ -52,7 +52,6 @@ std::vector<Token> Parser::parse_tokens(std::string input) {
         }
         if(c == ')') {
             tokens.emplace_back(Token{TokenType::close_paren, {}});
-            continue;
         }
     }
     return tokens;

@@ -10,4 +10,6 @@ add_executable(plc src/main.cpp
         src/Token.h
         src/Parser.cpp
         src/Parser.h
+        src/BlockasmGenerator.cpp
+        src/BlockasmGenerator.h
 )

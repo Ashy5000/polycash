@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/plc.dir/src/main.cpp.o CMakeFiles/plc.dir/src/Parser.cpp.o -o plc

@@ -4,3 +4,4 @@ gui_wallet/target
 contracts/target
 nohup.out
 contract.blockasm
+language/cmake-build-debug
