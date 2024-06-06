@@ -134,12 +134,12 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	bodySignaturesStr := parts[8]
 	signatureStrs := strings.Split(bodySignaturesStr, "#")
 	for _, signatureStr := range signatureStrs {
-		var signature Signature
-		_ = json.Unmarshal([]byte(signatureStr), &signature)
+		var bodySignature Signature
+		_ = json.Unmarshal([]byte(signatureStr), &bodySignature)
 		if err != nil {
 			return err
 		}
-		bodySignatures = append(bodySignatures, signature)
+		bodySignatures = append(bodySignatures, bodySignature)
 	}
 	// i.BodySignatures = bodySignatures
 	return nil
