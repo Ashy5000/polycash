@@ -116,13 +116,15 @@ func VerifySmartContractTransactions(block Block) bool {
 	// Validate the smart contracts
 	for _, contract := range smartContracts {
 		if !VerifySmartContract(contract) {
-			Log("Block has invalid smart contract. Ignoring block request.", true)
+			Warn("Block has invalid smart contract. Ignoring block request.")
 			return false
 		}
 	}
 	// Execute the smart contracts
 	var smartContractCreatedTransactions []Transaction
-	var fullTransition StateTransition
+	var fullTransition = StateTransition{
+		UpdatedData: make(map[uint64][]byte),
+	}
 	for _, contract := range smartContracts {
 		transactions, transition, gasUsed, err := contract.Execute()
 		if err != nil {
@@ -138,7 +140,7 @@ func VerifySmartContractTransactions(block Block) bool {
 			fullTransition.UpdatedData[location] = value
 		}
 	}
-	if !reflect.DeepEqual(fullTransition, block.Transition) {
+	if !reflect.DeepEqual(fullTransition.UpdatedData, block.Transition.UpdatedData) {
 		Warn("Block has invalid state transition. Ignoring block request.")
 		return false
 	}
@@ -150,24 +152,9 @@ func VerifySmartContractTransactions(block Block) bool {
 		}
 	}
 	// Check if the two lists are the same
-	if len(smartContractCreatedTransactions) != len(smartContractCreatedTransactionsInBlock) {
-		Warn("Block has invalid smart-contract-created transactions. Ignoring block request.")
+	if !reflect.DeepEqual(smartContractCreatedTransactions, smartContractCreatedTransactionsInBlock) {
+		Warn("Block has invalid smart contract transactions. Ignoring block request.")
 		return false
-	}
-	for _, transaction := range smartContractCreatedTransactions {
-		// Check if transaction is in the block
-		transactionIsInBlock := false
-		for _, transactionInBlock := range smartContractCreatedTransactionsInBlock {
-			transactionString := fmt.Sprintf("%s:%s:%f:%d", transaction.Sender.Y, transaction.Recipient.Y, transaction.Amount, transaction.Timestamp.UnixNano())
-			transactionInBlockString := fmt.Sprintf("%s:%s:%f:%d", transactionInBlock.Sender.Y, transactionInBlock.Recipient.Y, transactionInBlock.Amount, transactionInBlock.Timestamp.UnixNano())
-			if transactionString == transactionInBlockString {
-				transactionIsInBlock = true
-			}
-		}
-		if !transactionIsInBlock {
-			Warn("Block has invalid smart-contract-created transactions. Ignoring block request.")
-			return false
-		}
 	}
 	return true
 }
@@ -209,6 +196,10 @@ func VerifyBlock(block Block) bool {
 	}
 	if !VerifyTimeVerifiers(block, block.TimeVerifiers, block.TimeVerifierSignatures, false) || !VerifyTimeVerifiers(block, block.PreMiningTimeVerifiers, block.PreMiningTimeVerifierSignatures, true) {
 		Log("Block has invalid time verifiers. Ignoring block request.", true)
+		isValid = false
+	}
+	if !VerifySmartContractTransactions(block) {
+		Log("Block has invalid smart contract transactions. Ignoring block request.", true)
 		isValid = false
 	}
 	return isValid

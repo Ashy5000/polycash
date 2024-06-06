@@ -141,7 +141,6 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 		}
 		bodySignatures = append(bodySignatures, bodySignature)
 	}
-	// i.BodySignatures = bodySignatures
 	return nil
 }
 
