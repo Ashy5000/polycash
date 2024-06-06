@@ -13,7 +13,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -58,7 +57,6 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 			if line[:9] != "Gas used:" {
 				if line[:14] == "State change: " {
 					stateChangeString := line[14:]
-					fmt.Println(stateChangeString)
 					parts := strings.Split(stateChangeString, "|")
 					address := parts[0]
 					addressUint64, err := strconv.ParseUint(address, 10, 32)
@@ -83,7 +81,6 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 		words := strings.Split(line, " ")
 		var senderY []byte
 		err = json.Unmarshal([]byte(words[1]), &senderY)
-		fmt.Println("senderY:", senderY)
 		if err != nil {
 			return nil, StateTransition{}, 0, err
 		}

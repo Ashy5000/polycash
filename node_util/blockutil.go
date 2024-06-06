@@ -176,7 +176,6 @@ func Send(receiver string, amount string, transactionBody []byte) {
 	sender := key.PublicKey.Y
 	timestamp := time.Now().UnixNano()
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%d", sender, receiver, amount, timestamp)))
-	fmt.Println(hash[:])
 	sigBytes, err := key.X.Sign(hash[:])
 	sig := Signature{
 		S: sigBytes,
@@ -238,7 +237,6 @@ func DeploySmartContract(contractPath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(contractsStr))
 	amount := "0"
 	timestamp := time.Now().UnixNano()
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", deployer.Y, deployer.Y, amount, timestamp)

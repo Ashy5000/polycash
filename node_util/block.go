@@ -104,7 +104,6 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	i.Recipient = DecodePublicKey(parts[1])
 	amount, err := strconv.ParseFloat(parts[2], 64)
 	if err != nil {
-		fmt.Println("Error parsing float")
 		return err
 	}
 	i.Amount = amount
@@ -116,7 +115,6 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	var signature Signature
 	err = json.Unmarshal([]byte(`"`+parts[3]+`"`), &signature)
 	if err != nil {
-		fmt.Println("Error unmarshalling signature")
 		return err
 	}
 	i.SenderSignature = signature
@@ -124,13 +122,11 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	contractsStr := strings.Replace(parts[5], "'", `"`, -1)
 	err = json.Unmarshal([]byte(contractsStr), &contracts)
 	if err != nil {
-		fmt.Println("Error unmarshalling contracts")
 		return err
 	}
 	i.Contracts = contracts
 	i.FromSmartContract, err = strconv.ParseBool(parts[6])
 	if err != nil {
-		fmt.Println("Error parsing bool")
 		return err
 	}
 	i.Body, err = json.Marshal(parts[7])
@@ -141,7 +137,6 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 		var signature Signature
 		_ = json.Unmarshal([]byte(signatureStr), &signature)
 		if err != nil {
-			fmt.Println("Error unmarshalling signature")
 			return err
 		}
 		bodySignatures = append(bodySignatures, signature)

@@ -60,7 +60,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", senderStr, recipientStr, amount, timestamp.UnixNano())))
-	fmt.Println("Hash:", hash)
 	if TransactionHashes[hash] > 0 {
 		Log("No new job. Ignoring mine request.", true)
 		return
@@ -186,7 +185,6 @@ func HandleBlockchainRequest(w http.ResponseWriter, _ *http.Request) {
 }
 
 func HandleIdentifyRequest(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("Handling identify request")
 	// Get body of request
 	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -194,14 +192,16 @@ func HandleIdentifyRequest(w http.ResponseWriter, req *http.Request) {
 	}
 	// Hash data
 	hash := sha256.Sum256(bodyBytes)
-	fmt.Println("Hash ", hash[:])
 	// Initialize AuthenticationProof
 	proof := AuthenticationProof{
 		PublicKey: GetKey("").PublicKey,
 		Data:      hash[:],
 	}
 	// Sign the proof
-	SignAuthenticationProof(&proof)
+	err = SignAuthenticationProof(&proof)
+	if err != nil {
+		panic(err)
+	}
 	// Send the proof
 	proofBytes, err := json.Marshal(proof)
 	if err != nil {

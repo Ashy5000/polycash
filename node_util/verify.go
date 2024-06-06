@@ -33,7 +33,6 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 		Error("Failed to initialize Dilithium2 verifier", true)
 	}
 	isValid, err := verifier.Verify(hash[:], sig, senderKey.Y)
-	fmt.Println("Done verifying signature.")
 	if err != nil {
 		panic(err)
 	}
