@@ -14,7 +14,7 @@
 class BlockasmGenerator {
 public:
     std::string GenerateBlockasm(std::vector<Token> tokens);
-    std::tuple<std::string, std::vector<Variable>> GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation);
+    std::tuple<std::string, std::vector<Variable>> GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation, std::vector<Variable> vars);
 };
 
 

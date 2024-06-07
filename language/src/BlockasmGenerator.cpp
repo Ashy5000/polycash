@@ -18,7 +18,7 @@ std::string BlockasmGenerator::GenerateBlockasm(std::vector<Token> tokens) {
     for(int i = 0; i < tokens.size(); i++) {
         Token token = tokens[i];
         if(token.type == TokenType::system_at) {
-            std::tuple<std::string, std::vector<Variable>> generatedTuple = GenerateSystemFunctionBlockasm(tokens, i, nextAllocatedLocation);
+            std::tuple<std::string, std::vector<Variable>> generatedTuple = GenerateSystemFunctionBlockasm(tokens, i, nextAllocatedLocation, vars);
             blockasm << std::get<0>(generatedTuple);
             std::vector<Variable> newVars = std::get<1>(generatedTuple);
             vars.insert(vars.end(), newVars.begin(), newVars.end());
@@ -28,8 +28,7 @@ std::string BlockasmGenerator::GenerateBlockasm(std::vector<Token> tokens) {
     return blockasm.str();
 }
 
-std::tuple<std::string, std::vector<Variable>> BlockasmGenerator::GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation) {
-    std::vector<Variable> vars;
+std::tuple<std::string, std::vector<Variable>> BlockasmGenerator::GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation, std::vector<Variable> vars) {
     std::stringstream blockasm;
     Token identifier = tokens[i + 1];
     if(identifier.type != TokenType::identifier) {
@@ -89,6 +88,21 @@ std::tuple<std::string, std::vector<Variable>> BlockasmGenerator::GenerateSystem
             Variable var = Variable(exprToken.children[0].value, nextAllocatedLocation, Type::type_placeholder);
             vars.emplace_back(var);
             blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation++;
+        } else if(function == "free") {
+            int indexToRemove = -1;
+            for(int j = 0; j < vars.size(); j++) {
+                Variable var = vars[j];
+                if(var.name == exprToken.children[0].value) {
+                    indexToRemove = j;
+                    break;
+                }
+            }
+            if(indexToRemove == -1) {
+                std::cerr << "Cannot free undefined variable." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            blockasm << "Free 0x" << std::hex << vars[indexToRemove].location << std::endl;
+            vars.erase(vars.begin() + indexToRemove);
         } else {
             std::cerr << "Unknown system function " << function << "." << std::endl;
             exit(EXIT_FAILURE);
