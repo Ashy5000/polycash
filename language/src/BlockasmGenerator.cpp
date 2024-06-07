@@ -73,7 +73,7 @@ std::tuple<std::string, std::vector<Variable>> BlockasmGenerator::GenerateSystem
     } else if(identifier.value == "alloc") {
         Variable var = Variable(exprToken.children[0].value, nextAllocatedLocation);
         vars.emplace_back(var);
-        blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation++ << std::endl;
+        blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation++;
     } else {
         std::cerr << "Unknown system function." << std::endl;
         exit(EXIT_FAILURE);
