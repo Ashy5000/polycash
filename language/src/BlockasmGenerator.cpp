@@ -49,33 +49,52 @@ std::tuple<std::string, std::vector<Variable>> BlockasmGenerator::GenerateSystem
     Token closeParen = tokens[i + 4];
     if(closeParen.type != TokenType::close_paren) {
         std::cerr << "Expected ')'." << std::endl;
+        exit(EXIT_FAILURE);
     }
-    if(identifier.value == "exit") {
-        ExpressionBlockasmGenerator generator;
-        std::tuple<std::string, int> expressionGenerationResult = generator.GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation, vars);
-        std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
-        int location = std::get<1>(expressionGenerationResult);
-        blockasm << expressionBlockasm << std::endl;
-        blockasm << "Exit 0x" << std::hex << location << std::endl;
-        if(location >= nextAllocatedLocation) {
-            nextAllocatedLocation = location + 1;
-        }
-        Token semiToken = tokens[i + 5];
-        if(semiToken.type != TokenType::semi) {
-            std::cerr << "Expected semicolon." << std::endl;
+    std::string delimiter = "::";
+    int delimiterPos = identifier.value.find(delimiter);
+    if(delimiterPos == identifier.value.npos) {
+        std::cerr << "Invalid system function format." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    std::string module = identifier.value.substr(0, delimiterPos);
+    std::string function = identifier.value.substr(delimiterPos + 2);
+    if(module == "contract") {
+        if(function == "exit") {
+            ExpressionBlockasmGenerator generator;
+            std::tuple<std::string, int> expressionGenerationResult = generator.GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation, vars);
+            std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
+            int location = std::get<1>(expressionGenerationResult);
+            blockasm << expressionBlockasm << std::endl;
+            blockasm << "Exit 0x" << std::hex << location << std::endl;
+            if(location >= nextAllocatedLocation) {
+                nextAllocatedLocation = location + 1;
+            }
+            Token semiToken = tokens[i + 5];
+            if(semiToken.type != TokenType::semi) {
+                std::cerr << "Expected semicolon." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            Token newlineToken = tokens[i + 6];
+            if(newlineToken.type != TokenType::newline) {
+                std::cerr << "Unexpected token after semicolon." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        } else {
+            std::cerr << "Unknown system function " << identifier.value << "." << std::endl;
             exit(EXIT_FAILURE);
         }
-        Token newlineToken = tokens[i + 6];
-        if(newlineToken.type != TokenType::newline) {
-            std::cerr << "Unexpected token after semicolon." << std::endl;
+    } else if(module == "memory") {
+        if(function == "alloc") {
+            Variable var = Variable(exprToken.children[0].value, nextAllocatedLocation, Type::type_placeholder);
+            vars.emplace_back(var);
+            blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation++;
+        } else {
+            std::cerr << "Unknown system function " << function << "." << std::endl;
             exit(EXIT_FAILURE);
         }
-    } else if(identifier.value == "alloc") {
-        Variable var = Variable(exprToken.children[0].value, nextAllocatedLocation);
-        vars.emplace_back(var);
-        blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation++;
     } else {
-        std::cerr << "Unknown system function." << std::endl;
+        std::cerr << "Unknown module." << std::endl;
         exit(EXIT_FAILURE);
     }
     return std::make_tuple(blockasm.str(), vars);

@@ -6,14 +6,18 @@
 #define VARIABLE_H
 #include <string>
 
+#include "Type.h"
+
 
 class Variable {
 public:
     std::string name;
     int location;
-    Variable(std::string name_p, int location_p) {
+    Type type;
+    Variable(std::string name_p, int location_p, Type type_p) {
         name = name_p;
         location = location_p;
+        type = type_p;
     }
 };
 

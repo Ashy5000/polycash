@@ -1,2 +1,2 @@
-@alloc(exitCode);
-@exit(exitCode);
+@memory::alloc(exitCode);
+@contract::exit(exitCode);

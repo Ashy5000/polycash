@@ -25,7 +25,7 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
             blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation << " " << expression.children[0].value;
             return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
         } else if(expression.children[0].type == TokenType::identifier) {
-            Variable referencedVar = Variable("", 0);
+            Variable referencedVar = Variable("", 0, Type::type_placeholder);
             for(Variable var : vars) {
                 if(var.name == expression.children[0].value) {
                     referencedVar = var;
