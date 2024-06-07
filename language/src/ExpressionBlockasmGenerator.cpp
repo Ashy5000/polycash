@@ -4,12 +4,18 @@
 
 #include "ExpressionBlockasmGenerator.h"
 
-std::string ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation) {
+#include <iostream>
+#include <sstream>
+#include <tuple>
+
+#include "Variable.h"
+
+std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, std::vector<Variable> vars) {
     if(expression.type != TokenType::expr) {
         std::cerr << "Expected expression when generating Blockasm." << std::endl;
         exit(EXIT_FAILURE);
     }
-    if(expression.children.size() == 0) {
+    if(expression.children.empty()) {
         std::cerr << "Empty expression not allowed." << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -17,7 +23,15 @@ std::string ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(Token ex
         if(expression.children[0].type == TokenType::int_lit) {
             std::stringstream blockasm;
             blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation << " " << expression.children[0].value;
-            return blockasm.str();
+            return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+        } else if(expression.children[0].type == TokenType::identifier) {
+            Variable referencedVar = Variable("", 0);
+            for(Variable var : vars) {
+                if(var.name == expression.children[0].value) {
+                    referencedVar = var;
+                }
+            }
+            return std::make_tuple("", referencedVar.location);
         } else {
             std::cerr << "Unknown expression." << std::endl;
         }

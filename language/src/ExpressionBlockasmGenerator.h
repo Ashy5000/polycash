@@ -4,16 +4,15 @@
 
 #ifndef EXPRESSIONBLOCKASMGENERATOR_H
 #define EXPRESSIONBLOCKASMGENERATOR_H
-#include <iostream>
-#include <sstream>
 #include <string>
 
 #include "Token.h"
+#include "Variable.h"
 
 
 class ExpressionBlockasmGenerator {
 public:
-    std::string GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation);
+    std::tuple<std::string, int> GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, std::vector<Variable> vars);
 };
 
 

@@ -52,9 +52,14 @@ std::tuple<std::string, std::vector<Variable>> BlockasmGenerator::GenerateSystem
     }
     if(identifier.value == "exit") {
         ExpressionBlockasmGenerator generator;
-        std::string expressionBlockasm = generator.GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation);
+        std::tuple<std::string, int> expressionGenerationResult = generator.GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation, vars);
+        std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
+        int location = std::get<1>(expressionGenerationResult);
         blockasm << expressionBlockasm << std::endl;
-        blockasm << "Exit 0x" << std::hex << nextAllocatedLocation++ << std::endl;
+        blockasm << "Exit 0x" << std::hex << location << std::endl;
+        if(location >= nextAllocatedLocation) {
+            nextAllocatedLocation = location + 1;
+        }
         Token semiToken = tokens[i + 5];
         if(semiToken.type != TokenType::semi) {
             std::cerr << "Expected semicolon." << std::endl;

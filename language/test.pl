@@ -1,2 +1,2 @@
-@exit(0);
-@alloc(panda);
+@alloc(exitCode);
+@exit(exitCode);
