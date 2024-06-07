@@ -6,23 +6,30 @@
 
 #include <iostream>
 #include <sstream>
+#include <tuple>
 
 #include "ExpressionBlockasmGenerator.h"
+#include "Variable.h"
 
 std::string BlockasmGenerator::GenerateBlockasm(std::vector<Token> tokens) {
     std::stringstream blockasm;
+    std::vector<Variable> vars;
     int nextAllocatedLocation = 0;
     for(int i = 0; i < tokens.size(); i++) {
         Token token = tokens[i];
         if(token.type == TokenType::system_at) {
-            blockasm << GenerateSystemFunctionBlockasm(tokens, i, nextAllocatedLocation);
+            std::tuple<std::string, std::vector<Variable>> generatedTuple = GenerateSystemFunctionBlockasm(tokens, i, nextAllocatedLocation);
+            blockasm << std::get<0>(generatedTuple);
+            std::vector<Variable> newVars = std::get<1>(generatedTuple);
+            vars.insert(vars.end(), newVars.begin(), newVars.end());
             i += 6;
         }
     }
     return blockasm.str();
 }
 
-std::string BlockasmGenerator::GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation) {
+std::tuple<std::string, std::vector<Variable>> BlockasmGenerator::GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation) {
+    std::vector<Variable> vars;
     std::stringstream blockasm;
     Token identifier = tokens[i + 1];
     if(identifier.type != TokenType::identifier) {
@@ -47,8 +54,7 @@ std::string BlockasmGenerator::GenerateSystemFunctionBlockasm(std::vector<Token>
         ExpressionBlockasmGenerator generator;
         std::string expressionBlockasm = generator.GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation);
         blockasm << expressionBlockasm << std::endl;
-        blockasm << "Exit 0x" << std::hex << nextAllocatedLocation << std::endl;
-        nextAllocatedLocation++;
+        blockasm << "Exit 0x" << std::hex << nextAllocatedLocation++ << std::endl;
         Token semiToken = tokens[i + 5];
         if(semiToken.type != TokenType::semi) {
             std::cerr << "Expected semicolon." << std::endl;
@@ -59,9 +65,13 @@ std::string BlockasmGenerator::GenerateSystemFunctionBlockasm(std::vector<Token>
             std::cerr << "Unexpected token after semicolon." << std::endl;
             exit(EXIT_FAILURE);
         }
+    } else if(identifier.value == "alloc") {
+        Variable var = Variable(exprToken.children[0].value, nextAllocatedLocation);
+        vars.emplace_back(var);
+        blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation++ << std::endl;
     } else {
         std::cerr << "Unknown system function." << std::endl;
         exit(EXIT_FAILURE);
     }
-    return blockasm.str();
+    return std::make_tuple(blockasm.str(), vars);
 }

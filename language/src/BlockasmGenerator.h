@@ -8,12 +8,13 @@
 #include <vector>
 
 #include "Token.h"
+#include "Variable.h"
 
 
 class BlockasmGenerator {
 public:
     std::string GenerateBlockasm(std::vector<Token> tokens);
-    std::string GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation);
+    std::tuple<std::string, std::vector<Variable>> GenerateSystemFunctionBlockasm(std::vector<Token> tokens, int i, int &nextAllocatedLocation);
 };
 
 
