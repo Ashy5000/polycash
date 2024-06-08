@@ -28,6 +28,9 @@ func main() {
 	if len(Blockchain) == 0 {
 		Append(GenesisBlock())
 	}
+	if *mine {
+		*serve = true
+	}
 	if *serve {
 		if *mine {
 			go Mine()

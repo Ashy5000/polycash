@@ -18,7 +18,7 @@ var nextTransactionPeerIps []string
 var nextTransactionSignatures [][]byte
 
 func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
-	fmt.Println("Handling L2 transaction request.")
+	Log("Handling L2 transaction request.", true)
 	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		panic(err)
@@ -34,9 +34,8 @@ func HandleTransactionRequest(_ http.ResponseWriter, req *http.Request) {
 	peerIp += ":8080"
 	// Add http:// to IP address
 	peerIp = "http://" + peerIp
-	fmt.Println(peerIp)
 	nextTransactionPeerIps = append(nextTransactionPeerIps, peerIp)
-	if len(nextTransactions) >= 1 {
+	if len(nextTransactions) >= 5 {
 		// Combine transactions
 		combinedTransactions := CombineL2Transactions(nextTransactions)
 		// Request requesters to sign combined transactions
