@@ -10,7 +10,7 @@
 
 #include "Variable.h"
 
-std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, std::vector<Variable> vars) {
+std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(const Token &expression, const int nextAllocatedLocation, const std::vector<Variable>& vars) {
     if(expression.type != TokenType::expr) {
         std::cerr << "Expected expression when generating Blockasm." << std::endl;
         exit(EXIT_FAILURE);
@@ -26,7 +26,7 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
             return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
         } else if(expression.children[0].type == TokenType::identifier) {
             Variable referencedVar = Variable("", 0, Type::type_placeholder);
-            for(Variable var : vars) {
+            for(const Variable& var : vars) {
                 if(var.name == expression.children[0].value) {
                     referencedVar = var;
                 }
