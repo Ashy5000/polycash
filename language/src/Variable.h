@@ -5,6 +5,7 @@
 #ifndef VARIABLE_H
 #define VARIABLE_H
 #include <string>
+#include <utility>
 
 #include "Type.h"
 
@@ -14,8 +15,8 @@ public:
     std::string name;
     int location;
     Type type;
-    Variable(std::string name_p, int location_p, Type type_p) {
-        name = name_p;
+    Variable(std::string name_p, const int location_p, const Type type_p) {
+        name = std::move(name_p);
         location = location_p;
         type = type_p;
     }

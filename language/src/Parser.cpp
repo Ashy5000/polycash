@@ -9,10 +9,10 @@
 
 std::vector<Token> Parser::parse_tokens(std::string input) {
     std::vector<Token> tokens;
-    Token activeToken = Token{TokenType::type_placeholder, {}};
+    auto activeToken = Token{TokenType::type_placeholder, {}};
     std::string substring;
     for(int i = 0; i < input.size(); i++) {
-        char c = input[i];
+        const char c = input[i];
         if(c == '(') {
             tokens.emplace_back(activeToken);
             activeToken.children = {};

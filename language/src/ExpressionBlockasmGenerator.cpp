@@ -24,17 +24,17 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
             std::stringstream blockasm;
             blockasm << "InitBfr 0x" << std::hex << nextAllocatedLocation << " " << expression.children[0].value;
             return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
-        } else if(expression.children[0].type == TokenType::identifier) {
-            Variable referencedVar = Variable("", 0, Type::type_placeholder);
+        }
+        if(expression.children[0].type == TokenType::identifier) {
+            auto referencedVar = Variable("", 0, Type::type_placeholder);
             for(const Variable& var : vars) {
                 if(var.name == expression.children[0].value) {
                     referencedVar = var;
                 }
             }
             return std::make_tuple("", referencedVar.location);
-        } else {
-            std::cerr << "Unknown expression." << std::endl;
         }
+        std::cerr << "Unknown expression." << std::endl;
     }
     std::cerr << "Unknown expression." << std::endl;
     exit(EXIT_FAILURE);

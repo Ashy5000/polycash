@@ -15,9 +15,9 @@ public:
     TokenType type = TokenType::type_placeholder;
     std::string value;
     std::vector<Token> children;
-    Token(TokenType type_p, std::string value_p) {
+    Token(const TokenType type_p, std::string value_p) {
         type = type_p;
-        value = value_p;
+        value = std::move(value_p);
         children = {};
     }
 };
