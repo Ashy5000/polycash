@@ -110,13 +110,18 @@ std::vector<Variable> BlockasmGenerator::GenerateSystemFunctionBlockasm(int i, i
             exit(EXIT_FAILURE);
         }
     } else if(module == "io") {
-        if(function == "printf") {
+        if(function == "print") {
             std::tuple<std::string, int> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
             int expressionLocation = std::get<1>(expressionGenerationResult);
             blockasm << expressionBlockasm << std::endl;
             blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << expressionLocation << " 0x00000000" << std::endl;
-            blockasm << "Free 0x" << std::setfill('0') << std::setw(8) << std::hex << expressionLocation << " 0x00000000" << std::endl;
+        } else if(function == "err") {
+            std::tuple<std::string, int> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation, vars);
+            std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
+            int expressionLocation = std::get<1>(expressionGenerationResult);
+            blockasm << expressionBlockasm << std::endl;
+            blockasm << "Stderr 0x" << std::setfill('0') << std::setw(8) << std::hex << expressionLocation << " 0x00000000" << std::endl;
         }
     } else {
         std::cerr << "Unknown module." << std::endl;
