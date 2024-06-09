@@ -38,4 +38,4 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 | UpdateState  | 001A | Location | Value  | ResDst |
 | GetFromState | 001B | Location | Dst    | ResDst |
 
-`0x00000000` is a pre-initialized buffer.
+`0x00000000` is a pre-initialized buffer. It is used for capturing global errors.
