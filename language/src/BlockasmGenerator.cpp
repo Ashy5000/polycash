@@ -114,12 +114,18 @@ std::vector<Variable> BlockasmGenerator::GenerateSystemFunctionBlockasm(int i, i
             std::tuple<std::string, int> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
             int expressionLocation = std::get<1>(expressionGenerationResult);
+            if(expressionLocation >= nextAllocatedLocation) {
+                nextAllocatedLocation = expressionLocation + 1;
+            }
             blockasm << expressionBlockasm << std::endl;
             blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << expressionLocation << " 0x00000000" << std::endl;
         } else if(function == "err") {
             std::tuple<std::string, int> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(exprToken, nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
             int expressionLocation = std::get<1>(expressionGenerationResult);
+            if(expressionLocation >= nextAllocatedLocation) {
+                nextAllocatedLocation = expressionLocation + 1;
+            }
             blockasm << expressionBlockasm << std::endl;
             blockasm << "Stderr 0x" << std::setfill('0') << std::setw(8) << std::hex << expressionLocation << " 0x00000000" << std::endl;
         }

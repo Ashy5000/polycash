@@ -11,9 +11,14 @@ std::vector<Token> Parser::parse_tokens(std::string input) {
     std::vector<Token> tokens;
     auto activeToken = Token{TokenType::type_placeholder, {}};
     std::string substring;
+    int depth = 0;
     for(int i = 0; i < input.size(); i++) {
         const char c = input[i];
         if(c == '(') {
+            depth++;
+            if(activeToken.type == TokenType::expr) {
+                continue;
+            }
             tokens.emplace_back(activeToken);
             activeToken.children = {};
             activeToken.value = {};
@@ -23,6 +28,11 @@ std::vector<Token> Parser::parse_tokens(std::string input) {
             continue;
         }
         if(c == ')') {
+            if(depth > 1) {
+                depth--;
+                continue;
+            }
+            depth--;
             activeToken.children = parse_tokens(substring);
             tokens.emplace_back(activeToken);
             activeToken.children = {};
@@ -70,6 +80,9 @@ std::vector<Token> Parser::parse_tokens(std::string input) {
         }
         if(c == ';') {
             tokens.emplace_back(Token{TokenType::semi, {}});
+        }
+        if(c == '.') {
+            tokens.emplace_back(Token{TokenType::concat, {}});
         }
         if(c == '\n') {
             tokens.emplace_back(Token{TokenType::newline, {}});

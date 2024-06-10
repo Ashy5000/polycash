@@ -1,5 +1,5 @@
 @memory::alloc(var);
-@io::print(var);
+@io::print((var) . (2));
 @memory::free(var);
 @memory::alloc(exitCode);
 @contract::exit(exitCode);

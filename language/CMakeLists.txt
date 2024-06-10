@@ -16,4 +16,6 @@ add_executable(plc src/main.cpp
         src/ExpressionBlockasmGenerator.h
         src/Variable.h
         src/Type.h
+        src/Operator.h
+        src/OperatorType.h
 )

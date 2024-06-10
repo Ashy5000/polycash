@@ -17,6 +17,7 @@ enum class TokenType {
     semi,
     expr,
     newline,
+    concat,
 };
 
 
