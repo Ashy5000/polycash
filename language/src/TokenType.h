@@ -19,6 +19,9 @@ enum class TokenType {
     newline,
     concat,
     add,
+    sub,
+    mul,
+    div,
     comma,
 };
 

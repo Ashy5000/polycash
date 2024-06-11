@@ -11,6 +11,9 @@ enum class OperatorType {
     type_placeholder,
     concat,
     add,
+    sub,
+    mul,
+    div
 };
 
 

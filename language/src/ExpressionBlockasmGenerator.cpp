@@ -54,6 +54,18 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
             type = OperatorType::add;
             break;
         }
+        if(t.type == TokenType::sub) {
+            type = OperatorType::sub;
+            break;
+        }
+        if(t.type == TokenType::mul) {
+            type = OperatorType::mul;
+            break;
+        }
+        if(t.type == TokenType::div) {
+            type = OperatorType::div;
+            break;
+        }
     }
     std::vector preOperatorTokens(expression.children.begin(), expression.children.begin() + i);
     std::vector postOperatorTokens(expression.children.begin() + i + 1, expression.children.end());
@@ -85,6 +97,24 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
     }
     if(type == OperatorType::add) {
         blockasm << "Add 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+    }
+    if(type == OperatorType::sub) {
+        blockasm << "Sub 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+    }
+    if(type == OperatorType::mul) {
+        blockasm << "Mul 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+    }
+    if(type == OperatorType::div) {
+        blockasm << "Div 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
         return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);

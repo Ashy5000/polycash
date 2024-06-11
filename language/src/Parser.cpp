@@ -87,6 +87,15 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         if(c == '+') {
             tokens.emplace_back(Token{TokenType::add, {}});
         }
+        if(c == '-') {
+            tokens.emplace_back(Token{TokenType::sub, {}});
+        }
+        if(c == '*') {
+            tokens.emplace_back(Token{TokenType::mul, {}});
+        }
+        if(c == '/') {
+            tokens.emplace_back(Token{TokenType::div, {}});
+        }
         if(c == ',') {
             tokens.emplace_back(Token{TokenType::comma, {}});
         }
