@@ -130,7 +130,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
                 exit(EXIT_FAILURE);
             }
             char* end;
-            int val = std::strtol(params[1].children[0].value.c_str(), end, 10);
+            int val = std::strtol(params[1].children[0].value.c_str(), &end, 10);
             if(errno == ERANGE) {
                 std::cerr << "Expected integer as value" << std::endl;
             }
