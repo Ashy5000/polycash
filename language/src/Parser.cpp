@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-std::vector<Token> Parser::parse_tokens(std::string input) {
+std::vector<Token> Parser::parse_tokens(const std::string &input) {
     std::vector<Token> tokens;
     auto activeToken = Token{TokenType::type_placeholder, {}};
     std::string substring;

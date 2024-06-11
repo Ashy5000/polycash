@@ -25,8 +25,7 @@ int main(int argc, char* argv[]) {
     std::vector<Token> tokens = Parser::parse_tokens(contents);
     auto generator = BlockasmGenerator(tokens);
     std::string blockasm = generator.GenerateBlockasm();
-    std::ofstream targetAsm("out.blockasm");
-    if (targetAsm.is_open()) {
+    if (std::ofstream targetAsm("out.blockasm"); targetAsm.is_open()) {
         targetAsm << blockasm << std::endl;
         targetAsm.close();
     } else {

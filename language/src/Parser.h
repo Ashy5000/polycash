@@ -11,7 +11,7 @@
 
 class Parser {
 public:
-    static std::vector<Token> parse_tokens(std::string input);
+    static std::vector<Token> parse_tokens(const std::string &input);
 };
 
 

@@ -9,7 +9,6 @@
 #include <sstream>
 #include <tuple>
 
-#include "Operator.h"
 #include "OperatorType.h"
 #include "Variable.h"
 

@@ -27,7 +27,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
             std::tuple tuple = GenerateSystemFunctionBlockasm(i, nextAllocatedLocation, vars);
             std::vector<Variable> newVars = std::get<0>(tuple);
             vars.insert(vars.end(), newVars.begin(), newVars.end());
-            int tokensConsumed = std::get<1>(tuple);
+            const int tokensConsumed = std::get<1>(tuple);
             i += tokensConsumed;
         }
     }
@@ -40,8 +40,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
         std::cerr << "System at (@) must be followed by an identifier." << std::endl;
         exit(EXIT_FAILURE);
     }
-    Token openParen = tokens[i + 2];
-    if(openParen.type != TokenType::open_paren) {
+    if(Token openParen = tokens[i + 2]; openParen.type != TokenType::open_paren) {
         std::cerr << "System call identifier must be followed by '('." << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -69,13 +68,11 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
             break;
         }
     }
-    Token semiToken = tokens[i + 5];
-    if(semiToken.type != TokenType::semi) {
+    if(Token semiToken = tokens[i + 5]; semiToken.type != TokenType::semi) {
         std::cerr << "Expected semicolon." << std::endl;
         exit(EXIT_FAILURE);
     }
-    Token newlineToken = tokens[i + 6];
-    if(newlineToken.type != TokenType::newline) {
+    if(Token newlineToken = tokens[i + 6]; newlineToken.type != TokenType::newline) {
         std::cerr << "Unexpected token after semicolon." << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -109,8 +106,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
         } else if(function == "free") {
             int indexToRemove = -1;
             for(int j = 0; j < vars.size(); j++) {
-                Variable var = vars[j];
-                if(var.name == params[0].children[0].value) {
+                if(Variable var = vars[j]; var.name == params[0].children[0].value) {
                     indexToRemove = j;
                     break;
                 }
@@ -124,8 +120,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
         } else if(function == "set") {
             int indexToRename = -1;
             for(int j = 0; j < vars.size(); j++) {
-                Variable var = vars[j];
-                if(var.name == params[0].children[0].value) {
+                if(Variable var = vars[j]; var.name == params[0].children[0].value) {
                     indexToRename = j;
                     break;
                 }
@@ -134,7 +129,11 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
                 std::cerr << "Cannot set undefined variable." << std::endl;
                 exit(EXIT_FAILURE);
             }
-            int val = atoi(params[1].children[0].value.c_str());
+            char* end;
+            int val = std::strtol(params[1].children[0].value.c_str(), end, 10);
+            if(errno == ERANGE) {
+                std::cerr << "Expected integer as value" << std::endl;
+            }
             blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << vars[indexToRename].location << " 0x";
             blockasm << std::setfill('0') << std::setw(16) << std::hex << val << " 0x00000000" << std::endl;
         } else {
