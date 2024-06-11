@@ -18,6 +18,8 @@ enum class TokenType {
     expr,
     newline,
     concat,
+    add,
+    comma,
 };
 
 

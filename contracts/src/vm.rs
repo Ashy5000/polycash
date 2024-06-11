@@ -66,6 +66,14 @@ pub fn run_vm(
                 gas_used += 1.0;
                 return (line.args[0].parse::<i64>().unwrap(), gas_used);
             }
+            "ExitBfr" => {
+                gas_used += 1.0;
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                let exit_code = buffers.get(&line.args[0].clone()).expect("Unable to read exit code buffer").as_u64().expect("Could not convert exit code to u64");
+                return (exit_code as i64, gas_used);
+            }
             "InitBfr" => {
                 if vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())

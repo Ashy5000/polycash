@@ -84,6 +84,12 @@ std::vector<Token> Parser::parse_tokens(std::string input) {
         if(c == '.') {
             tokens.emplace_back(Token{TokenType::concat, {}});
         }
+        if(c == '+') {
+            tokens.emplace_back(Token{TokenType::add, {}});
+        }
+        if(c == ',') {
+            tokens.emplace_back(Token{TokenType::comma, {}});
+        }
         if(c == '\n') {
             tokens.emplace_back(Token{TokenType::newline, {}});
         }

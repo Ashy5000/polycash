@@ -9,7 +9,8 @@
 
 enum class OperatorType {
     type_placeholder,
-    concat
+    concat,
+    add,
 };
 
 

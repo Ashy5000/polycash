@@ -1,5 +1,4 @@
-@memory::alloc(var);
-@io::print((var) . (2));
-@memory::free(var);
+@io::print((2) + (2));
 @memory::alloc(exitCode);
+@memory::set(exitCode, 0);
 @contract::exit(exitCode);
