@@ -10,7 +10,8 @@ import (
 )
 
 var analysisCommands = map[string]func([]string){
-	"GetTPS": GetTPSCmd,
+	"GetTPS":          GetTPSCmd,
+	"GetTokensMinted": GetTokensMintedCmd,
 }
 
 func GetTPSCmd(fields []string) {
@@ -21,6 +22,11 @@ func GetTPSCmd(fields []string) {
 	}
 	tps := GetTPS(time.Duration(durationInt) * time.Second)
 	fmt.Println(tps)
+}
+
+func GetTokensMintedCmd(fields []string) {
+	tokensMinted := GetNumTokensMinted()
+	fmt.Println(tokensMinted)
 }
 
 func RunAnalysisCmd(input string) {

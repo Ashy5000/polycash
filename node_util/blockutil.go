@@ -123,7 +123,7 @@ func GetBalance(key []byte) float64 {
 		for _, transaction := range block.Transactions {
 			if bytes.Equal(transaction.Sender.Y, key) {
 				total -= transaction.Amount
-				if len(Blockchain) > 50 { // Fees start after 50 blocks
+				if i > 50 { // Fees start after 50 blocks
 					fee := TransactionFee + (BodyFeePerByte * float64(len(transaction.Body)))
 					for _, contract := range transaction.Contracts {
 						fee += GasPrice * contract.GasUsed
@@ -137,7 +137,7 @@ func GetBalance(key []byte) float64 {
 		if bytes.Equal(block.Miner.Y, key) {
 			lastBlock := Blockchain[i-1]
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
-			if len(Blockchain) > 50 { // Fees start after 50 blocks
+			if i > 50 { // Fees start after 50 blocks
 				fees := 0.0
 				for _, transaction := range block.Transactions {
 					fees += TransactionFee
@@ -146,6 +146,7 @@ func GetBalance(key []byte) float64 {
 						fees += GasPrice * contract.GasUsed
 					}
 				}
+				miningTotal += fees
 			}
 			// Get number of miners at the time of mining
 			minerCount := GetMinerCount(i)
