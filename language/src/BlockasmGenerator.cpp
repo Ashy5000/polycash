@@ -172,7 +172,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
             std::vector<int> locations = std::get<1>(parsingResult);
             blockasm << expressionBlockasm << std::endl;
             int dataLocation = locations[0];
-            blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
+            blockasm << "Stderr 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
         }
     } else {
         std::cerr << "Unknown module." << std::endl;
