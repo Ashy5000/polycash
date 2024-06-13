@@ -22,4 +22,6 @@ add_executable(plc src/main.cpp
         src/Signature.h
         src/ParamsParser.cpp
         src/ParamsParser.h
+        src/SystemFunction.h
+        src/SystemFunctions.h
 )

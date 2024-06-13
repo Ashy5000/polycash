@@ -13,6 +13,7 @@
 #include "ExpressionBlockasmGenerator.h"
 #include "ParamsParser.h"
 #include "Signature.h"
+#include "SystemFunctions.h"
 #include "Variable.h"
 
 BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p) {
@@ -86,6 +87,13 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
     }
     std::string module = identifier.value.substr(0, delimiterPos);
     std::string function = identifier.value.substr(delimiterPos + 2);
+    for(SystemFunction func : SYSTEM_FUNCTIONS) {
+        if(func.module == module && func.name == function) {
+            std::string funcBlockasm = func.generateBlockasm(params, nextAllocatedLocation, vars);
+            blockasm << funcBlockasm;
+            return std::make_tuple(vars, 6);
+        }
+    }
     if(module == "contract") {
         if(function == "exit") {
             Signature sig = Signature({Type::uint64});
