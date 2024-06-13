@@ -11,6 +11,8 @@
 #include <utility>
 
 #include "ExpressionBlockasmGenerator.h"
+#include "ParamsParser.h"
+#include "Signature.h"
 #include "Variable.h"
 
 BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p) {
@@ -86,13 +88,16 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
     std::string function = identifier.value.substr(delimiterPos + 2);
     if(module == "contract") {
         if(function == "exit") {
-            std::tuple<std::string, int> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
-            std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
-            int location = std::get<1>(expressionGenerationResult);
-            blockasm << expressionBlockasm << std::endl;
-            blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << location << std::endl;
-            if(location >= nextAllocatedLocation) {
-                nextAllocatedLocation = location + 1;
+            Signature sig = Signature({Type::uint64});
+            ParamsParser pp = ParamsParser(params, sig);
+            std::tuple<std::string, std::vector<int>> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
+            std::string expressionBlockasm = std::get<0>(parsingResult);
+            std::vector<int> locations = std::get<1>(parsingResult);
+            int exitCodeLocation = locations[0];
+            blockasm << expressionBlockasm;
+            blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation << std::endl;
+            if(exitCodeLocation >= nextAllocatedLocation) {
+                nextAllocatedLocation = exitCodeLocation + 1;
             }
         } else {
             std::cerr << "Unknown system function " << identifier.value << "." << std::endl;
@@ -100,7 +105,16 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
         }
     } else if(module == "memory") {
         if(function == "alloc") {
-            auto var = Variable(params[0].children[0].value, nextAllocatedLocation, Type::type_placeholder);
+            std::string typeString = params[1].children[0].value;
+            Type type = Type::type_placeholder;
+            if(typeString == "uint64") {
+                type = Type::uint64;
+            }
+            if(type == Type::type_placeholder) {
+                std::cerr << "Unknown type " << typeString << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            auto var = Variable(params[0].children[0].value, nextAllocatedLocation, type);
             vars.emplace_back(var);
             blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation++ << " 0x00000000" << std::endl;
         } else if(function == "free") {
@@ -142,7 +156,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
         }
     } else if(module == "io") {
         if(function == "print") {
-            std::tuple<std::string, int> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
+            std::tuple<std::string, int, Type> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
             int expressionLocation = std::get<1>(expressionGenerationResult);
             if(expressionLocation >= nextAllocatedLocation) {
@@ -151,7 +165,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
             blockasm << expressionBlockasm << std::endl;
             blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << expressionLocation << " 0x00000000" << std::endl;
         } else if(function == "err") {
-            std::tuple<std::string, int> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
+            std::tuple<std::string, int, Type> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
             int expressionLocation = std::get<1>(expressionGenerationResult);
             if(expressionLocation >= nextAllocatedLocation) {

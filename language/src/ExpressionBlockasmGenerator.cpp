@@ -12,7 +12,7 @@
 #include "OperatorType.h"
 #include "Variable.h"
 
-std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(const Token &expression, int nextAllocatedLocation, const std::vector<Variable>& vars) {
+std::tuple<std::string, int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(const Token &expression, int nextAllocatedLocation, const std::vector<Variable>& vars) {
     if(expression.type != TokenType::expr) {
         std::cerr << "Expected expression when generating Blockasm." << std::endl;
         exit(EXIT_FAILURE);
@@ -28,7 +28,7 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
             int val = stoi(expression.children[0].value);
             blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x";
             blockasm << std::setfill('0') << std::setw(16) << std::hex << val << " 0x00000000" << std::endl;
-            return std::make_tuple(blockasm.str(), nextAllocatedLocation);
+            return std::make_tuple(blockasm.str(), nextAllocatedLocation, Type::uint64);
         }
         if(expression.children[0].type == TokenType::identifier) {
             auto referencedVar = Variable("", 0, Type::type_placeholder);
@@ -37,7 +37,7 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
                     referencedVar = var;
                 }
             }
-            return std::make_tuple("", referencedVar.location);
+            return std::make_tuple("", referencedVar.location, referencedVar.type);
         }
         std::cerr << "Unknown expression." << std::endl;
         exit(EXIT_FAILURE);
@@ -93,31 +93,31 @@ std::tuple<std::string, int> ExpressionBlockasmGenerator::GenerateBlockasmFromEx
         blockasm << "App 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
-        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1, Type::uint64);
     }
     if(type == OperatorType::add) {
         blockasm << "Add 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
-        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1, Type::uint64);
     }
     if(type == OperatorType::sub) {
         blockasm << "Sub 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
-        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1, Type::uint64);
     }
     if(type == OperatorType::mul) {
         blockasm << "Mul 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
-        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1, Type::uint64);
     }
     if(type == OperatorType::div) {
         blockasm << "Div 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
-        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1);
+        return std::make_tuple(blockasm.str(), nextAllocatedLocation + 1, Type::uint64);
     }
     std::cerr << "Unknown expression." << std::endl;
     exit(EXIT_FAILURE);
