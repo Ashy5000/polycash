@@ -472,8 +472,10 @@ pub fn run_vm(
                 }
                 let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
                 let contents_vec_u8 = vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
-                let contents_hex = hex::encode(contents_vec_u8);
+                let contents_hex = hex::encode(contents_vec_u8.clone());
                 println!("State change: {}|{}", location, contents_hex);
+                gas_used += 3.0;
+                gas_used += 0.6 * contents_vec_u8.len() as f64;
             }
             "GetFromState" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())

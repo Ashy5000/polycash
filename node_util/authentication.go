@@ -36,7 +36,7 @@ func SignAuthenticationProof(a *AuthenticationProof) error {
 	return nil
 }
 
-func RequestAuthentication(peer_ip string) (PublicKey, bool) {
+func RequestAuthentication(peer_ip string) (PublicKey, bool, error) {
 	// Generate a random slice of bytes to sign
 	// This is to prevent replay attacks
 	data := make([]byte, 64)
@@ -53,7 +53,7 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool) {
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		panic(err)
+		return PublicKey{}, false, err
 	}
 	// Read the response
 	body, err := io.ReadAll(res.Body)
@@ -69,7 +69,7 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool) {
 	// Verify the signature
 	isValid := VerifyAuthenticationProof(&proof, digest[:])
 	if !isValid {
-		return PublicKey{}, false
+		return PublicKey{}, false, nil
 	}
-	return proof.PublicKey, true
+	return proof.PublicKey, true, nil
 }

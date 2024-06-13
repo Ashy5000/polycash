@@ -36,7 +36,7 @@ func TestSyncBlockchain(t *testing.T) {
 				assert.NotNil(t, Blockchain)
 			}
 		}()
-		SyncBlockchain()
+		SyncBlockchain(-1)
 	})
 }
 

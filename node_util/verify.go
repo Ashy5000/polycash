@@ -87,7 +87,7 @@ func DetectFork(block Block) bool {
 			Log("The node software is designed to handle this edge case, so operations can continue as normal.", false)
 			Log("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.", true)
 			Log("The blockchain will be re-synced to stay on the longest chain.", true)
-			SyncBlockchain()
+			SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Wait for finality when switching chains
 			return true
 		}
 	}
@@ -171,7 +171,7 @@ func VerifyBlock(block Block) bool {
 		Log("Block has invalid previous block hash. Ignoring block request.", true)
 		Log("The block could be on a different fork.", true)
 		Log("The blockchain will be re-synced to stay on the longest chain.", true)
-		SyncBlockchain()
+		SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Wait for finality when switching chains
 		isValid = false
 	}
 	isValid = VerifyMiner(block.Miner) && isValid

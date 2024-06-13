@@ -42,7 +42,7 @@ func GetKey(path string) PrivateKey {
 	return key
 }
 
-func SyncBlockchain() {
+func SyncBlockchain(finalityBlockHeight int) {
 	longestLength := 0
 	var longestBlockchain []Block
 	errCount := 0
@@ -63,6 +63,7 @@ func SyncBlockchain() {
 		}
 		length := len(peerBlockchain)
 		// Check to ensure proof of work is valid
+		createsFork := false
 		for i, block := range peerBlockchain {
 			if i == 0 {
 				continue
@@ -76,6 +77,9 @@ func SyncBlockchain() {
 			if binary.BigEndian.Uint64(blockHash[:]) > MaximumUint64/block.Difficulty {
 				Log("Invalid blockchain received from peer.", true)
 				continue
+			}
+			if blockHash != HashBlock(Blockchain[i]) {
+				createsFork = true
 			}
 			// Get the correct difficulty for the block
 			lastMinedBlock := peerBlockchain[i-1]
@@ -91,6 +95,13 @@ func SyncBlockchain() {
 			correctDifficulty := GetDifficulty(lastTime, lastDifficulty)
 			if block.Difficulty != correctDifficulty {
 				Log("Invalid blockchain received from peer.", true)
+				continue
+			}
+		}
+		if createsFork {
+			// Require finality
+			if length < finalityBlockHeight {
+				Log("Ignoring blockchain received from peer due to lack of finality.", true)
 				continue
 			}
 		}

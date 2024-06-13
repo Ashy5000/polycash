@@ -50,7 +50,7 @@ var commands = map[string]func([]string){
 
 func SyncCmd(fields []string) {
 	Log("Syncing blockchain...", false)
-	SyncBlockchain()
+	SyncBlockchain(-1)
 	Log("Blockchain successfully synced!", false)
 	Log(fmt.Sprintf("Length: %d", len(Blockchain)), false)
 }

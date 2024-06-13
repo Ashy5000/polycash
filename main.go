@@ -24,7 +24,7 @@ func main() {
 	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
 	flag.Parse()
 	LoadStateCmd(nil)
-	SyncBlockchain()
+	SyncBlockchain(-1)
 	if len(Blockchain) == 0 {
 		Append(GenesisBlock())
 	}
