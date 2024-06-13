@@ -156,14 +156,14 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
         }
     } else if(module == "io") {
         if(function == "print") {
-            std::tuple<std::string, int, Type> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
-            std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
-            int expressionLocation = std::get<1>(expressionGenerationResult);
-            if(expressionLocation >= nextAllocatedLocation) {
-                nextAllocatedLocation = expressionLocation + 1;
-            }
+            Signature sig = Signature({Type::uint64});
+            ParamsParser pp = ParamsParser(params, sig);
+            std::tuple<std::string, std::vector<int>> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
+            std::string expressionBlockasm = std::get<0>(parsingResult);
+            std::vector<int> locations = std::get<1>(parsingResult);
             blockasm << expressionBlockasm << std::endl;
-            blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << expressionLocation << " 0x00000000" << std::endl;
+            int dataLocation = locations[0];
+            blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
         } else if(function == "err") {
             std::tuple<std::string, int, Type> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(expressionGenerationResult);
