@@ -23,6 +23,7 @@ enum class TokenType {
     mul,
     div,
     comma,
+    eq,
 };
 
 

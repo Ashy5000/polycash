@@ -32,6 +32,24 @@ std::string BlockasmGenerator::GenerateBlockasm() {
             vars.insert(vars.end(), newVars.begin(), newVars.end());
             const int tokensConsumed = std::get<1>(tuple);
             i += tokensConsumed;
+        } else if(token.type == TokenType::identifier) {
+            if(tokens[i + 1].type == TokenType::eq) {
+                if(tokens[i + 2].type == TokenType::eq) {
+                    // e.g. newVar == 0
+                    std::string varName = token.value;
+                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 4], nextAllocatedLocation, vars);
+                    std::string exprBlockasm = std::get<0>(exprTuple);
+                    blockasm << exprBlockasm;
+                    int exprLoc = std::get<1>(exprTuple);
+                    if(exprLoc >= nextAllocatedLocation) {
+                        nextAllocatedLocation = exprLoc + 1;
+                    }
+                    Type type = std::get<2>(exprTuple);
+                    Variable var = Variable(varName, exprLoc, type);
+                    vars.emplace_back(var);
+                    i += 6;
+                }
+            }
         }
     }
     return blockasm.str();

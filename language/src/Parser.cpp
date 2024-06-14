@@ -19,7 +19,9 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
             if(activeToken.type == TokenType::expr) {
                 continue;
             }
-            tokens.emplace_back(activeToken);
+            if(!activeToken.value.empty() || (activeToken.type != TokenType::identifier && activeToken.type != TokenType::type_placeholder)) {
+                tokens.emplace_back(activeToken);
+            }
             activeToken.children = {};
             activeToken.value = {};
             activeToken.type = TokenType::type_placeholder;
@@ -98,6 +100,9 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         }
         if(c == ',') {
             tokens.emplace_back(Token{TokenType::comma, {}});
+        }
+        if(c == '=') {
+            tokens.emplace_back(Token{TokenType::eq, {}});
         }
         if(c == '\n') {
             tokens.emplace_back(Token{TokenType::newline, {}});

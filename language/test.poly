@@ -1,4 +1,4 @@
-@memory::alloc(num, uint64);
+num == (0)
 @memory::set(num, 2);
 @io::print(num * 2);
 @memory::alloc(exitCode, uint64);
