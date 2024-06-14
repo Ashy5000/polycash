@@ -22,7 +22,7 @@ const std::vector SYSTEM_FUNCTIONS = {
             std::vector<int> locations = std::get<1>(parsingResult);
             int exitCodeLocation = locations[0];
             blockasm << expressionBlockasm;
-            blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation << std::endl;
+            blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation;
             if(exitCodeLocation >= nextAllocatedLocation) {
                 nextAllocatedLocation = exitCodeLocation + 1;
             }
