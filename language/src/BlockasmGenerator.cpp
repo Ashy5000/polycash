@@ -35,7 +35,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
         } else if(token.type == TokenType::identifier) {
             if(tokens[i + 1].type == TokenType::eq) {
                 if(tokens[i + 2].type == TokenType::eq) {
-                    // e.g. newVar == 0
+                    // e.g. newVar == 3
                     std::string varName = token.value;
                     std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 4], nextAllocatedLocation, vars);
                     std::string exprBlockasm = std::get<0>(exprTuple);
@@ -48,6 +48,29 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     Variable var = Variable(varName, exprLoc, type);
                     vars.emplace_back(var);
                     i += 6;
+                } else {
+                    // e.g. existingVar = 5
+                    std::string varName = token.value;
+                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 3], nextAllocatedLocation, vars);
+                    std::string exprBlockasm = std::get<0>(exprTuple);
+                    blockasm << exprBlockasm;
+                    int exprLoc = std::get<1>(exprTuple);
+                    if(exprLoc >= nextAllocatedLocation) {
+                        nextAllocatedLocation = exprLoc + 1;
+                    }
+                    Type type = std::get<2>(exprTuple);
+                    for(const Variable &var : vars) {
+                        if(var.name == varName) {
+                            if(var.type != type) {
+                                std::cerr << "Expression type does not match variable type." << std::endl;
+                                exit(EXIT_FAILURE);
+                            }
+                            blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << exprLoc << " 0x";
+                            blockasm << std::setfill('0') << std::setw(8) << var.location << " 0x00000000" << std::endl;
+                            break;
+                        }
+                    }
+                    i += 5;
                 }
             }
         }

@@ -1,6 +1,5 @@
 num == (0)
-@memory::set(num, 2);
+num = (2)
 @io::print(num * 2);
-@memory::alloc(exitCode, uint64);
-@memory::set(exitCode, 0);
+exitCode == (0)
 @contract::exit(exitCode);
