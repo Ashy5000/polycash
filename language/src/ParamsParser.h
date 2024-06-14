@@ -6,7 +6,6 @@
 #define PARAMSPARSER_H
 #include <tuple>
 #include <vector>
-#include <vector>
 
 #include "Signature.h"
 #include "Token.h"

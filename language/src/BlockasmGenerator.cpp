@@ -87,7 +87,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
     }
     std::string module = identifier.value.substr(0, delimiterPos);
     std::string function = identifier.value.substr(delimiterPos + 2);
-    for(SystemFunction func : SYSTEM_FUNCTIONS) {
+    for(const SystemFunction& func : SYSTEM_FUNCTIONS) {
         if(func.module == module && func.name == function) {
             std::string funcBlockasm = func.generateBlockasm(params, nextAllocatedLocation, vars);
             blockasm << funcBlockasm;
@@ -152,7 +152,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
                 exit(EXIT_FAILURE);
             }
             char* end;
-            int val = std::strtol(params[1].children[0].value.c_str(), &end, 10);
+            int val = static_cast<int>(std::strtol(params[1].children[0].value.c_str(), &end, 10));
             if(errno == ERANGE) {
                 std::cerr << "Expected integer as value" << std::endl;
             }

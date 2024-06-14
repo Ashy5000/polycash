@@ -6,7 +6,6 @@
 #define SIGNATURE_H
 #include <vector>
 
-#include "Token.h"
 #include "Type.h"
 
 

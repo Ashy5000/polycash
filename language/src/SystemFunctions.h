@@ -11,7 +11,7 @@
 #include "Signature.h"
 #include "SystemFunction.h"
 
-const std::vector<SystemFunction> SYSTEM_FUNCTIONS = {
+const std::vector SYSTEM_FUNCTIONS = {
     SystemFunction(
         [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars) -> std::string {
             std::stringstream blockasm;
