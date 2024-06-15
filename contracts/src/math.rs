@@ -49,6 +49,14 @@ impl MathOperation for Divide {
     }
 }
 
+pub(crate) struct Modulo;
+
+impl MathOperation for Modulo {
+    fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
+        Ok(a % b)
+    }
+}
+
 pub(crate) struct And {}
 
 impl MathOperation for And {

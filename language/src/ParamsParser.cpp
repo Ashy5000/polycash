@@ -14,7 +14,7 @@
 #include "Signature.h"
 #include "Type.h"
 
-std::tuple<std::string, std::vector<int>, bool> ParamsParser::ParseParamsWithSignature(int &nextAllocatedLocation, const std::vector<Variable>& vars, Signature sig) {
+std::tuple<std::string, std::vector<int>, bool> ParamsParser::ParseParamsWithSignature(int &nextAllocatedLocation, const std::vector<Variable>& vars, const Signature& sig) {
     std::stringstream blockasm;
     std::vector<int> locations;
     std::vector<Type> types;
@@ -38,10 +38,9 @@ std::tuple<std::string, std::vector<int>, bool> ParamsParser::ParseParamsWithSig
 
 std::tuple<std::string, std::vector<int>, Signature> ParamsParser::ParseParams(
     int &nextAllocatedLocation, const std::vector<Variable> &vars) {
-    for(Signature sig : signatures) {
+    for(const Signature& sig : signatures) {
         std::tuple parseRes = ParseParamsWithSignature(nextAllocatedLocation, vars, sig);
-        bool sigSucceeded = std::get<2>(parseRes);
-        if(!sigSucceeded) {
+        if(bool sigSucceeded = std::get<2>(parseRes); !sigSucceeded) {
             continue;
         }
         std::string blockasm = std::get<0>(parseRes);

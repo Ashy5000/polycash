@@ -123,8 +123,8 @@ const std::vector SYSTEM_FUNCTIONS = {
     SystemFunction(
         [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
             std::stringstream blockasm;
-            Signature sig = Signature({Type::uint64});
-            ParamsParser pp = ParamsParser(params, {sig});
+            auto sig = Signature({Type::uint64});
+            auto pp = ParamsParser(params, {sig});
             std::tuple<std::string, std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(parsingResult);
             std::vector<int> locations = std::get<1>(parsingResult);

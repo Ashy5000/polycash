@@ -14,6 +14,7 @@ use crate::{
     math::{execute_math_operation, Add, And, Divide, Eq, Multiply, Not, Or, Subtract},
     syntax_tree::SyntaxTree,
 };
+use crate::math::Modulo;
 
 pub fn vm_access_buffer(
     buffers: &mut HashMap<String, Buffer>,
@@ -165,6 +166,16 @@ pub fn run_vm(
                     line.args[3].clone(),
                 );
                 gas_used += 1.0;
+            }
+            "Mod" => {
+                execute_math_operation(
+                    Modulo {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                )
             }
             "Eq" => {
                 execute_math_operation(
