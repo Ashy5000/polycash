@@ -9,7 +9,8 @@
 
 enum class Type {
     type_placeholder,
-    uint64
+    uint64,
+    string
 };
 
 

@@ -24,6 +24,7 @@ enum class TokenType {
     div,
     comma,
     eq,
+    string_lit,
 };
 
 

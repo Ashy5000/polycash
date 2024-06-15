@@ -12,8 +12,23 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
     auto activeToken = Token{TokenType::type_placeholder, {}};
     std::string substring;
     int depth = 0;
+    bool inString = false;
+    std::string str;
     for(int i = 0; i < input.size(); i++) {
         const char c = input[i];
+        if(c == '"' && activeToken.type != TokenType::expr) {
+            inString = !inString;
+            Token t = Token(TokenType::string_lit, str);
+            str.clear();
+            if(!inString) {
+                tokens.push_back(t);
+            }
+            continue;
+        }
+        if(inString) {
+            str.push_back(c);
+            continue;
+        }
         if(c == '(') {
             depth++;
             if(activeToken.type == TokenType::expr) {

@@ -307,6 +307,15 @@ pub fn run_vm(
                 println!("{:?}", buffers.get(&line.args[0]).unwrap().contents);
                 gas_used += 0.5;
             }
+            "PrintStr" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                    vm_throw_local_error(buffers, line.args[1].clone())
+                }
+                let contents = &buffers.get(&line.args[0]).unwrap().contents;
+                let str = std::str::from_utf8(&*contents).unwrap();
+                println!("{}", str);
+                gas_used += 0.5;
+            }
             "Stderr" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())

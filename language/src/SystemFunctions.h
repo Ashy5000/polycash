@@ -16,8 +16,8 @@ const std::vector SYSTEM_FUNCTIONS = {
         [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars) -> std::string {
             std::stringstream blockasm;
             Signature sig = Signature({Type::uint64});
-            ParamsParser pp = ParamsParser(params, sig);
-            std::tuple<std::string, std::vector<int>> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
+            ParamsParser pp = ParamsParser(params, {sig});
+            std::tuple<std::string, std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(parsingResult);
             std::vector<int> locations = std::get<1>(parsingResult);
             int exitCodeLocation = locations[0];
@@ -101,14 +101,20 @@ const std::vector SYSTEM_FUNCTIONS = {
     SystemFunction(
         [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
             std::stringstream blockasm;
-            Signature sig = Signature({Type::uint64});
-            ParamsParser pp = ParamsParser(params, sig);
-            std::tuple<std::string, std::vector<int>> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
+            Signature uint64Sig = Signature({Type::uint64});
+            Signature stringSig = Signature({Type::string});
+            ParamsParser pp = ParamsParser(params, {uint64Sig, stringSig});
+            std::tuple<std::string, std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(parsingResult);
             std::vector<int> locations = std::get<1>(parsingResult);
+            Signature sig = std::get<2>(parsingResult);
             blockasm << expressionBlockasm << std::endl;
             int dataLocation = locations[0];
-            blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
+            if(sig.expectedTypes[0] == Type::uint64) {
+                blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
+            } else {
+                blockasm << "PrintStr 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
+            }
             return blockasm.str();
         },
         "io",
@@ -118,8 +124,8 @@ const std::vector SYSTEM_FUNCTIONS = {
         [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
             std::stringstream blockasm;
             Signature sig = Signature({Type::uint64});
-            ParamsParser pp = ParamsParser(params, sig);
-            std::tuple<std::string, std::vector<int>> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
+            ParamsParser pp = ParamsParser(params, {sig});
+            std::tuple<std::string, std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
             std::string expressionBlockasm = std::get<0>(parsingResult);
             std::vector<int> locations = std::get<1>(parsingResult);
             blockasm << expressionBlockasm << std::endl;

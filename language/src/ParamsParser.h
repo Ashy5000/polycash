@@ -13,11 +13,14 @@
 
 
 class ParamsParser {
+    std::tuple<std::string, std::vector<int>, bool> ParseParamsWithSignature(int &nextAllocatedLocation, const std::vector<Variable> &vars, Signature sig);
 public:
     std::vector<Token> params;
-    Signature sig;
-    std::tuple<std::string, std::vector<int>> ParseParams(int &nextAllocatedLocation, const std::vector<Variable>& vars) ;
-    ParamsParser(std::vector<Token> params_p, Signature sig_p);
+    std::vector<Signature> signatures;
+
+    std::tuple<std::string, std::vector<int>, Signature> ParseParams(int &nextAllocatedLocation,
+                                                                     const std::vector<Variable> &vars);
+    ParamsParser(std::vector<Token> params_p, std::vector<Signature> signatures_p);
 };
 
 

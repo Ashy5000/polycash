@@ -6,6 +6,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <tuple>
 
@@ -29,6 +30,20 @@ std::tuple<std::string, int, Type> ExpressionBlockasmGenerator::GenerateBlockasm
             blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x";
             blockasm << std::setfill('0') << std::setw(16) << std::hex << val << " 0x00000000" << std::endl;
             return std::make_tuple(blockasm.str(), nextAllocatedLocation, Type::uint64);
+        }
+        if(expression.children[0].type == TokenType::string_lit) {
+            std::stringstream blockasm;
+            std::stringstream buffer(expression.children[0].value);
+            blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+            blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x";
+            std::istreambuf_iterator it( buffer.rdbuf( ) );
+            std::istreambuf_iterator<char> end; // eof
+            std::stringstream out;
+            out << std::hex;
+            std::copy(it, end, std::ostream_iterator<int>(out));
+            blockasm << out.str();
+            blockasm << " 0x00000000" << std::endl;
+            return std::make_tuple(blockasm.str(), nextAllocatedLocation, Type::string);
         }
         if(expression.children[0].type == TokenType::identifier) {
             auto referencedVar = Variable("", 0, Type::type_placeholder);

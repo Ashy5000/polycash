@@ -1,5 +1,3 @@
-num == (0)
-num = (2)
-@io::print(num * 2);
-exitCode == (0)
-@contract::exit(exitCode);
+str == ("Hello, world!")
+@io::print(str);
+@contract::exit(0);
