@@ -58,6 +58,7 @@ pub fn run_vm(
     let mut line_number = 0;
     let mut should_increment;
     let mut gas_used = 0.0;
+    let mut origins = vec![];
     while line_number < syntax_tree.lines.len() {
         let line = syntax_tree.lines[line_number].clone();
         should_increment = true;
@@ -288,6 +289,16 @@ pub fn run_vm(
                     should_increment = false;
                 }
                 gas_used += 1.0;
+            }
+            "Call" => {
+                origins.push(line_number + 1);
+                line_number = line.args[0].parse::<usize>().unwrap() - 1;
+                should_increment = false;
+            }
+            "Ret" => {
+                line_number = *origins.last().expect("Could not get last origin");
+                origins.remove(origins.len() - 1);
+                should_increment = false;
             }
             "Stdout" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
