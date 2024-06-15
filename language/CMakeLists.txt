@@ -24,4 +24,9 @@ add_executable(plc src/main.cpp
         src/ParamsParser.h
         src/SystemFunction.h
         src/SystemFunctions.h
+        src/BlockasmLib.cpp
+        src/BlockasmLib.h
+        src/Function.h
+        src/Linker.cpp
+        src/Linker.h
 )

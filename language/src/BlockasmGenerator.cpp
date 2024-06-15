@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "ExpressionBlockasmGenerator.h"
+#include "Linker.h"
 #include "ParamsParser.h"
 #include "Signature.h"
 #include "SystemFunctions.h"
@@ -19,12 +20,14 @@
 BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p) {
     tokens = std::move(tokens_p);
     blockasm = {};
+    blockasm << ";^^^^BEGIN_SOURCE^^^^" << std::endl;
 }
 
 
 std::string BlockasmGenerator::GenerateBlockasm() {
     std::vector<Variable> vars;
     int nextAllocatedLocation = 1;
+    auto l = Linker({"string.blockasm"});
     for(int i = 0; i < tokens.size(); i++) {
         if(const Token token = tokens[i]; token.type == TokenType::system_at) {
             std::tuple tuple = GenerateSystemFunctionBlockasm(i, nextAllocatedLocation, vars);
@@ -75,7 +78,9 @@ std::string BlockasmGenerator::GenerateBlockasm() {
             }
         }
     }
-    return blockasm.str();
+    Linker::SkipLibs(blockasm);
+    std::string blockasmStr = blockasm.str();
+    return blockasmStr;
 }
 
 std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunctionBlockasm(const int i, int &nextAllocatedLocation, std::vector<Variable> vars) {
