@@ -38,13 +38,30 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
                     }
                     j++;
                 }
-                const std::string &temp = blockasm.str();
-                blockasm.seekp(0);
+                std::stringstream before;
+                std::stringstream after;
+                bool streamingToBefore = true;
+                for(std::string line; std::getline(blockasm, line); ) {
+                    if(line == ";^^^^BEGIN_SOURCE^^^^") {
+                        after << line << std::endl;
+                        streamingToBefore = false;
+                        continue;
+                    }
+                    if(streamingToBefore) {
+                        before << line << std::endl;
+                        continue;
+                    }
+                    after << line << std::endl;
+                }
+                blockasm = std::stringstream();
+                blockasm << before.str();
                 blockasm << source;
-                blockasm << temp;
+                std::string blockasmStr = blockasm.str();
+                blockasm << after.str();
             }
         }
     }
+    functionsInjected.emplace_back(name);
 }
 
 void Linker::SkipLibs(std::stringstream &blockasm) {
@@ -67,3 +84,15 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
     blockasm << "Jmp " << jmpTo << std::endl;
     blockasm << temp;
 }
+
+void Linker::ScheduleJob(LinkerJob name) {
+    jobs.emplace_back(name);
+}
+
+void Linker::RunJobs(std::stringstream &blockasm) {
+    for(LinkerJob job : jobs) {
+        InjectIfNotPresent(job.name, blockasm);
+    }
+}
+
+

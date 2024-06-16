@@ -9,6 +9,7 @@
 
 #include "Token.h"
 #include "Variable.h"
+#include "Linker.h"
 
 
 class ExpressionBlockasmGenerator {

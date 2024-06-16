@@ -8,13 +8,13 @@ You should have received a copy of the GNU General Public License along with thi
 */
 use std::collections::HashMap;
 
+use crate::math::Modulo;
 use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
     math::{execute_math_operation, Add, And, Divide, Eq, Multiply, Not, Or, Subtract},
     syntax_tree::SyntaxTree,
 };
-use crate::math::Modulo;
 
 pub fn vm_access_buffer(
     buffers: &mut HashMap<String, Buffer>,
@@ -73,13 +73,14 @@ pub fn run_vm(
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
                     vm_throw_local_error(buffers, line.args[1].clone())
                 }
-                let exit_code = buffers.get(&line.args[0].clone()).expect("Unable to read exit code buffer").as_u64().expect("Could not convert exit code to u64");
+                let exit_code = buffers
+                    .get(&line.args[0].clone())
+                    .expect("Unable to read exit code buffer")
+                    .as_u64()
+                    .expect("Could not convert exit code to u64");
                 return (exit_code as i64, gas_used);
             }
             "InitBfr" => {
-                if vm_check_buffer_initialization(buffers, line.args[0].clone()) {
-                    vm_throw_local_error(buffers, line.args[1].clone())
-                }
                 buffers.insert(
                     line.args[0].clone(),
                     Buffer {
@@ -122,6 +123,17 @@ pub fn run_vm(
                     }
                 }
                 gas_used += 1.0;
+            }
+            "BfrLen" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[2].clone())
+                }
+                let x = vm_access_buffer(buffers, line.args[0].clone(), line.args[2].clone());
+                if let Some(y) = buffers.get_mut(&(line.args[1].clone())) {
+                    y.load_u64(x.len().try_into().unwrap());
+                }
             }
             "Add" => {
                 execute_math_operation(
@@ -167,16 +179,14 @@ pub fn run_vm(
                 );
                 gas_used += 1.0;
             }
-            "Mod" => {
-                execute_math_operation(
-                    Modulo {},
-                    buffers,
-                    line.args[0].clone(),
-                    line.args[1].clone(),
-                    line.args[2].clone(),
-                    line.args[3].clone(),
-                )
-            }
+            "Mod" => execute_math_operation(
+                Modulo {},
+                buffers,
+                line.args[0].clone(),
+                line.args[1].clone(),
+                line.args[2].clone(),
+                line.args[3].clone(),
+            ),
             "Eq" => {
                 execute_math_operation(
                     Eq {},
@@ -498,11 +508,13 @@ pub fn run_vm(
             }
             "UpdateState" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
-                    || !vm_check_buffer_initialization(buffers, line.args[1].clone()) {
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
                     vm_throw_local_error(buffers, line.args[2].clone());
                 }
                 let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
-                let contents_vec_u8 = vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
+                let contents_vec_u8 =
+                    vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
                 let contents_hex = hex::encode(contents_vec_u8.clone());
                 println!("State change: {}|{}", location, contents_hex);
                 gas_used += 3.0;
@@ -510,7 +522,8 @@ pub fn run_vm(
             }
             "GetFromState" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
-                    || !vm_check_buffer_initialization(buffers, line.args[1].clone()) {
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
                     vm_throw_local_error(buffers, line.args[2].clone());
                 }
                 let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap();

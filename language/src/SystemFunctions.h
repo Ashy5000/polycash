@@ -13,7 +13,7 @@
 
 const std::vector SYSTEM_FUNCTIONS = {
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars) -> std::string {
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars, Linker &l) -> std::string {
             std::stringstream blockasm;
             Signature sig = Signature({Type::uint64});
             ParamsParser pp = ParamsParser(params, {sig});
@@ -32,7 +32,7 @@ const std::vector SYSTEM_FUNCTIONS = {
         "exit"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
             std::stringstream blockasm;
             std::string typeString = params[1].children[0].value;
             Type type = Type::type_placeholder;
@@ -52,7 +52,7 @@ const std::vector SYSTEM_FUNCTIONS = {
         "alloc"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
             std::stringstream blockasm;
             int indexToRemove = -1;
             for(int j = 0; j < vars.size(); j++) {
@@ -73,7 +73,7 @@ const std::vector SYSTEM_FUNCTIONS = {
         "free"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
             std::stringstream blockasm;
             int indexToRename = -1;
             for(int j = 0; j < vars.size(); j++) {
@@ -99,7 +99,7 @@ const std::vector SYSTEM_FUNCTIONS = {
         "set"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
             std::stringstream blockasm;
             Signature uint64Sig = Signature({Type::uint64});
             Signature stringSig = Signature({Type::string});
@@ -121,7 +121,7 @@ const std::vector SYSTEM_FUNCTIONS = {
         "print"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable> &vars) -> std::string {
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars, Linker &) -> std::string {
             std::stringstream blockasm;
             auto sig = Signature({Type::uint64});
             auto pp = ParamsParser(params, {sig});

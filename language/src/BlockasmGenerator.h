@@ -6,8 +6,10 @@
 #define BLOCKASMGENERATOR_H
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
+#include "Linker.h"
 #include "Token.h"
 #include "Variable.h"
 
@@ -15,7 +17,7 @@
 class BlockasmGenerator {
 public:
     std::string GenerateBlockasm();
-    std::tuple<std::vector<Variable>, int> GenerateSystemFunctionBlockasm(int i, int &nextAllocatedLocation, std::vector<Variable> vars);
+    std::tuple<std::vector<Variable>, int> GenerateSystemFunctionBlockasm(const int i, int &nextAllocatedLocation, std::vector<Variable> vars, Linker l);
     explicit BlockasmGenerator(std::vector<Token> tokens_p);
 private:
     std::stringstream blockasm;

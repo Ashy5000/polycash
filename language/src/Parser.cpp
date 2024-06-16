@@ -65,7 +65,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         if(c == ' ') {
             continue;
         }
-        if(std::isalpha(c) || c == ':') {
+        if(std::isalpha(c) || c == ':' || c == '_') {
             if(activeToken.value.empty()) {
                 activeToken.type = TokenType::identifier;
             }

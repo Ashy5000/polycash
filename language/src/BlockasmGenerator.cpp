@@ -26,11 +26,11 @@ BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p) {
 
 std::string BlockasmGenerator::GenerateBlockasm() {
     std::vector<Variable> vars;
-    int nextAllocatedLocation = 1;
+    int nextAllocatedLocation = 0x00001000;
     auto l = Linker({"string.blockasm"});
     for(int i = 0; i < tokens.size(); i++) {
         if(const Token token = tokens[i]; token.type == TokenType::system_at) {
-            std::tuple tuple = GenerateSystemFunctionBlockasm(i, nextAllocatedLocation, vars);
+            std::tuple tuple = GenerateSystemFunctionBlockasm(i, nextAllocatedLocation, vars, l);
             std::vector<Variable> newVars = std::get<0>(tuple);
             vars.insert(vars.end(), newVars.begin(), newVars.end());
             const int tokensConsumed = std::get<1>(tuple);
@@ -76,6 +76,10 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     i += 5;
                 }
             }
+        } else if(token.type == TokenType::div) {
+            if(tokens[i + 1].type == TokenType::identifier) {
+                l.InjectIfNotPresent(tokens[i + 1].value, blockasm);
+            }
         }
     }
     Linker::SkipLibs(blockasm);
@@ -83,7 +87,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
     return blockasmStr;
 }
 
-std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunctionBlockasm(const int i, int &nextAllocatedLocation, std::vector<Variable> vars) {
+std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunctionBlockasm(const int i, int &nextAllocatedLocation, std::vector<Variable> vars, Linker l) {
     Token identifier = tokens[i + 1];
     if(identifier.type != TokenType::identifier) {
         std::cerr << "System at (@) must be followed by an identifier." << std::endl;
@@ -135,7 +139,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
     std::string function = identifier.value.substr(delimiterPos + 2);
     for(const SystemFunction& func : SYSTEM_FUNCTIONS) {
         if(func.module == module && func.name == function) {
-            std::string funcBlockasm = func.generateBlockasm(params, nextAllocatedLocation, vars);
+            std::string funcBlockasm = func.generateBlockasm(params, nextAllocatedLocation, vars, l);
             blockasm << funcBlockasm;
             return std::make_tuple(vars, 6);
         }
