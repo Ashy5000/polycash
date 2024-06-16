@@ -25,6 +25,7 @@ enum class TokenType {
     comma,
     eq,
     string_lit,
+    excl,
 };
 
 

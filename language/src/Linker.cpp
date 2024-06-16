@@ -92,3 +92,16 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
     blockasm << "Jmp " << jmpTo << std::endl;
     blockasm << temp;
 }
+
+std::string Linker::CallFunction(const std::string& name) {
+    for(const InjectedFunction& func : functionsInjected) {
+        if(func.name == name) {
+            std::stringstream blockasm;
+            blockasm << "Jmp " << func.offset << std::endl;
+            return blockasm.str();
+        }
+    }
+    std::cerr << "Attempt to call unresolved function " << name << std::endl;
+    exit(EXIT_FAILURE);
+}
+

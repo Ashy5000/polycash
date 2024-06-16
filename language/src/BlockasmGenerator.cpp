@@ -80,6 +80,12 @@ std::string BlockasmGenerator::GenerateBlockasm() {
             if(tokens[i + 1].type == TokenType::identifier) {
                 l.InjectIfNotPresent(tokens[i + 1].value, blockasm);
             }
+        } else if(token.type == TokenType::excl) {
+            if(tokens[i + 1].type == TokenType::identifier) {
+                std::string functionName = tokens[i + 1].value;
+                std::string functionCallBlockasm = l.CallFunction(functionName);
+                blockasm << functionCallBlockasm;
+            }
         }
     }
     Linker::SkipLibs(blockasm);

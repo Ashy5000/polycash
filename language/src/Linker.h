@@ -13,6 +13,7 @@ class Linker {
 public:
     std::vector<BlockasmLib> libs;
     void InjectIfNotPresent(std::string name, std::stringstream &blockasm);
+    [[nodiscard]] std::string CallFunction(const std::string &name);
 
     static void SkipLibs(std::stringstream &blockasm);
 

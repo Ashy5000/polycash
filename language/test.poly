@@ -1,4 +1,5 @@
 /check_string
 str == ("Hello, world!")
+!check_string
 @io::print(str);
 @contract::exit(0);

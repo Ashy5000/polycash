@@ -95,6 +95,9 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         if(c == '@') {
             tokens.emplace_back(Token{TokenType::system_at, {}});
         }
+        if(c == '!') {
+            tokens.emplace_back(Token{TokenType::excl, {}});
+        }
         if(c == ';') {
             tokens.emplace_back(Token{TokenType::semi, {}});
         }
