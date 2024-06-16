@@ -20,15 +20,17 @@ Linker::Linker(const std::vector<std::string> &entries) {
 }
 
 void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
-    for(std::string injectedName: functionsInjected) {
-        if(injectedName == name) {
+    for(const InjectedFunction& fn: functionsInjected) {
+        if(fn.name == name) {
             return;
         }
     }
+    int offset = -1;
     for(const BlockasmLib& lib : libs) {
         for(int i = 0; i < lib.functions.size(); i++) {
             Function func = lib.functions[i];
             if(func.name == name) {
+                offset = 2;
                 std::string source;
                 std::istringstream iss(lib.source);
                 int j = 0;
@@ -48,6 +50,7 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
                         continue;
                     }
                     if(streamingToBefore) {
+                        offset++;
                         before << line << std::endl;
                         continue;
                     }
@@ -61,7 +64,12 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
             }
         }
     }
-    functionsInjected.emplace_back(name);
+    if(offset == -1) {
+        std::cerr << "Unknown function " << name << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    auto injectedFunction = InjectedFunction(name, offset);
+    functionsInjected.emplace_back(injectedFunction);
 }
 
 void Linker::SkipLibs(std::stringstream &blockasm) {

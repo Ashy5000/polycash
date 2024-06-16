@@ -5,10 +5,11 @@
 #ifndef LINKER_H
 #define LINKER_H
 #include "BlockasmLib.h"
+#include "InjectedFunction.h"
 
 
 class Linker {
-    std::vector<std::string> functionsInjected;
+    std::vector<InjectedFunction> functionsInjected;
 public:
     std::vector<BlockasmLib> libs;
     void InjectIfNotPresent(std::string name, std::stringstream &blockasm);

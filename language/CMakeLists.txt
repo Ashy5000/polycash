@@ -29,4 +29,5 @@ add_executable(plc src/main.cpp
         src/Function.h
         src/Linker.cpp
         src/Linker.h
+        src/InjectedFunction.h
 )
