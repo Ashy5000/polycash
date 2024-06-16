@@ -84,15 +84,3 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
     blockasm << "Jmp " << jmpTo << std::endl;
     blockasm << temp;
 }
-
-void Linker::ScheduleJob(LinkerJob name) {
-    jobs.emplace_back(name);
-}
-
-void Linker::RunJobs(std::stringstream &blockasm) {
-    for(LinkerJob job : jobs) {
-        InjectIfNotPresent(job.name, blockasm);
-    }
-}
-
-

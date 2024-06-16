@@ -7,19 +7,11 @@
 #include "BlockasmLib.h"
 
 
-class LinkerJob {
-public:
-    std::string name;
-};
-
 class Linker {
     std::vector<std::string> functionsInjected;
-    std::vector<LinkerJob> jobs;
 public:
     std::vector<BlockasmLib> libs;
     void InjectIfNotPresent(std::string name, std::stringstream &blockasm);
-    void ScheduleJob(LinkerJob name);
-    void RunJobs(std::stringstream &blockasm);
 
     static void SkipLibs(std::stringstream &blockasm);
 
