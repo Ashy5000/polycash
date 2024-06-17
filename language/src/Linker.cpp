@@ -4,7 +4,6 @@
 
 #include "Linker.h"
 
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -34,12 +33,6 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
                 std::string source;
                 std::istringstream iss(lib.source);
                 int j = 0;
-                for(std::string line; std::getline(iss, line); ) {
-                    if(j >= func.lineOffset) {
-                        source += line + "\n";
-                    }
-                    j++;
-                }
                 std::stringstream before;
                 std::stringstream after;
                 bool streamingToBefore = true;
@@ -55,6 +48,29 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
                         continue;
                     }
                     after << line << std::endl;
+                }
+                for(std::string line; std::getline(iss, line); ) {
+                    if(j >= func.lineOffset) {
+                        if(line.substr(0, 3) == "Jmp") {
+                            std::stringstream ss(line);
+                            std::string temp;
+                            std::stringstream adjustedLine;
+                            while(ss >> temp) {
+                                if(temp.substr(0, 2) != "0x" && temp.substr(0, 3) != "Jmp") {
+                                    int relativeLine = stoi(temp);
+                                    int absoluteLine = relativeLine + offset;
+                                    adjustedLine << absoluteLine;
+                                } else {
+                                    adjustedLine << temp;
+                                }
+                                adjustedLine << " ";
+                            }
+                            source += adjustedLine.str() + "\n";
+                        } else {
+                            source += line + "\n";
+                        }
+                    }
+                    j++;
                 }
                 blockasm = std::stringstream();
                 blockasm << before.str();
