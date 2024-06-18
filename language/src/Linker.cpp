@@ -113,7 +113,7 @@ std::string Linker::CallFunction(const std::string& name) {
     for(const InjectedFunction& func : functionsInjected) {
         if(func.name == name) {
             std::stringstream blockasm;
-            blockasm << "Jmp " << func.offset << std::endl;
+            blockasm << "Call " << func.offset << std::endl;
             return blockasm.str();
         }
     }
