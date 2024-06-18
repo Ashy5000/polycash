@@ -92,9 +92,17 @@ pub fn run_vm(
             }
             "CpyBfr" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
-                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
                 {
                     vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                if !vm_check_buffer_initialization(buffers, line.args[1].clone()) {
+                    buffers.insert(
+                        line.args[1].clone(),
+                        Buffer {
+                            contents: Vec::new(),
+                        },
+                    );
+                    gas_used += 2.0;
                 }
                 let src_contents: Vec<u8> =
                     vm_access_buffer(buffers, line.args[0].clone(), line.args[2].clone());

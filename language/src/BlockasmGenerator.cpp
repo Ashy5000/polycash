@@ -83,7 +83,31 @@ std::string BlockasmGenerator::GenerateBlockasm() {
         } else if(token.type == TokenType::excl) {
             if(tokens[i + 1].type == TokenType::identifier) {
                 std::string functionName = tokens[i + 1].value;
-                std::string functionCallBlockasm = l.CallFunction(functionName);
+                if(tokens[i + 2].type != TokenType::open_paren) {
+                    std::cerr << "Expected '('" << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                std::vector<Token> params;
+                for(int j = i + 3; j < tokens.size(); j++) {
+                    if(tokens[j].type == TokenType::expr) {
+                        params.emplace_back(tokens[j]);
+                    }
+                    if(tokens[j].type == TokenType::newline) {
+                        break;
+                    }
+                }
+                std::vector<int> paramLocs;
+                for(Token param : params) {
+                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(param, nextAllocatedLocation, vars);
+                    std::string exprBlockasm = std::get<0>(exprTuple);
+                    blockasm << exprBlockasm;
+                    int exprLoc = std::get<1>(exprTuple);
+                    if(exprLoc >= nextAllocatedLocation) {
+                        nextAllocatedLocation = exprLoc + 1;
+                    }
+                    paramLocs.emplace_back(exprLoc);
+                }
+                std::string functionCallBlockasm = l.CallFunction(functionName, paramLocs);
                 blockasm << functionCallBlockasm;
             }
         }

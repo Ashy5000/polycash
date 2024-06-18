@@ -6,6 +6,8 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
+#include "Signature.h"
 
 void BlockasmLib::LoadSource() {
     std::stringstream source_stream;
@@ -20,15 +22,40 @@ void BlockasmLib::LoadSource() {
         if(line[0] == ';') {
             std::string name;
             std::istringstream innerIss(line);
+            Signature sig({{}});
             int j = 0;
-            for(std::string segment; std::getline(innerIss, segment, '@'); ) {
+            for(std::string segment; std::getline(innerIss, segment, ' '); ) {
                 if(j == 1) {
-                    name = segment;
-                    break;
+                    name = segment.substr(1);
+                }
+                if(j > 1) {
+                    std::istringstream innerInnerIss(segment);
+                    int k = 0;
+                    Type paramType;
+                    int paramLoc;
+                    for(std::string subSegment; std::getline(innerInnerIss, subSegment, '@'); ) {
+                        if(k == 0) {
+                            std::string paramTypeStr = subSegment.substr(1);
+                            if(paramTypeStr == "string") {
+                                paramType = Type::string;
+                            } else if(paramTypeStr == "uint64") {
+                                paramType = Type::uint64;
+                            } else {
+                                std::cerr << "Unknown type " << paramTypeStr << std::endl;
+                                exit(EXIT_FAILURE);
+                            }
+                        } else if(k == 1) {
+                            std::string paramLocStr = subSegment.substr(2);
+                            paramLoc = atoi(paramLocStr.c_str());
+                        }
+                        k++;
+                    }
+                    sig.expectedTypes.emplace_back(paramType);
+                    sig.locations.emplace_back(paramLoc);
                 }
                 j++;
             }
-            Function f = Function(i + 1, name);
+            Function f = Function(i + 1, name, sig);
             functions.emplace_back(f);
         }
         i++;

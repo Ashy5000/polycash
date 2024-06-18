@@ -5,6 +5,7 @@
 #include "Linker.h"
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 
 Linker::Linker(const std::vector<std::string> &entries) {
@@ -58,7 +59,7 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
                             while(ss >> temp) {
                                 if(temp.substr(0, 2) != "0x" && temp.substr(0, 3) != "Jmp") {
                                     int relativeLine = stoi(temp);
-                                    int absoluteLine = relativeLine + offset;
+                                    int absoluteLine = relativeLine + offset - 1;
                                     adjustedLine << absoluteLine;
                                 } else {
                                     adjustedLine << temp;
@@ -109,10 +110,24 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
     blockasm << temp;
 }
 
-std::string Linker::CallFunction(const std::string& name) {
+std::string Linker::CallFunction(const std::string& name, std::vector<int> paramLocs) {
     for(const InjectedFunction& func : functionsInjected) {
         if(func.name == name) {
             std::stringstream blockasm;
+            for(int i = 0; i < paramLocs.size(); i++) {
+                int fromLoc = paramLocs[i];
+                int toLoc = 0;
+                for(BlockasmLib lib : libs) {
+                    for(Function libFunc : lib.functions) {
+                        if(libFunc.name == func.name) {
+                            toLoc = libFunc.sig.locations[i];
+                            break;
+                        }
+                    }
+                }
+                blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << fromLoc << " 0x";
+                blockasm << std::setfill('0') << std::setw(8) << std::hex << toLoc << " 0x00000000" << std::endl;
+            }
             blockasm << "Call " << func.offset << std::endl;
             return blockasm.str();
         }

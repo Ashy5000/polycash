@@ -1,5 +1,5 @@
 /check_string
 str == ("Hello, world!")
-!check_string
+!check_string((str))
 @io::print(str);
 @contract::exit(0);

@@ -12,6 +12,7 @@
 class Signature {
 public:
     std::vector<Type> expectedTypes;
+    std::vector<int> locations;
     [[nodiscard]] bool CheckSignature(const std::vector<Type> &types) const;
     explicit Signature(std::vector<Type> expectedTypes_p);
 };
