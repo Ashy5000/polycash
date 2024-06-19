@@ -10,16 +10,17 @@
 #include "Signature.h"
 #include "Token.h"
 #include "Variable.h"
+#include "Linker.h"
 
 
 class ParamsParser {
-    std::tuple<std::string, std::vector<int>, bool> ParseParamsWithSignature(int &nextAllocatedLocation, const std::vector<Variable> &vars, const Signature& sig);
+    std::tuple<std::vector<int>, bool> ParseParamsWithSignature(int &nextAllocatedLocation, const std::vector<Variable> &vars, const Signature& sig, std::stringstream &blockasm, Linker &l);
 public:
     std::vector<Token> params;
     std::vector<Signature> signatures;
 
-    std::tuple<std::string, std::vector<int>, Signature> ParseParams(int &nextAllocatedLocation,
-                                                                     const std::vector<Variable> &vars);
+    std::tuple<std::vector<int>, Signature> ParseParams(int &nextAllocatedLocation,
+                                                                     const std::vector<Variable> &vars, std::stringstream &blockasm, Linker &l);
     ParamsParser(std::vector<Token> params_p, std::vector<Signature> signatures_p);
 };
 

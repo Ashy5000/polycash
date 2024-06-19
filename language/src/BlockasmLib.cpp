@@ -22,13 +22,24 @@ void BlockasmLib::LoadSource() {
         if(line[0] == ';') {
             std::string name;
             std::istringstream innerIss(line);
-            Signature sig({{}});
+            Signature sig({}, Type::type_placeholder);
             int j = 0;
             for(std::string segment; std::getline(innerIss, segment, ' '); ) {
                 if(j == 1) {
                     name = segment.substr(1);
                 }
-                if(j > 1) {
+                if(j == 2) {
+                    std::string returnTypeStr = segment.substr(2);
+                    if(returnTypeStr == "string") {
+                        sig.returnType = Type::string;
+                    } else if(returnTypeStr == "uint64") {
+                        sig.returnType = Type::uint64;
+                    } else {
+                        std::cerr << "Unknown type " << returnTypeStr << std::endl;
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                if(j > 2) {
                     std::istringstream innerInnerIss(segment);
                     int k = 0;
                     Type paramType;

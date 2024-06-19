@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <tuple>
 
 Linker::Linker(const std::vector<std::string> &entries) {
     libs = {};
@@ -105,12 +106,13 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
         exit(EXIT_FAILURE);
     }
     const std::string &temp = blockasm.str();
-    blockasm.seekp(0);
+    blockasm = {};
     blockasm << "Jmp " << jmpTo << std::endl;
     blockasm << temp;
 }
 
-std::string Linker::CallFunction(const std::string& name, std::vector<int> paramLocs) {
+std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std::vector<int> paramLocs) {
+    Type t;
     for(const InjectedFunction& func : functionsInjected) {
         if(func.name == name) {
             std::stringstream blockasm;
@@ -121,6 +123,7 @@ std::string Linker::CallFunction(const std::string& name, std::vector<int> param
                     for(Function libFunc : lib.functions) {
                         if(libFunc.name == func.name) {
                             toLoc = libFunc.sig.locations[i];
+                            t = libFunc.sig.returnType;
                             break;
                         }
                     }
@@ -129,7 +132,7 @@ std::string Linker::CallFunction(const std::string& name, std::vector<int> param
                 blockasm << std::setfill('0') << std::setw(8) << std::hex << toLoc << " 0x00000000" << std::endl;
             }
             blockasm << "Call " << func.offset << std::endl;
-            return blockasm.str();
+            return std::make_tuple(blockasm.str(), t);
         }
     }
     std::cerr << "Attempt to call unresolved function " << name << std::endl;

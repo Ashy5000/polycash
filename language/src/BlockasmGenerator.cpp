@@ -40,28 +40,27 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                 if(tokens[i + 2].type == TokenType::eq) {
                     // e.g. newVar == 3
                     std::string varName = token.value;
-                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 4], nextAllocatedLocation, vars);
-                    std::string exprBlockasm = std::get<0>(exprTuple);
-                    blockasm << exprBlockasm;
-                    int exprLoc = std::get<1>(exprTuple);
+                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 4], nextAllocatedLocation, vars, blockasm, l);
+                    int exprLoc = std::get<0>(exprTuple);
                     if(exprLoc >= nextAllocatedLocation) {
                         nextAllocatedLocation = exprLoc + 1;
                     }
-                    Type type = std::get<2>(exprTuple);
-                    Variable var = Variable(varName, exprLoc, type);
+                    Type type = std::get<1>(exprTuple);
+                    blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x";
+                    blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+                    Variable var = Variable(varName, nextAllocatedLocation, type);
+                    nextAllocatedLocation++;
                     vars.emplace_back(var);
                     i += 6;
                 } else {
                     // e.g. existingVar = 5
                     std::string varName = token.value;
-                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 3], nextAllocatedLocation, vars);
-                    std::string exprBlockasm = std::get<0>(exprTuple);
-                    blockasm << exprBlockasm;
-                    int exprLoc = std::get<1>(exprTuple);
+                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 3], nextAllocatedLocation, vars, blockasm, l);
+                    int exprLoc = std::get<0>(exprTuple);
                     if(exprLoc >= nextAllocatedLocation) {
                         nextAllocatedLocation = exprLoc + 1;
                     }
-                    Type type = std::get<2>(exprTuple);
+                    Type type = std::get<1>(exprTuple);
                     for(const Variable &var : vars) {
                         if(var.name == varName) {
                             if(var.type != type) {
@@ -98,16 +97,15 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                 }
                 std::vector<int> paramLocs;
                 for(Token param : params) {
-                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(param, nextAllocatedLocation, vars);
-                    std::string exprBlockasm = std::get<0>(exprTuple);
-                    blockasm << exprBlockasm;
-                    int exprLoc = std::get<1>(exprTuple);
+                    std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(param, nextAllocatedLocation, vars, blockasm, l);
+                    int exprLoc = std::get<0>(exprTuple);
                     if(exprLoc >= nextAllocatedLocation) {
                         nextAllocatedLocation = exprLoc + 1;
                     }
                     paramLocs.emplace_back(exprLoc);
                 }
-                std::string functionCallBlockasm = l.CallFunction(functionName, paramLocs);
+                std::tuple functionCallTuple = l.CallFunction(functionName, paramLocs);
+                std::string functionCallBlockasm = std::get<0>(functionCallTuple);
                 blockasm << functionCallBlockasm;
             }
         }
@@ -169,8 +167,7 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
     std::string function = identifier.value.substr(delimiterPos + 2);
     for(const SystemFunction& func : SYSTEM_FUNCTIONS) {
         if(func.module == module && func.name == function) {
-            std::string funcBlockasm = func.generateBlockasm(params, nextAllocatedLocation, vars, l);
-            blockasm << funcBlockasm;
+            func.generateBlockasm(params, nextAllocatedLocation, vars, blockasm, l);
             return std::make_tuple(vars, 6);
         }
     }

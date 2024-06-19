@@ -32,6 +32,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         if(c == '(') {
             depth++;
             if(activeToken.type == TokenType::expr) {
+                substring += "(";
                 continue;
             }
             if(!activeToken.value.empty() || (activeToken.type != TokenType::identifier && activeToken.type != TokenType::type_placeholder)) {
@@ -47,6 +48,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         if(c == ')') {
             if(depth > 1) {
                 depth--;
+                substring += ")";
                 continue;
             }
             depth--;
