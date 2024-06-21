@@ -28,6 +28,7 @@ func main() {
 	if len(Blockchain) == 0 {
 		Append(GenesisBlock())
 	}
+	LoadEnv()
 	if *mine {
 		*serve = true
 	}

@@ -10,10 +10,13 @@ package node_util
 
 import "math"
 
-func CalculateBlockReward(minerCount int64) float64 {
+func CalculateBlockReward(minerCount int64, blockHeight int) float64 {
 	// The more miners, the less reward
 	// This is designed to prevent miners from forking their hash power to get more rewards
 	p := 0.95
+	if Env.Upgrades.Guadalajara <= blockHeight {
+		p = 0.99
+	}
 	reward := math.Pow(p, float64(minerCount))
 	return reward
 }
