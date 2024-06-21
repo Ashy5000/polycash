@@ -16,6 +16,7 @@ import (
 	"time"
 
 	. "cryptocurrency/node_util"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -79,6 +80,7 @@ func TestVerifyMiner(t *testing.T) {
 		miner := key.PublicKey
 		miner.Y = []byte("123")
 		Blockchain = nil
+		LoadEnv()
 		Append(GenesisBlock())
 		Append(Block{
 			Transactions:      []Transaction{},

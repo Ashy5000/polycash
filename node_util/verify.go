@@ -56,6 +56,9 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 }
 
 func VerifyMiner(miner PublicKey) bool {
+	if Env.Upgrades.Jinan <= len(Blockchain) {
+		return true
+	}
 	if IsNewMiner(miner, len(Blockchain)) && GetMinerCount(len(Blockchain)) >= GetMaxMiners() {
 		Log(fmt.Sprintf("Miner count: %d", GetMinerCount(len(Blockchain))), true)
 		Log(fmt.Sprintf("Maximum miner count: %d", GetMaxMiners()), true)

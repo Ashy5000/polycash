@@ -16,6 +16,7 @@ import (
 
 type NetworkUpgrades struct {
 	Guadalajara int `json:"guadalajara"`
+	Jinan       int `json:"jinan"`
 }
 
 type Environment struct {
