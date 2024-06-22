@@ -105,6 +105,4 @@ This software is released under the GNU General Public License v3.0.
 
 ## Contributing
 
-I'm not accepting pull requests for this repository for now, but you're more than welcome to open an issue if there's something you want improved, added, or fixed.
-
-When the mainnet is fully deployed, this repository will be fully open for contributions. Until then, I'd like to wait until the codebase is fully stable.
+Contributions are greatly appreciated! See the CONTRIBUTING file for more details.
