@@ -240,12 +240,8 @@ func BootstrapCmd(fields []string) {
 
 func GetFromStateCmd(fields []string) {
 	address := fields[1]
-	addressUint64, err := strconv.ParseUint(address, 10, 64)
-	if err != nil {
-		panic(err)
-	}
 	state := CalculateCurrentState()
-	dataBytes := state.Data[addressUint64]
+	dataBytes := state.Data[address]
 	dataHex := hex.EncodeToString(dataBytes)
 	fmt.Println("Data:", dataHex)
 }

@@ -17,6 +17,11 @@ func CalculateBlockReward(minerCount int64, blockHeight int) float64 {
 	if Env.Upgrades.Guadalajara <= blockHeight {
 		p = 0.99
 	}
-	reward := math.Pow(p, float64(minerCount))
+	var reward float64
+	if Env.Upgrades.Alexandria > blockHeight {
+		reward = math.Pow(p, float64(minerCount))
+	} else {
+		reward = math.Pow(p, float64(minerCount)) * float64(10000*(blockHeight%31536000)) // Block reward multiplies by a constant (10000) every year. This will prevent a limited supply.
+	}
 	return reward
 }

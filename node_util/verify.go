@@ -126,7 +126,7 @@ func VerifySmartContractTransactions(block Block) bool {
 	// Execute the smart contracts
 	var smartContractCreatedTransactions []Transaction
 	var fullTransition = StateTransition{
-		UpdatedData: make(map[uint64][]byte),
+		UpdatedData: make(map[string][]byte),
 	}
 	for _, contract := range smartContracts {
 		transactions, transition, gasUsed, err := contract.Execute()

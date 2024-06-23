@@ -52,7 +52,7 @@ func CreateBlock() (Block, error) {
 	Log(fmt.Sprintf("Mining block with difficulty %d", block.Difficulty), false)
 	for hash > MaximumUint64/block.Difficulty {
 		block.Transition = StateTransition{
-			UpdatedData: make(map[uint64][]byte),
+			UpdatedData: make(map[string][]byte),
 		}
 		for _, PartialStateTransition := range NextTransitions {
 			for address, data := range PartialStateTransition.UpdatedData {
