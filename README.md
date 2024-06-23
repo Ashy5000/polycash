@@ -43,6 +43,14 @@ git clone https://github.com/ashy5000/cryptocurrency
 cd cryptocurrency
 ```
 
+Build:
+
+```bash
+go build -o builds/node/node_linux-amd64 # replace for your os and architecture
+cd contracts
+cargo build
+```
+
 ### To run as a client:
 
 To use an interactive console for viewing and adding to the blockchain, run:
