@@ -72,11 +72,7 @@ To get started, run `keygen` to generate a new key. To get your balance, find yo
 To run the node software, which keeps the blockchain distributed across the p2p network, run:
 
 ```bash
-./builds/node/node_linux_x86_64 -serve -port 8080  # replace for your os and architecture
-# In a new terminal window: (optional, starts a peer server so it is faster to find new nodes)
-# This is not at all required.
-cd peer_server
-cargo run
+./builds/node/node_linux_x86_64 -serve -port [PORT]  # replace for your os and architecture
 ```
 
 ### To run a miner:
@@ -84,19 +80,15 @@ cargo run
 To run the mining software, which adds new blocks to the blockchain in exchange for a reward, run:
 
 ```bash
-./builds/node/node_linux_x86_64 -serve -mine -port 8080
-# In a new terminal window: (optional, starts a peer server so it is faster to find new nodes)
-# This is not at all required.
-cd peer_server
-cargo run
+./builds/node/node_linux_x86_64 -serve -mine -port [PORT]
 ```
 
-### To connect to a peer via their peer server:
+### To connect to a peer:
 
-To connect to a peer that is also running a peer server (ran the commands after `# In a new terminal window:`), run:
+To connect to a peer, enter the BlockCMD console and run:
 
-```bash
-curl http://[PEER IP]:6060 -d 'http://[YOUR IP]:8080'
+```
+addPeer http://PEER_IP:PORT
 ```
 
 ## License
