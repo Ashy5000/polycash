@@ -12,6 +12,7 @@ import (
 	. "cryptocurrency/node_interface"
 	. "cryptocurrency/node_util"
 	. "cryptocurrency/rollup"
+	. "cryptocurrency/testing"
 	"flag"
 	"net/http"
 )
@@ -41,6 +42,8 @@ func main() {
 	} else {
 		if *command == "exit" {
 			StartCmdLine()
+		} else if *command == "test" {
+			StartTest()
 		} else {
 			RunCmd(*command)
 		}

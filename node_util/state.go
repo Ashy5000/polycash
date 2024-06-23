@@ -9,11 +9,11 @@ You should have received a copy of the GNU General Public License along with thi
 package node_util
 
 type State struct {
-	Data map[uint64][]byte
+	Data map[string][]byte
 }
 
 type StateTransition struct {
-	UpdatedData map[uint64][]byte
+	UpdatedData map[string][]byte
 }
 
 func TransitionState(state State, transition StateTransition) State {
@@ -25,7 +25,7 @@ func TransitionState(state State, transition StateTransition) State {
 
 func CalculateCurrentState() State {
 	state := State{
-		Data: make(map[uint64][]byte),
+		Data: make(map[string][]byte),
 	}
 	for _, block := range Blockchain {
 		state = TransitionState(state, block.Transition)

@@ -16,7 +16,7 @@ mod vm;
 
 use crate::{buffer::Buffer, vm::run_vm};
 
-use std::{collections::HashMap, process::ExitCode};
+use std::{collections::HashMap, env, process::ExitCode};
 
 fn main() -> ExitCode {
     let contract_contents = read_contract::read_contract();
@@ -30,7 +30,9 @@ fn main() -> ExitCode {
         },
     );
     let blockutil_interface = blockutil::BlockUtilInterface::new();
-    let (exit_code, gas_used) = run_vm(tree, &mut buffers, blockutil_interface);
+    let args: Vec<String> = env::args().collect();
+    let contract_hash = &args[2];
+    let (exit_code, gas_used) = run_vm(tree, &mut buffers, blockutil_interface, contract_hash.clone());
     println!("Gas used: {}", gas_used);
     ExitCode::from(exit_code as u8)
 }
