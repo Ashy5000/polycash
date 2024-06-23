@@ -19,9 +19,9 @@ func DecodePublicKey(keyString string) PublicKey {
 		Y: []byte(""),
 	}
 	for _, ps := range strings.Split(strings.Trim(keyString, "[]"), " ") {
-		pi, _ := strconv.Atoi(ps)
-		if pi > 255 {
-			panic("Byte out of range during public key conversion")
+		pi, err := strconv.ParseUint(ps, 10, 8)
+		if err != nil {
+			panic(err)
 		}
 		key.Y = append(key.Y, byte(pi))
 	}
