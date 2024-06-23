@@ -20,6 +20,9 @@ func DecodePublicKey(keyString string) PublicKey {
 	}
 	for _, ps := range strings.Split(strings.Trim(keyString, "[]"), " ") {
 		pi, _ := strconv.Atoi(ps)
+		if pi > 255 {
+			panic("Byte out of range during public key conversion")
+		}
 		key.Y = append(key.Y, byte(pi))
 	}
 	return key
