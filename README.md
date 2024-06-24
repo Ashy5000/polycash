@@ -71,7 +71,7 @@ Commands:
 - `savestate`: save a backup of the current state of the blockchain to a file
 - `loadstate`: load a backup of the current state of the blockchain from a file
 - `exit`: exit the console
-- `addpeer {ip}`: by default, connects to a peer. If using a centralized peer server, makes yourself known to the network.
+- `addpeer {ip}`: connect to a peer
 
 To get started, run `keygen` to generate a new key. To get your balance, find your public key in the `key.json` file (the long number following `"Y":`), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key. When you're done, type `encrypt` to encrypt your private key and store it safely. You can decrypt it later to use it again with `decrypt`. You must use a passcode that is a multiple of 16 characters long for encryption and decryption. Write it down somewhere safe, as you will not be able to access your private key without it.
 
