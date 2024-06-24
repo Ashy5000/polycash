@@ -1,4 +1,4 @@
-; @check_string ->uint64 /string@0x00000002
+; @check_string ->boolean /string@0x00000002
 InitBfr 0x00000010 0x00000000
 BfrLen 0x00000002 0x00000010 0x00000000
 InitBfr 0x00000011 0x00000000

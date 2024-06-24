@@ -1,6 +1,7 @@
 /check_string
 str == ("Hello, world!")
-isValid == (!check_string((str)))
-@io::print(str);
-@io::print(isValid);
+isInvalid == (!check_string((str)))
+if(isInvalid) {
+    @io::print(str);
+}
 @contract::exit(0);

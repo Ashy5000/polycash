@@ -17,16 +17,20 @@
 #include "SystemFunctions.h"
 #include "Variable.h"
 
-BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p) {
+BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, int nextAllocatedLocation_p, std::vector<Variable> vars_p, bool useLinker_p) {
     tokens = std::move(tokens_p);
+    nextAllocatedLocation = nextAllocatedLocation_p;
     blockasm = {};
-    blockasm << ";^^^^BEGIN_SOURCE^^^^" << std::endl;
+    useLinker = useLinker_p;
+    if(useLinker) {
+        blockasm << ";^^^^BEGIN_SOURCE^^^^" << std::endl;
+    }
+    vars = std::move(vars_p);
 }
 
 
 std::string BlockasmGenerator::GenerateBlockasm() {
-    std::vector<Variable> vars;
-    int nextAllocatedLocation = 0x00001000;
+    int nextLabel = 0;
     auto l = Linker({"string.blockasm"});
     for(int i = 0; i < tokens.size(); i++) {
         if(const Token token = tokens[i]; token.type == TokenType::system_at) {
@@ -74,9 +78,35 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     }
                     i += 5;
                 }
+            } else if(token.value == "if") {
+                std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(tokens[i + 2], nextAllocatedLocation, vars, blockasm, l);
+                int exprLoc = std::get<0>(exprTuple);
+                if(exprLoc >= nextAllocatedLocation) {
+                    nextAllocatedLocation = exprLoc + 1;
+                }
+                Type type = std::get<1>(exprTuple);
+                if(type != Type::boolean) {
+                    std::cerr << "Expected bool in if statement";
+                    exit(EXIT_FAILURE);
+                }
+                blockasm << "Not 0x" << std::setfill('0') << std::setw(8) << exprLoc << " 0x";
+                blockasm << std::setfill('0') << std::setw(8) << exprLoc << " 0x00000000" << std::endl;
+                blockasm << "JmpCond 0x" << std::setfill('0') << std::setw(8) << exprLoc << " ";
+                blockasm << "<" << nextLabel << " 0x00000000" << std::endl;
+                BlockasmGenerator subGenerator = BlockasmGenerator(tokens[i + 5].children, nextAllocatedLocation, vars, false);
+                blockasm << subGenerator.GenerateBlockasm();
+                int subGeneratorNextAllocatedLocation = subGenerator.GetNextAllocatedLocation();
+                if(subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
+                    nextAllocatedLocation = subGeneratorNextAllocatedLocation + 1;
+                }
+                blockasm << "; LABEL " << nextLabel++ << std::endl;
             }
         } else if(token.type == TokenType::div) {
             if(tokens[i + 1].type == TokenType::identifier) {
+                if(!useLinker) {
+                    std::cerr << "Imports are only allowed in root of file" << std::endl;
+                    exit(EXIT_FAILURE);
+                }
                 l.InjectIfNotPresent(tokens[i + 1].value, blockasm);
             }
         } else if(token.type == TokenType::excl) {
@@ -96,7 +126,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     }
                 }
                 std::vector<int> paramLocs;
-                for(Token param : params) {
+                for(const Token& param : params) {
                     std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(param, nextAllocatedLocation, vars, blockasm, l);
                     int exprLoc = std::get<0>(exprTuple);
                     if(exprLoc >= nextAllocatedLocation) {
@@ -110,7 +140,9 @@ std::string BlockasmGenerator::GenerateBlockasm() {
             }
         }
     }
-    Linker::SkipLibs(blockasm);
+    if(useLinker) {
+        Linker::SkipLibs(blockasm);
+    }
     std::string blockasmStr = blockasm.str();
     return blockasmStr;
 }
@@ -173,4 +205,8 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
     }
     std::cerr << "Unknown module." << std::endl;
     exit(EXIT_FAILURE);
+}
+
+int BlockasmGenerator::GetNextAllocatedLocation() {
+    return nextAllocatedLocation;
 }

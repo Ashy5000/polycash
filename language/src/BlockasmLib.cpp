@@ -34,6 +34,8 @@ void BlockasmLib::LoadSource() {
                         sig.returnType = Type::string;
                     } else if(returnTypeStr == "uint64") {
                         sig.returnType = Type::uint64;
+                    } else if(returnTypeStr == "boolean") {
+                        sig.returnType = Type::boolean;
                     } else {
                         std::cerr << "Unknown type " << returnTypeStr << std::endl;
                         exit(EXIT_FAILURE);
