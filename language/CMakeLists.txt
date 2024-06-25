@@ -30,4 +30,6 @@ add_executable(plc src/main.cpp
         src/Linker.cpp
         src/Linker.h
         src/InjectedFunction.h
+        src/LabelManager.cpp
+        src/LabelManager.h
 )

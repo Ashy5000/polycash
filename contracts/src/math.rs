@@ -125,8 +125,13 @@ pub(crate) fn execute_math_operation(
         buffer_1 = buffers.get(&b).unwrap();
     }
     let buffer_0_u64 = buffer_0.as_u64().unwrap();
-    let buffer_1_u64 = buffer_1.as_u64().unwrap();
-    let result_u64 = operation.execute(buffer_0_u64, buffer_1_u64);
+    let result_u64;
+    if std::any::type_name_of_val(&operation) != "contracts::math::Not" {
+        let buffer_1_u64 = buffer_1.as_u64().unwrap();
+        result_u64 = operation.execute(buffer_0_u64, buffer_1_u64);
+    } else {
+        result_u64 = operation.execute(buffer_0_u64, 0);
+    }
     let buffer_result = buffers.get_mut(&res).unwrap();
     buffer_result.load_u64(result_u64.expect("Error storing result in buffer"));
 }
