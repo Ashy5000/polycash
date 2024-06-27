@@ -4,9 +4,10 @@
 
 #include "Linker.h"
 
-#include <iomanip>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
+#include <tuple>
 
 Linker::Linker(const std::vector<std::string> &entries) {
     libs = {};
@@ -34,12 +35,6 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
                 std::string source;
                 std::istringstream iss(lib.source);
                 int j = 0;
-                for(std::string line; std::getline(iss, line); ) {
-                    if(j >= func.lineOffset) {
-                        source += line + "\n";
-                    }
-                    j++;
-                }
                 std::stringstream before;
                 std::stringstream after;
                 bool streamingToBefore = true;
@@ -55,6 +50,29 @@ void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
                         continue;
                     }
                     after << line << std::endl;
+                }
+                for(std::string line; std::getline(iss, line); ) {
+                    if(j >= func.lineOffset) {
+                        if(line.substr(0, 3) == "Jmp") {
+                            std::stringstream ss(line);
+                            std::string temp;
+                            std::stringstream adjustedLine;
+                            while(ss >> temp) {
+                                if(temp.substr(0, 2) != "0x" && temp.substr(0, 3) != "Jmp") {
+                                    int relativeLine = stoi(temp);
+                                    int absoluteLine = relativeLine + offset - 1;
+                                    adjustedLine << absoluteLine;
+                                } else {
+                                    adjustedLine << temp;
+                                }
+                                adjustedLine << " ";
+                            }
+                            source += adjustedLine.str() + "\n";
+                        } else {
+                            source += line + "\n";
+                        }
+                    }
+                    j++;
                 }
                 blockasm = std::stringstream();
                 blockasm << before.str();
@@ -88,17 +106,33 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
         exit(EXIT_FAILURE);
     }
     const std::string &temp = blockasm.str();
-    blockasm.seekp(0);
+    blockasm = {};
     blockasm << "Jmp " << jmpTo << std::endl;
     blockasm << temp;
 }
 
-std::string Linker::CallFunction(const std::string& name) {
+std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std::vector<int> paramLocs) {
+    Type t;
     for(const InjectedFunction& func : functionsInjected) {
         if(func.name == name) {
             std::stringstream blockasm;
-            blockasm << "Jmp " << func.offset << std::endl;
-            return blockasm.str();
+            for(int i = 0; i < paramLocs.size(); i++) {
+                int fromLoc = paramLocs[i];
+                int toLoc = 0;
+                for(BlockasmLib lib : libs) {
+                    for(Function libFunc : lib.functions) {
+                        if(libFunc.name == func.name) {
+                            toLoc = libFunc.sig.locations[i];
+                            t = libFunc.sig.returnType;
+                            break;
+                        }
+                    }
+                }
+                blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << fromLoc << " 0x";
+                blockasm << std::setfill('0') << std::setw(8) << std::hex << toLoc << " 0x00000000" << std::endl;
+            }
+            blockasm << "Call " << func.offset << std::endl;
+            return std::make_tuple(blockasm.str(), t);
         }
     }
     std::cerr << "Attempt to call unresolved function " << name << std::endl;

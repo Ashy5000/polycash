@@ -163,7 +163,7 @@ func GetBalance(key []byte) float64 {
 			}
 			// Get number of miners at the time of mining
 			minerCount := GetMinerCount(i)
-			reward := CalculateBlockReward(minerCount)
+			reward := CalculateBlockReward(minerCount, i)
 			miningTotal += reward
 			blocksMined++
 		}

@@ -13,7 +13,8 @@ enum class OperatorType {
     add,
     sub,
     mul,
-    div
+    div,
+    eq
 };
 
 

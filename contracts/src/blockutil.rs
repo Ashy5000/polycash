@@ -77,7 +77,7 @@ impl BlockUtilInterface {
         let output = output[output.len() - 1].to_string();
         (output, true)
     }
-    pub fn get_from_state(&self, property: u64) -> (Vec<u8>, bool) {
+    pub fn get_from_state(&self, property: String) -> (Vec<u8>, bool) {
         let command = format!("sync;getFromState {}", property);
         if !sanitize_node_console_command(&command) {
             println!("Forbidden command");

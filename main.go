@@ -12,6 +12,7 @@ import (
 	. "cryptocurrency/node_interface"
 	. "cryptocurrency/node_util"
 	. "cryptocurrency/rollup"
+	. "cryptocurrency/testing"
 	"flag"
 	"net/http"
 )
@@ -28,6 +29,7 @@ func main() {
 	if len(Blockchain) == 0 {
 		Append(GenesisBlock())
 	}
+	LoadEnv()
 	if *mine {
 		*serve = true
 	}
@@ -40,6 +42,8 @@ func main() {
 	} else {
 		if *command == "exit" {
 			StartCmdLine()
+		} else if *command == "test" {
+			StartTest()
 		} else {
 			RunCmd(*command)
 		}

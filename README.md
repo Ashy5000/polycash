@@ -43,6 +43,14 @@ git clone https://github.com/ashy5000/cryptocurrency
 cd cryptocurrency
 ```
 
+Build:
+
+```bash
+go build -o builds/node/node_linux-amd64 # replace for your os and architecture
+cd contracts
+cargo build
+```
+
 ### To run as a client:
 
 To use an interactive console for viewing and adding to the blockchain, run:
@@ -63,7 +71,7 @@ Commands:
 - `savestate`: save a backup of the current state of the blockchain to a file
 - `loadstate`: load a backup of the current state of the blockchain from a file
 - `exit`: exit the console
-- `addpeer {ip}`: by default, connects to a peer. If using a centralized peer server, makes yourself known to the network.
+- `addpeer {ip}`: connect to a peer
 
 To get started, run `keygen` to generate a new key. To get your balance, find your public key in the `key.json` file (the long number following `"Y":`), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key. When you're done, type `encrypt` to encrypt your private key and store it safely. You can decrypt it later to use it again with `decrypt`. You must use a passcode that is a multiple of 16 characters long for encryption and decryption. Write it down somewhere safe, as you will not be able to access your private key without it.
 
@@ -72,11 +80,7 @@ To get started, run `keygen` to generate a new key. To get your balance, find yo
 To run the node software, which keeps the blockchain distributed across the p2p network, run:
 
 ```bash
-./builds/node/node_linux_x86_64 -serve -port 8080  # replace for your os and architecture
-# In a new terminal window: (optional, starts a peer server so it is faster to find new nodes)
-# This is not at all required.
-cd peer_server
-cargo run
+./builds/node/node_linux_x86_64 -serve -port [PORT]  # replace for your os and architecture
 ```
 
 ### To run a miner:
@@ -84,19 +88,15 @@ cargo run
 To run the mining software, which adds new blocks to the blockchain in exchange for a reward, run:
 
 ```bash
-./builds/node/node_linux_x86_64 -serve -mine -port 8080
-# In a new terminal window: (optional, starts a peer server so it is faster to find new nodes)
-# This is not at all required.
-cd peer_server
-cargo run
+./builds/node/node_linux_x86_64 -serve -mine -port [PORT]
 ```
 
-### To connect to a peer via their peer server:
+### To connect to a peer:
 
-To connect to a peer that is also running a peer server (ran the commands after `# In a new terminal window:`), run:
+To connect to a peer, enter the BlockCMD console and run:
 
-```bash
-curl http://[PEER IP]:6060 -d 'http://[YOUR IP]:8080'
+```
+addPeer http://PEER_IP:PORT
 ```
 
 ## License
@@ -105,6 +105,4 @@ This software is released under the GNU General Public License v3.0.
 
 ## Contributing
 
-I'm not accepting pull requests for this repository for now, but you're more than welcome to open an issue if there's something you want improved, added, or fixed.
-
-When the mainnet is fully deployed, this repository will be fully open for contributions. Until then, I'd like to wait until the codebase is fully stable.
+Contributions are greatly appreciated! See the CONTRIBUTING file for more details.

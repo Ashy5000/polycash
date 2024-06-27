@@ -10,8 +10,8 @@ use std::{env, fs};
 
 pub fn read_contract() -> String {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        panic!("Expected exactly 1 argument, got {}", args.len())
+    if args.len() != 3 {
+        panic!("Expected exactly 3 arguments, got {}", args.len())
     }
     let contract_path = &args[1];
     let contents = fs::read_to_string(contract_path)

@@ -11,6 +11,7 @@ package node_util
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"os"
@@ -38,7 +39,9 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 	if err := os.WriteFile("contract.blockasm", []byte(c.Contents), 0666); err != nil {
 		return nil, StateTransition{}, 0, err
 	}
-	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm").Output()
+	contractStr := c.Contents
+	hash := sha256.Sum256([]byte(contractStr))
+	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm", string(hash[:])).Output()
 	if err != nil {
 		return nil, StateTransition{}, 0, err
 	}
@@ -46,7 +49,7 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 	transactions := make([]Transaction, 0)
 	gasUsed := 0.0
 	transition := StateTransition{
-		UpdatedData: make(map[uint64][]byte),
+		UpdatedData: make(map[string][]byte),
 	}
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -59,16 +62,12 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 					stateChangeString := line[14:]
 					parts := strings.Split(stateChangeString, "|")
 					address := parts[0]
-					addressUint64, err := strconv.ParseUint(address, 10, 32)
-					if err != nil {
-						return nil, StateTransition{}, 0, err
-					}
 					valueHex := parts[1]
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {
 						return nil, StateTransition{}, 0, err
 					}
-					transition.UpdatedData[addressUint64] = valueBytes
+					transition.UpdatedData[address] = valueBytes
 					continue
 				}
 			}

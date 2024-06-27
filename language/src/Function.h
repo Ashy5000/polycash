@@ -6,12 +6,15 @@
 #define FUNCTION_H
 #include <string>
 
+#include "Signature.h"
+
 
 class Function {
 public:
     int lineOffset;
     std::string name;
-    Function(const int lineOffset_p, std::string name_p) : lineOffset(lineOffset_p), name(std::move(name_p)) {}
+    Signature sig;
+    Function(const int lineOffset_p, std::string name_p, Signature sig_p) : lineOffset(lineOffset_p), name(std::move(name_p)), sig(std::move(sig_p)) {}
 };
 
 

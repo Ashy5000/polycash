@@ -4,6 +4,8 @@
 
 #include "Signature.h"
 
+#include <utility>
+
 
 bool Signature::CheckSignature(const std::vector<Type> &types) const {
     for(int i = 0; i < types.size(); i++) {
@@ -14,7 +16,8 @@ bool Signature::CheckSignature(const std::vector<Type> &types) const {
     return true;
 }
 
-Signature::Signature(std::vector<Type> expectedTypes_p) {
-    expectedTypes = expectedTypes_p;
+Signature::Signature(std::vector<Type> expectedTypes_p, Type returnType_p) {
+    expectedTypes = std::move(expectedTypes_p);
+    returnType = returnType_p;
 }
 

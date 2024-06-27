@@ -26,6 +26,9 @@ enum class TokenType {
     eq,
     string_lit,
     excl,
+    open_curly,
+    close_curly,
+    block,
 };
 
 

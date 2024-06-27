@@ -29,9 +29,41 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
             str.push_back(c);
             continue;
         }
+        if(c == '{') {
+            depth++;
+            if(activeToken.type == TokenType::expr || activeToken.type == TokenType::block) {
+                substring += "{";
+                continue;
+            }
+            if(!activeToken.value.empty() || (activeToken.type != TokenType::identifier && activeToken.type != TokenType::type_placeholder)) {
+                tokens.emplace_back(activeToken);
+            }
+            activeToken.children = {};
+            activeToken.value = {};
+            activeToken.type = TokenType::type_placeholder;
+            tokens.emplace_back(Token{TokenType::open_curly, {}});
+            activeToken.type = TokenType::block;
+            continue;
+        }
+        if(c == '}') {
+            if(depth > 1) {
+                depth--;
+                substring += "}";
+                continue;
+            }
+            depth--;
+            activeToken.children = parse_tokens(substring);
+            tokens.emplace_back(activeToken);
+            activeToken.children = {};
+            activeToken.value = {};
+            activeToken.type = TokenType::type_placeholder;
+            substring.clear();
+            tokens.emplace_back(Token{TokenType::close_curly, {}});
+        }
         if(c == '(') {
             depth++;
-            if(activeToken.type == TokenType::expr) {
+            if(activeToken.type == TokenType::expr || activeToken.type == TokenType::block) {
+                substring += "(";
                 continue;
             }
             if(!activeToken.value.empty() || (activeToken.type != TokenType::identifier && activeToken.type != TokenType::type_placeholder)) {
@@ -47,6 +79,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         if(c == ')') {
             if(depth > 1) {
                 depth--;
+                substring += ")";
                 continue;
             }
             depth--;
@@ -58,7 +91,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
             substring.clear();
             tokens.emplace_back(Token{TokenType::close_paren, {}});
         }
-        if(activeToken.type == TokenType::expr) {
+        if(activeToken.type == TokenType::expr || activeToken.type == TokenType::block) {
             substring.push_back(c);
             continue;
         }

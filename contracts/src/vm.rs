@@ -55,6 +55,7 @@ pub fn run_vm(
     syntax_tree: SyntaxTree,
     buffers: &mut HashMap<String, Buffer>,
     blockutil_interface: BlockUtilInterface,
+    contract_hash: String
 ) -> (i64, f64) {
     let mut line_number = 0;
     let mut should_increment;
@@ -92,9 +93,17 @@ pub fn run_vm(
             }
             "CpyBfr" => {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
-                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
                 {
                     vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                if !vm_check_buffer_initialization(buffers, line.args[1].clone()) {
+                    buffers.insert(
+                        line.args[1].clone(),
+                        Buffer {
+                            contents: Vec::new(),
+                        },
+                    );
+                    gas_used += 2.0;
                 }
                 let src_contents: Vec<u8> =
                     vm_access_buffer(buffers, line.args[0].clone(), line.args[2].clone());
@@ -516,7 +525,7 @@ pub fn run_vm(
                 let contents_vec_u8 =
                     vm_access_buffer(buffers, line.args[1].clone(), line.args[2].clone());
                 let contents_hex = hex::encode(contents_vec_u8.clone());
-                println!("State change: {}|{}", location, contents_hex);
+                println!("State change: {}{}|{}", contract_hash.clone(), location, contents_hex);
                 gas_used += 3.0;
                 gas_used += 0.6 * contents_vec_u8.len() as f64;
             }
@@ -526,8 +535,22 @@ pub fn run_vm(
                 {
                     vm_throw_local_error(buffers, line.args[2].clone());
                 }
-                let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap();
+                let location = std::str::from_utf8(&*vm_access_buffer(buffers, line.args[0].clone(), line.args[1].clone())).expect("Could not convert state location to string").to_owned();
                 let (contents_vec_u8, success) = blockutil_interface.get_from_state(location);
+                if !success {
+                    vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
+                dst_buffer.contents = contents_vec_u8;
+            }
+            "GetFromStateWithPrefix" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                let location = std::str::from_utf8(&*vm_access_buffer(buffers, line.args[0].clone(), line.args[1].clone())).expect("Could not convert state location to string").to_owned();
+                let (contents_vec_u8, success) = blockutil_interface.get_from_state(contract_hash.clone() + &*location);
                 if !success {
                     vm_throw_local_error(buffers, line.args[2].clone());
                 }

@@ -12,7 +12,7 @@ func GetNumTokensMinted() int64 {
 			result += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
 		}
 		minerCount := GetMinerCount(i)
-		reward := CalculateBlockReward(minerCount)
+		reward := CalculateBlockReward(minerCount, i)
 		result += reward
 	}
 	if len(Blockchain) > 50 {

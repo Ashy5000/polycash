@@ -10,30 +10,26 @@
 #include "ParamsParser.h"
 #include "Signature.h"
 #include "SystemFunction.h"
+#include "Linker.h"
 
 const std::vector SYSTEM_FUNCTIONS = {
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars, Linker &l) -> std::string {
-            std::stringstream blockasm;
-            Signature sig = Signature({Type::uint64});
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
+            Signature sig = Signature({Type::uint64}, Type::type_placeholder);
             ParamsParser pp = ParamsParser(params, {sig});
-            std::tuple<std::string, std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
-            std::string expressionBlockasm = std::get<0>(parsingResult);
-            std::vector<int> locations = std::get<1>(parsingResult);
+            std::tuple<std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars, blockasm, l);
+            std::vector<int> locations = std::get<0>(parsingResult);
             int exitCodeLocation = locations[0];
-            blockasm << expressionBlockasm;
             blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation;
             if(exitCodeLocation >= nextAllocatedLocation) {
                 nextAllocatedLocation = exitCodeLocation + 1;
             }
-            return blockasm.str();
         },
         "contract",
         "exit"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
-            std::stringstream blockasm;
+            [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
             std::string typeString = params[1].children[0].value;
             Type type = Type::type_placeholder;
             if(typeString == "uint64") {
@@ -46,14 +42,12 @@ const std::vector SYSTEM_FUNCTIONS = {
             auto var = Variable(params[0].children[0].value, nextAllocatedLocation, type);
             vars.emplace_back(var);
             blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation++ << " 0x00000000" << std::endl;
-            return blockasm.str();
         },
         "memory",
         "alloc"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
-            std::stringstream blockasm;
+            [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
             int indexToRemove = -1;
             for(int j = 0; j < vars.size(); j++) {
                 if(Variable var = vars[j]; var.name == params[0].children[0].value) {
@@ -67,14 +61,12 @@ const std::vector SYSTEM_FUNCTIONS = {
             }
             blockasm << "Free 0x" << std::setfill('0') << std::setw(8) << std::hex << vars[indexToRemove].location << " 0x00000000" << std::endl;
             vars.erase(vars.begin() + indexToRemove);
-            return blockasm.str();
         },
         "memory",
         "free"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
-            std::stringstream blockasm;
+            [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
             int indexToRename = -1;
             for(int j = 0; j < vars.size(); j++) {
                 if(Variable var = vars[j]; var.name == params[0].children[0].value) {
@@ -93,45 +85,36 @@ const std::vector SYSTEM_FUNCTIONS = {
             }
             blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << vars[indexToRename].location << " 0x";
             blockasm << std::setfill('0') << std::setw(16) << std::hex << val << " 0x00000000" << std::endl;
-            return blockasm.str();
         },
         "memory",
         "set"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, Linker &l) -> std::string {
-            std::stringstream blockasm;
-            Signature uint64Sig = Signature({Type::uint64});
-            Signature stringSig = Signature({Type::string});
+            [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
+            Signature uint64Sig = Signature({Type::uint64}, Type::type_placeholder);
+            Signature stringSig = Signature({Type::string}, Type::type_placeholder);
             ParamsParser pp = ParamsParser(params, {uint64Sig, stringSig});
-            std::tuple<std::string, std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
-            std::string expressionBlockasm = std::get<0>(parsingResult);
-            std::vector<int> locations = std::get<1>(parsingResult);
-            Signature sig = std::get<2>(parsingResult);
-            blockasm << expressionBlockasm << std::endl;
+            std::tuple<std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars, blockasm, l);
+            std::vector<int> locations = std::get<0>(parsingResult);
+            Signature sig = std::get<1>(parsingResult);
             int dataLocation = locations[0];
             if(sig.expectedTypes[0] == Type::uint64) {
                 blockasm << "Stdout 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
             } else {
                 blockasm << "PrintStr 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
             }
-            return blockasm.str();
         },
         "io",
         "print"
     ),
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars, Linker &) -> std::string {
-            std::stringstream blockasm;
-            auto sig = Signature({Type::uint64});
+            [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
+            auto sig = Signature({Type::uint64}, Type::type_placeholder);
             auto pp = ParamsParser(params, {sig});
-            std::tuple<std::string, std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars);
-            std::string expressionBlockasm = std::get<0>(parsingResult);
-            std::vector<int> locations = std::get<1>(parsingResult);
-            blockasm << expressionBlockasm << std::endl;
+            std::tuple<std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars, blockasm, l);
+            std::vector<int> locations = std::get<0>(parsingResult);
             int dataLocation = locations[0];
             blockasm << "Stderr 0x" << std::setfill('0') << std::setw(8) << std::hex << dataLocation << " 0x00000000" << std::endl;
-            return blockasm.str();
         },
         "io",
         "err"

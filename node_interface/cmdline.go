@@ -240,24 +240,30 @@ func BootstrapCmd(fields []string) {
 
 func GetFromStateCmd(fields []string) {
 	address := fields[1]
-	addressUint64, err := strconv.ParseUint(address, 10, 64)
-	if err != nil {
-		panic(err)
-	}
 	state := CalculateCurrentState()
-	dataBytes := state.Data[addressUint64]
+	dataBytes := state.Data[address]
 	dataHex := hex.EncodeToString(dataBytes)
 	fmt.Println("Data:", dataHex)
 }
 
 func HelpCmd(fields []string) {
 	fmt.Println("Commands:")
+	fmt.Println("help - Display this help menu")
+	fmt.Println("license - Display this software's license (GNU GPL v3)")
 	fmt.Println("sync - Sync the blockchain with peers")
-	fmt.Println("balance <public key> - Get the balance of a public key")
-	fmt.Println("send <public key> <amount> - Send an amount to a public key")
 	fmt.Println("keygen - Generate a new key")
+	fmt.Println("showPublicKey - Print your public key")
+	fmt.Println("encrypt - Encrypt your keys for extra security")
+	fmt.Println("decrypt - Decrypt your keys so you can use them")
+	fmt.Println("send <public key> <amount> - Send an amount to a public key")
+	fmt.Println("sendL2 <public key> <amount> - Send an amount to a public key via L2 rollups (alpha)")
+	fmt.Println("balance <public key> - Get the balance of a public key")
 	fmt.Println("savestate - Save the blockchain to a file")
 	fmt.Println("loadstate - Load the blockchain from a file")
+	fmt.Println("deploySmartContract <blockasm path> - Deploy a smart contract to the blockchain")
+	fmt.Println("addPeer <ip> - Connect to a peer")
+	fmt.Println("startAnalysisConsole - Start a specialized console for analyzing the blockchain and network")
+	fmt.Println("bootstrap - Connect to more peers")
 	fmt.Println("exit - Exit the console")
 }
 

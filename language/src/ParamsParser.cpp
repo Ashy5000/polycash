@@ -14,38 +14,34 @@
 #include "Signature.h"
 #include "Type.h"
 
-std::tuple<std::string, std::vector<int>, bool> ParamsParser::ParseParamsWithSignature(int &nextAllocatedLocation, const std::vector<Variable>& vars, const Signature& sig) {
-    std::stringstream blockasm;
+std::tuple<std::vector<int>, bool> ParamsParser::ParseParamsWithSignature(int &nextAllocatedLocation, const std::vector<Variable> &vars, const Signature& sig, std::stringstream &blockasm, Linker &l) {
     std::vector<int> locations;
     std::vector<Type> types;
     for(Token param : params) {
-        std::tuple<std::string, int, Type> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars);
-        std::string blockasmSection = std::get<0>(expressionGenerationResult);
-        blockasm << blockasmSection;
-        int location = std::get<1>(expressionGenerationResult);
+        std::tuple<int, Type> expressionGenerationResult = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars, blockasm, l);
+        int location = std::get<0>(expressionGenerationResult);
         if(location >= nextAllocatedLocation) {
             nextAllocatedLocation = location + 1;
         }
         locations.emplace_back(location);
-        Type type = std::get<2>(expressionGenerationResult);
+        Type type = std::get<1>(expressionGenerationResult);
         types.emplace_back(type);
     }
     if(!sig.CheckSignature(types)) {
-        return std::make_tuple("", locations, false);
+        return std::make_tuple(locations, false);
     }
-    return std::make_tuple(blockasm.str(), locations, true);
+    return std::make_tuple(locations, true);
 }
 
-std::tuple<std::string, std::vector<int>, Signature> ParamsParser::ParseParams(
-    int &nextAllocatedLocation, const std::vector<Variable> &vars) {
+std::tuple<std::vector<int>, Signature> ParamsParser::ParseParams(
+    int &nextAllocatedLocation, const std::vector<Variable> &vars, std::stringstream &blockasm, Linker &l) {
     for(const Signature& sig : signatures) {
-        std::tuple parseRes = ParseParamsWithSignature(nextAllocatedLocation, vars, sig);
-        if(bool sigSucceeded = std::get<2>(parseRes); !sigSucceeded) {
+        std::tuple parseRes = ParseParamsWithSignature(nextAllocatedLocation, vars, sig, blockasm, l);
+        if(bool sigSucceeded = std::get<1>(parseRes); !sigSucceeded) {
             continue;
         }
-        std::string blockasm = std::get<0>(parseRes);
-        std::vector locations = std::get<1>(parseRes);
-        return std::make_tuple(blockasm, locations, sig);
+        std::vector locations = std::get<0>(parseRes);
+        return std::make_tuple(locations, sig);
     }
     std::cerr << "No matching signature for function" << std::endl;
     exit(EXIT_FAILURE);
