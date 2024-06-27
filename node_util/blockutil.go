@@ -78,8 +78,10 @@ func SyncBlockchain(finalityBlockHeight int) {
 				Log("Invalid blockchain received from peer.", true)
 				continue
 			}
-			if blockHash != HashBlock(Blockchain[i]) {
-				createsFork = true
+			if i < len(Blockchain) - 1 {
+				if blockHash != HashBlock(Blockchain[i]) {
+					createsFork = true
+				}
 			}
 			// Get the correct difficulty for the block
 			lastMinedBlock := peerBlockchain[i-1]
