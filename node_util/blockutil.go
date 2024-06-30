@@ -71,12 +71,12 @@ func SyncBlockchain(finalityBlockHeight int) {
 			previousBlockHash := HashBlock(peerBlockchain[i-1])
 			if !bytes.Equal(block.PreviousBlockHash[:], previousBlockHash[:]) {
 				Log("Invalid blockchain received from peer.", true)
-				continue
+				break
 			}
 			blockHash := HashBlock(block)
 			if binary.BigEndian.Uint64(blockHash[:]) > MaximumUint64/block.Difficulty {
 				Log("Invalid blockchain received from peer.", true)
-				continue
+				break
 			}
 			if i < len(Blockchain) - 1 {
 				if blockHash != HashBlock(Blockchain[i]) {
@@ -97,14 +97,14 @@ func SyncBlockchain(finalityBlockHeight int) {
 			correctDifficulty := GetDifficulty(lastTime, lastDifficulty)
 			if block.Difficulty != correctDifficulty {
 				Log("Invalid blockchain received from peer.", true)
-				continue
+				break
 			}
 		}
 		if createsFork {
 			// Require finality
 			if length < finalityBlockHeight {
 				Log("Ignoring blockchain received from peer due to lack of finality.", true)
-				continue
+				break
 			}
 		}
 		if length > longestLength {
