@@ -46,9 +46,10 @@ cd cryptocurrency
 Build:
 
 ```bash
-go build -o builds/node/node_linux-amd64 # replace for your os and architecture
+go build -o builds/node/node
 cd contracts
 cargo build
+cd ..
 ```
 
 ### To run as a client:
@@ -56,7 +57,7 @@ cargo build
 To use an interactive console for viewing and adding to the blockchain, run:
 
 ```bash
-./builds/node/node_linux_x86_64 # replace for your os and architecture
+./builds/node/node
 ```
 
 Commands:
@@ -85,7 +86,7 @@ To get started, run `keygen` to generate a new key. To get your balance, find yo
 To run the node software, which keeps the blockchain distributed across the p2p network, run:
 
 ```bash
-./builds/node/node_linux_x86_64 -serve -port [PORT]  # replace for your os and architecture
+./builds/node/node -serve -port [PORT]
 ```
 
 ### To run a miner:
@@ -93,7 +94,7 @@ To run the node software, which keeps the blockchain distributed across the p2p 
 To run the mining software, which adds new blocks to the blockchain in exchange for a reward, run:
 
 ```bash
-./builds/node/node_linux_x86_64 -serve -mine -port [PORT]
+./builds/node/node -serve -mine -port [PORT]
 ```
 
 ### To connect to a peer:
