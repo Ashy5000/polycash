@@ -24,7 +24,7 @@ func MoveBlockchain(start bool) {
 
 func StartNode(port int) {
 	fmt.Println("Starting node...")
-	cmd := exec.Command("./builds/node/node_linux-amd64", "-serve", "-mine", "-port", fmt.Sprintf("%d", port))
+	cmd := exec.Command("./builds/node/node", "-serve", "-mine", "-port", fmt.Sprintf("%d", port))
 	err := cmd.Start()
 	if err != nil {
 		panic(err)

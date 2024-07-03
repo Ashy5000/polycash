@@ -29,6 +29,7 @@ func TestSyncBlockchain(t *testing.T) {
 	t.Run("It sets the blockchain to the longest blockchain from the peers or panics", func(t *testing.T) {
 		// Arrange
 		Blockchain = nil
+		LoadEnv()
 		// Act
 		defer func() {
 			// Assert

@@ -15,14 +15,8 @@ pub struct BlockUtilInterface {
 
 impl BlockUtilInterface {
     pub fn new() -> Self {
-        // Read the executable path from the executable path file
-        let node_executable_path = std::fs::read_to_string("node_executable_path.txt")
-            .expect("Could not read node_executable_path.txt");
-        // Remove the newline character
-        // This is necessary because the path is read from a file
-        let node_executable_path = node_executable_path.trim().to_string();
         Self {
-            node_executable_path,
+            "./builds/node/node"
         }
     }
     pub fn get_nth_block_property(&self, n: i64, property: String) -> (String, bool) {
