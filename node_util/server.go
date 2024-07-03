@@ -139,7 +139,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	if !VerifyBlock(block) {
+	if !VerifyBlock(block, len(Blockchain)) {
 		Log("Block is invalid. Ignoring block request.", true)
 		return
 	}
@@ -265,7 +265,12 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 	var miningFinishedTime time.Time
 	if block.MiningTime > 0 {
 		// Get the time mining finished
-		miningFinishedTime = block.Timestamp.Add(block.MiningTime)
+		if Env.Upgrades.Yangon <= len(Blockchain) {
+			previousBlockFinishedTime := Blockchain[len(Blockchain)-1].Timestamp.Add(Blockchain[len(Blockchain)-1].MiningTime)
+			currentTime = previousBlockFinishedTime.Add(block.MiningTime)
+		} else {
+			currentTime = block.Timestamp.Add(block.MiningTime)
+		}
 		// Check if the time the block was mined is within a reasonable range of the current time
 		// It cannot be in the future, and it cannot be more than 10 seconds in the past
 		if miningFinishedTime.After(currentTime) || miningFinishedTime.Before(currentTime.Add(-10*time.Second)) {

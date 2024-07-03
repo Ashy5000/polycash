@@ -10,8 +10,9 @@ package main
 
 import (
 	. "cryptocurrency/node_util"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHashBlock(t *testing.T) {
@@ -20,7 +21,7 @@ func TestHashBlock(t *testing.T) {
 		block := Block{}
 		var emptyHash [32]byte
 		// Act
-		hash := HashBlock(block)
+		hash := HashBlock(block, 0)
 		// Assert
 		assert.NotEqual(t, emptyHash, hash)
 	})

@@ -29,9 +29,31 @@ type Contract struct {
 	Contents string
 	Parties  []ContractParty
 	GasUsed  float64
+	Location uint64
+	Loaded   bool
+}
+
+func (c Contract) IsNewContract() bool {
+	return c.Location == 0
+}
+
+func (c Contract) LoadContract() {
+	state := CalculateCurrentState()
+	for _, contract := range state.Contracts {
+		if contract.Location == c.Location {
+			c.Contents = contract.Contents
+			c.Parties = contract.Parties
+			c.GasUsed = contract.GasUsed
+			c.Loaded = true
+			break
+		}
+	}
 }
 
 func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
+	if !c.Loaded {
+		c.LoadContract()
+	}
 	if !VerifySmartContract(c) {
 		Warn("Invalid contract detected.")
 		return make([]Transaction, 0), StateTransition{}, 0, nil
@@ -117,6 +139,11 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 			FromSmartContract: true,
 		}
 		transactions = append(transactions, transaction)
+	}
+	if c.IsNewContract() {
+		transition.NewContracts = map[uint64]Contract{
+			c.Location: c,
+		}
 	}
 	return transactions, transition, gasUsed, nil
 }

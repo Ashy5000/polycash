@@ -99,8 +99,8 @@ func DetectFork(block Block) bool {
 
 func DetectDuplicateBlock(hashBytes [64]byte) bool {
 	isDuplicate := false
-	for _, b := range Blockchain {
-		if HashBlock(b) == hashBytes {
+	for i, b := range Blockchain {
+		if HashBlock(b, i) == hashBytes {
 			isDuplicate = true
 		}
 	}
@@ -162,15 +162,14 @@ func VerifySmartContractTransactions(block Block) bool {
 	return true
 }
 
-func VerifyBlock(block Block) bool {
-	isValid := true
-	isValid = VerifyTransactions(block.Transactions) && isValid
-	hashBytes := HashBlock(block)
+func VerifyBlock(block Block, blockHeight int) bool {
+	isValid := VerifyTransactions(block.Transactions)
+	hashBytes := HashBlock(block, blockHeight)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	isValid = hash <= MaximumUint64/block.Difficulty && isValid
 	isValid = !DetectDuplicateBlock(hashBytes) && isValid
 	isValid = !DetectFork(block) && isValid
-	if len(Blockchain) > 0 && block.PreviousBlockHash != HashBlock(Blockchain[len(Blockchain)-1]) {
+	if len(Blockchain) > 0 && block.PreviousBlockHash != HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1) {
 		Log("Block has invalid previous block hash. Ignoring block request.", true)
 		Log("The block could be on a different fork.", true)
 		Log("The blockchain will be re-synced to stay on the longest chain.", true)

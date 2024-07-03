@@ -41,11 +41,11 @@ func CreateBlock() (Block, error) {
 		MiningTime:             0,
 	}
 	if len(Blockchain) > 0 {
-		block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1])
+		block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1)
 	} else {
 		block.PreviousBlockHash = [64]byte{}
 	}
-	hashBytes := HashBlock(block)
+	hashBytes := HashBlock(block, len(Blockchain))
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	// Request time verifiers
 	block.PreMiningTimeVerifierSignatures, block.PreMiningTimeVerifiers = RequestTimeVerification(block)
@@ -82,21 +82,26 @@ func CreateBlock() (Block, error) {
 				previousBlock.MiningTime = time.Minute
 			}
 			if len(Blockchain) > 0 {
-				block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1])
+				block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1)
 			} else {
 				block.PreviousBlockHash = [64]byte{}
 			}
 			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty)
 			block.Transactions = MiningTransactions
 			block.Nonce++
-			hashBytes = HashBlock(block)
+			hashBytes = HashBlock(block, len(Blockchain))
 			hash = binary.BigEndian.Uint64(hashBytes[:])
 		} else {
 			Log("Pool dry.", false)
 			return Block{}, errors.New("pool dry")
 		}
 	}
-	block.MiningTime = time.Since(start)
+	timeVerificationTimestamp := time.Now()
+	if Env.Upgrades.Yangon <= len(Blockchain) {
+		block.MiningTime = timeVerificationTimestamp.Sub(previousBlock.Timestamp.Add(previousBlock.MiningTime))
+	} else {
+		block.MiningTime = time.Since(start)
+	}
 	// Ask for time verifiers
 	block.TimeVerifierSignatures, block.TimeVerifiers = RequestTimeVerification(block)
 	if int64(len(block.TimeVerifiers)) < GetMinerCount(len(Blockchain))/5 {

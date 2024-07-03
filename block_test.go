@@ -14,6 +14,7 @@ import (
 	"time"
 
 	. "cryptocurrency/node_util"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -83,6 +84,6 @@ func TestBlock(t *testing.T) {
 			transaction.Timestamp = timestamp
 		}
 		// Assert
-		assert.Equal(t, HashBlock(block), HashBlock(unmarshaled))
+		assert.Equal(t, HashBlock(block, 0), HashBlock(unmarshaled, 0))
 	})
 }

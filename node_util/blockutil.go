@@ -68,18 +68,21 @@ func SyncBlockchain(finalityBlockHeight int) {
 			if i == 0 {
 				continue
 			}
-			previousBlockHash := HashBlock(peerBlockchain[i-1])
+			previousBlockHash := HashBlock(peerBlockchain[i-1], i-1)
 			if !bytes.Equal(block.PreviousBlockHash[:], previousBlockHash[:]) {
-				Log("Invalid blockchain received from peer.", true)
-				continue
+				Log("Invalid blockchain received from peer: incorrect previous block hash", true)
+				fmt.Println(block.PreviousBlockHash)
+				fmt.Println(previousBlockHash)
+				goto INVALID
 			}
-			blockHash := HashBlock(block)
+			blockHash := HashBlock(block, i)
 			if binary.BigEndian.Uint64(blockHash[:]) > MaximumUint64/block.Difficulty {
-				Log("Invalid blockchain received from peer.", true)
-				continue
+				Log("Invalid blockchain received from peer: proof of work", false)
+				fmt.Println("Failed at block", i)
+				goto INVALID
 			}
-			if i < len(Blockchain) - 1 {
-				if blockHash != HashBlock(Blockchain[i]) {
+			if i < len(Blockchain)-1 {
+				if blockHash != HashBlock(Blockchain[i], i) {
 					createsFork = true
 				}
 			}
@@ -96,21 +99,24 @@ func SyncBlockchain(finalityBlockHeight int) {
 			}
 			correctDifficulty := GetDifficulty(lastTime, lastDifficulty)
 			if block.Difficulty != correctDifficulty {
-				Log("Invalid blockchain received from peer.", true)
-				continue
+				Log("Invalid blockchain received from peer: incorrect difficulty", false)
+				goto INVALID
 			}
 		}
 		if createsFork {
 			// Require finality
 			if length < finalityBlockHeight {
-				Log("Ignoring blockchain received from peer due to lack of finality.", true)
-				continue
+				Log("Ignoring blockchain received from peer due to lack of finality.", false)
+				goto INVALID
 			}
 		}
 		if length > longestLength {
 			longestLength = length
 			longestBlockchain = peerBlockchain
 		}
+		break
+	INVALID:
+		errCount++
 	}
 	if errCount >= len(GetPeers()) {
 		Log("Failed to sync blockchain with any peers.", true)
@@ -228,6 +234,9 @@ func DeploySmartContract(contractPath string) error {
 	contract := Contract{
 		Contents: string(file),
 		Parties:  make([]ContractParty, 0),
+		GasUsed:  0,
+		Location: 0,
+		Loaded:   true,
 	}
 	key := GetKey("")
 	deployer := GetKey("").PublicKey

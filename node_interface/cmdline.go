@@ -288,7 +288,7 @@ func GetNthBlockCmd(fields []string) {
 	property := fields[2]
 	switch property {
 	case "hash":
-		hash := HashBlock(block)
+		hash := HashBlock(block, n)
 		fmt.Println(hex.EncodeToString(hash[:]))
 	case "prev_hash":
 		fmt.Println(hex.EncodeToString(block.PreviousBlockHash[:]))

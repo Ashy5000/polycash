@@ -24,12 +24,12 @@ func main() {
 	command := flag.String("command", "exit", "Run a command and exit")
 	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
 	flag.Parse()
+	LoadEnv()
 	LoadStateCmd(nil)
 	SyncBlockchain(-1)
 	if len(Blockchain) == 0 {
 		Append(GenesisBlock())
 	}
-	LoadEnv()
 	if *mine {
 		*serve = true
 	}
