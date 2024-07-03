@@ -62,16 +62,21 @@ To use an interactive console for viewing and adding to the blockchain, run:
 Commands:
 
 - `help`: see a list of all commands
+- `license`: display the software's license (GNU GPL v3)
 - `sync`: update the blockchain and all balances and transactions
 - `keygen`: generate a key pair so you can send and receive tokens
+- `showPublicKey`: print your public key to give to people or services that need to pay you
 - `encrypt`: encrypt the private key so you can store it safely
 - `decrypt`: decrypt the private key so you can use it
 - `send {recipient} {amount}`: send {amount} tokens to {recipient}
+- `sendL2 {recipient} {amount}`: send {amount} tokens to {recipient} via the layer 2 rollup system (alpha)
 - `balance {key}`: get the balance associated with the public key {key}
 - `savestate`: save a backup of the current state of the blockchain to a file
 - `loadstate`: load a backup of the current state of the blockchain from a file
-- `exit`: exit the console
 - `addpeer {ip}`: connect to a peer
+- `startAnalysisConsole`: start a console for analyzing the status and history of the blockchain and network
+- `bootstrap`: connect to your peers' peers for increased speed
+- `exit`: exit the console
 
 To get started, run `keygen` to generate a new key. To get your balance, find your public key in the `key.json` file (the long number following `"Y":`), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key. When you're done, type `encrypt` to encrypt your private key and store it safely. You can decrypt it later to use it again with `decrypt`. You must use a passcode that is a multiple of 16 characters long for encryption and decryption. Write it down somewhere safe, as you will not be able to access your private key without it.
 
