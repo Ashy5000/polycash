@@ -36,6 +36,11 @@ For a simpler guide, see the [welcome](docs/welcome.md) page.
 
 _Note: A node must have a publicly accessible IP address in order to join the network. You may have to set up port forwarding on your router._
 
+Prerequisites:
+- [go](https://go.dev/doc/install)
+- [liboqs-go](https://github.com/open-quantum-safe/liboqs-go)
+- [rust](https://www.rust-lang.org/tools/install)
+
 Create and clone the repository:
 
 ```bash
