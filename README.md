@@ -41,21 +41,11 @@ Prerequisites:
 - [liboqs-go](https://github.com/open-quantum-safe/liboqs-go)
 - [rust](https://www.rust-lang.org/tools/install)
 
-Create and clone the repository:
-
+Run the install script:
 ```bash
-git clone https://github.com/ashy5000/cryptocurrency
-cd cryptocurrency
+curl https://raw.githubusercontent.com/Ashy5000/cryptocurrency/master/install.sh | bash
 ```
-
-Build:
-
-```bash
-go build -o builds/node/node
-cd contracts
-cargo build
-cd ..
-```
+You don't need to authenticate as root for installation.
 
 ### To run as a client:
 
