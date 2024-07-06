@@ -1,5 +1,7 @@
 # Polycash
 
+[Polycash logo](https://github.com/ashy5000/cryptocurrency/blob/master/assets/logos/logo_red_green.png?raw=true)
+
 (Polycash has no association with the Polygon blockchain, despite the similar naming.)
 
 The home of a power-efficient, secure, quantum-resistant, and modern cryptocurrency blockchain designed to resolve the issues presented by the traditional PoW (Proof of Work) incentive mechanism while maintaining decentralization. Written in Golang and Rust for secure algorithm implementations, lightweight networking, memory safety, speed, and reliability.
