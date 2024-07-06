@@ -1,6 +1,6 @@
 # Polycash
 
-[Polycash logo](https://github.com/ashy5000/cryptocurrency/blob/master/assets/logos/logo_red_green.png?raw=true)
+<img src="https://github.com/Ashy5000/cryptocurrency/blob/master/assets/logos/logo_classic.png?raw=true" alt="Polycash logo" width="200" />
 
 (Polycash has no association with the Polygon blockchain, despite the similar naming.)
 
