@@ -44,6 +44,10 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 	var amountSpentInCurrentBlock float64
 	for _, transaction := range MiningTransactions {
 		if bytes.Equal(transaction.Sender.Y, senderKey.Y) {
+			if amountSpentInCurrentBlock+transaction.Amount > amountSpentInCurrentBlock {
+				Warn("Overflow detected.")
+				return false
+			}
 			amountSpentInCurrentBlock += transaction.Amount
 		}
 	}
