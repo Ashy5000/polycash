@@ -16,7 +16,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
     std::string str;
     for(int i = 0; i < input.size(); i++) {
         const char c = input[i];
-        if(c == '"' && activeToken.type != TokenType::expr) {
+        if(c == '"' && activeToken.type == TokenType::type_placeholder || activeToken.type == TokenType::string_lit) {
             inString = !inString;
             Token t = Token(TokenType::string_lit, str);
             str.clear();

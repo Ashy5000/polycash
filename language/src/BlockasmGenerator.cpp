@@ -89,6 +89,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     std::cerr << "Expected bool in if statement";
                     exit(EXIT_FAILURE);
                 }
+                blockasm << std::endl;
                 blockasm << "Not 0x" << std::setfill('0') << std::setw(8) << exprLoc << " 0x";
                 blockasm << std::setfill('0') << std::setw(8) << exprLoc << " 0x00000000" << std::endl;
                 blockasm << "JmpCond 0x" << std::setfill('0') << std::setw(8) << exprLoc << " ";

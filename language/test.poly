@@ -1,7 +1,8 @@
-/check_string
+/string_len
 str == ("Hello, world!")
-isInvalid == (!check_string((str)))
-if(isInvalid) {
-    @io::print(str);
+length == (!string_len((str)))
+@io::print(length);
+if(length = 13) {
+    @io::print("String is 13 characters long.");
 }
 @contract::exit(0);
