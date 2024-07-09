@@ -16,7 +16,7 @@ pub struct BlockUtilInterface {
 impl BlockUtilInterface {
     pub fn new() -> Self {
         Self {
-            "./builds/node/node"
+            node_executable_path: "builds/node/node".to_owned(),
         }
     }
     pub fn get_nth_block_property(&self, n: i64, property: String) -> (String, bool) {
