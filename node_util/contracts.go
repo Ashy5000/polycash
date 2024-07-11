@@ -14,6 +14,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -63,8 +64,10 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 	}
 	contractStr := c.Contents
 	hash := sha256.Sum256([]byte(contractStr))
-	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm", string(hash[:])).Output()
+	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm", hex.EncodeToString(hash[:])).Output()
 	if err != nil {
+		fmt.Println("Errored with output:", string(out))
+		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))
 		return nil, StateTransition{}, 0, err
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
@@ -90,8 +93,8 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 						return nil, StateTransition{}, 0, err
 					}
 					transition.UpdatedData[address] = valueBytes
-					continue
 				}
+				continue
 			}
 			gasUsed, err = strconv.ParseFloat(line[10:], 64)
 			if err != nil {

@@ -54,24 +54,20 @@ type OldBlock struct {
 }
 
 func HashBlock(block Block, blockHeight int) [64]byte {
-	marshaled, err := json.Marshal(block)
-	if err != nil {
-		panic(err)
-	}
-	blockCpy := Block{}
-	err = json.Unmarshal(marshaled, &blockCpy)
-	if err != nil {
-		panic(err)
-	}
-	blockCpy.MiningTime = time.Minute
-	blockCpy.TimeVerifierSignatures = []Signature{}
-	blockCpy.TimeVerifiers = []PublicKey{}
-	blockCpy.Timestamp = time.Time{}
-	for i := range block.Transactions {
-		blockCpy.Transactions[i].Timestamp = time.Time{}
-		blockCpy.Transactions[i].Body = []byte{}
-	}
 	if Env.Upgrades.Washington < blockHeight {
+		var blockCpy Block
+		marshaled, err := json.Marshal(block)
+		if err != nil {
+			panic(err)
+		}
+		err = json.Unmarshal(marshaled, &blockCpy)
+		if err != nil {
+			panic(err)
+		}
+		for i := range block.Transactions {
+			blockCpy.Transactions[i].Timestamp = time.Time{}
+			blockCpy.Transactions[i].Body = []byte{}
+		}
 		blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
 		sum := sha3.Sum512(blockBytes)
 		return sum

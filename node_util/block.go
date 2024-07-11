@@ -119,13 +119,16 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	i.SenderSignature = signature
+	fmt.Println("Unmarshaling contracts")
 	var contracts []Contract
 	contractsStr := strings.Replace(parts[5], "'", `"`, -1)
+	fmt.Println(contractsStr)
 	err = json.Unmarshal([]byte(contractsStr), &contracts)
 	if err != nil {
 		return err
 	}
 	i.Contracts = contracts
+	fmt.Println("Unmarshaled contracts")
 	i.FromSmartContract, err = strconv.ParseBool(parts[6])
 	if err != nil {
 		return err
@@ -133,6 +136,7 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	i.Body, err = json.Marshal(parts[7])
 	var bodySignatures []Signature
 	bodySignaturesStr := parts[8]
+	fmt.Println("Unmarshaling body signatures")
 	signatureStrs := strings.Split(bodySignaturesStr, "#")
 	for _, signatureStr := range signatureStrs {
 		var bodySignature Signature

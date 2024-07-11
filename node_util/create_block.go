@@ -31,14 +31,17 @@ func CreateBlock() (Block, error) {
 		previousBlock.MiningTime = time.Minute
 	}
 	block := Block{
-		Miner:                  GetKey("").PublicKey,
-		Transactions:           MiningTransactions,
-		Nonce:                  0,
-		Difficulty:             GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
-		Timestamp:              time.Now(),
-		TimeVerifierSignatures: []Signature{},
-		TimeVerifiers:          []PublicKey{},
-		MiningTime:             0,
+		Transactions:                    MiningTransactions,
+		Miner:                           GetKey("").PublicKey,
+		Nonce:                           0,
+		MiningTime:                      0,
+		Difficulty:                      GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
+		Timestamp:                       time.Now(),
+		PreMiningTimeVerifierSignatures: []Signature{},
+		PreMiningTimeVerifiers:          []PublicKey{},
+		TimeVerifierSignatures:          []Signature{},
+		TimeVerifiers:                   []PublicKey{},
+		Transition:                      StateTransition{},
 	}
 	if len(Blockchain) > 0 {
 		block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1)

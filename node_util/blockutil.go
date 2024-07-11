@@ -13,12 +13,14 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -226,17 +228,31 @@ func Send(receiver string, amount string, transactionBody []byte) {
 	}
 }
 
-func DeploySmartContract(contractPath string) error {
-	file, err := ioutil.ReadFile(contractPath)
-	if err != nil {
-		return err
+func DeploySmartContract(contractPath string, contractLocation string) error {
+	if contractPath == "" && contractLocation == "" {
+		return errors.New("must provide contract path or location")
 	}
-	contract := Contract{
-		Contents: string(file),
-		Parties:  make([]ContractParty, 0),
-		GasUsed:  0,
-		Location: 0,
-		Loaded:   true,
+	var contract Contract
+	if contractPath != "" {
+		file, err := ioutil.ReadFile(contractPath)
+		if err != nil {
+			return err
+		}
+		contract = Contract{
+			Contents: string(file),
+			Parties:  make([]ContractParty, 0),
+			GasUsed:  0,
+			Location: 0,
+			Loaded:   true,
+		}
+	} else {
+		contractLocationUint, err := strconv.ParseUint(contractLocation, 10, 64)
+		if err != nil {
+			return err
+		}
+		contract = Contract{
+			Location: contractLocationUint,
+		}
 	}
 	key := GetKey("")
 	deployer := GetKey("").PublicKey

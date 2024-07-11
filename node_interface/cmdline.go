@@ -30,6 +30,7 @@ var commands = map[string]func([]string){
 	"send":                 SendCmd,
 	"sendL2":               SendL2Cmd,
 	"deploySmartContract":  DeploySmartContractCmd,
+	"runSmartContract":     RunSmartContractCmd,
 	"keygen":               KeygenCmd,
 	"showPublicKey":        ShowPublicKeyCmd,
 	"encrypt":              EncryptCmd,
@@ -127,11 +128,19 @@ func SendL2Cmd(fields []string) {
 
 func DeploySmartContractCmd(fields []string) {
 	path := fields[1]
-	err := DeploySmartContract(path)
+	err := DeploySmartContract(path, "")
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Smart contract deployed successfully!")
+}
+
+func RunSmartContractCmd(fields []string) {
+	location := fields[1]
+	err := DeploySmartContract("", location)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func KeygenCmd(fields []string) {

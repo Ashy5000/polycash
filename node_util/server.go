@@ -93,7 +93,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	MiningTransactions = append(MiningTransactions, transaction)
 	var smartContractTransactions []Transaction
 	if len(transaction.Contracts) > 0 {
-		for _, contract := range transaction.Contracts {
+		for i, contract := range transaction.Contracts {
 			executeResult, transition,
 				gasUsed, err := contract.Execute()
 			NextTransitions[hash] = transition
@@ -104,7 +104,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			if executeResult != nil {
 				smartContractTransactions = append(smartContractTransactions, executeResult...)
 			}
-			contract.GasUsed = gasUsed
+			transaction.Contracts[i].GasUsed = gasUsed
 		}
 	}
 	for _, smartContractTransaction := range smartContractTransactions {
