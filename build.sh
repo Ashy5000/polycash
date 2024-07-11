@@ -7,24 +7,20 @@
 
 # You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# Build all combinations of os and arch
-for os in linux darwin windows; do
-  for arch in amd64 386 arm arm64; do
-    if [ $os = "darwin" -a $arch = "386" ]; then
-      continue
-    fi
-    if [ $os = "darwin" -a $arch = "arm" ]; then
-      continue
-    fi
-    echo "Building for $os $arch"
-    env GOOS=$os GOARCH=$arch go build -o builds/node/node_$os-$arch
-  done
-done
+# Build builds/node/node
+go build -o builds/node/node
 
 # Build the GUI wallet
 cd gui_wallet
-for triple in x86_64-unknown-linux-gnu; do
-  echo "Building for $triple"
-  cargo build --release --target $triple
-  mv target/$triple/release/gui_wallet ../builds/gui_wallet/gui_wallet_$triple
-done
+cargo build
+cd ..
+
+# Build vm software
+cd contracts
+cargo build
+cd ..
+
+# Build Polylang
+cd language
+cmake -S . -B cmake-build-debug
+cmake --build cmake-build-debug
