@@ -8,11 +8,10 @@ You should have received a copy of the GNU General Public License along with thi
 */
 use std::collections::HashMap;
 
-use crate::math::Modulo;
 use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
-    math::{execute_math_operation, Add, And, Divide, Eq, Multiply, Not, Or, Subtract},
+    math::{execute_math_operation, Add, And, Divide, Eq, Multiply, Not, Or, Subtract, Modulo},
     syntax_tree::SyntaxTree,
 };
 
