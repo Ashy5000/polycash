@@ -20,6 +20,7 @@ type NetworkUpgrades struct {
 	Alexandria  int `json:"alexandria"`
 	Yangon      int `json:"yangon"`
 	Washington  int `json:"washington"`
+	Dalian      int `json:"dalian"`
 }
 
 type Environment struct {

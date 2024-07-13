@@ -24,7 +24,11 @@ func GetDifficulty(lastTime time.Duration, lastDifficulty uint64) uint64 {
 	difficultyBeforeAdjustment := lastDifficulty * uint64(60) / uint64(lastTime.Seconds())
 	x := lastTime.Minutes() * float64(lastDifficulty)
 	var adjustment float64
-	adjustment = (1 / (1 + math.Pow(math.E, -(1/(10*Kdpm))*(x-Mdpm)))) + 0.5
+	if Env.Upgrades.Dalian <= len(Blockchain) {
+		adjustment = (1 / (1 + math.Pow(math.E, -(1/(100*Kdpm))*(x-(100*Kdpm))))) + 0.5
+	} else {
+		adjustment = (1 / (1 + math.Pow(math.E, -(1/Mdpm)*(x-Mdpm)))) + 0.5
+	}
 	difficultyAfterAdjustment := float64(difficultyBeforeAdjustment) / adjustment
 	difficultyUint64 := uint64(difficultyAfterAdjustment)
 	if difficultyUint64 > MinimumBlockDifficulty {
