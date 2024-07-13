@@ -14,6 +14,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -33,6 +34,8 @@ type Contract struct {
 	Location uint64
 	Loaded   bool
 }
+
+var ExternalStateWriteableValue = []byte("ExternalStateWriteableValue")
 
 func (c Contract) IsNewContract() bool {
 	return c.Location == 0
@@ -91,6 +94,20 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {
 						return nil, StateTransition{}, 0, err
+					}
+					transition.UpdatedData[address] = valueBytes
+				} else if line[:24] == "External state change: " {
+					stateChangeString := line[24:]
+					parts := strings.Split(stateChangeString, "|")
+					address := parts[0]
+					valueHex := parts[1]
+					valueBytes, err := hex.DecodeString(valueHex)
+					if err != nil {
+						return nil, StateTransition{}, 0, err
+					}
+					if !bytes.Equal(CalculateCurrentState().Data[address], ExternalStateWriteableValue) {
+						Warn("Contract attempted to modify external state not marked as writeable.")
+						return nil, StateTransition{}, 0, errors.New("contract attempted to modify external state not marked as writeable")
 					}
 					transition.UpdatedData[address] = valueBytes
 				}
