@@ -23,12 +23,17 @@ func main() {
 	port := flag.String("port", "8080", "Port to listen on (server only)")
 	command := flag.String("command", "exit", "Run a command and exit")
 	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
+	benchmark := flag.Bool("benchmark", false, "Set to true to enable benchmarking")
 	flag.Parse()
 	LoadEnv()
 	LoadStateCmd(nil)
 	SyncBlockchain(-1)
 	if len(Blockchain) == 0 {
 		Append(GenesisBlock())
+	}
+	if *benchmark {
+		Benchmark()
+		return
 	}
 	if *mine {
 		*serve = true
