@@ -1,7 +1,6 @@
 /string_len
 str == ("Hello, world!")
 length == (!string_len((str)))
-@io::print(length);
 if(length = 13) {
     @io::print("String is 13 characters long.");
 }
