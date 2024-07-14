@@ -18,7 +18,7 @@ pub(crate) struct Add {}
 
 impl MathOperation for Add {
     fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
-        Ok(a + b)
+        Ok(a.overflowing_add(b)[0])
     }
 }
 
@@ -26,7 +26,7 @@ pub(crate) struct Subtract {}
 
 impl MathOperation for Subtract {
     fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
-        Ok(a - b)
+        Ok(a.overflowing_sub(b)[0])
     }
 }
 
@@ -34,7 +34,7 @@ pub(crate) struct Multiply {}
 
 impl MathOperation for Multiply {
     fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
-        Ok(a * b)
+        Ok(a.overflowing_mul(b)[0])
     }
 }
 
@@ -45,7 +45,15 @@ impl MathOperation for Divide {
         if b == 0 {
             return Err("Division by zero".to_string());
         }
-        Ok(a / b)
+        Ok(a.overflowing_div(b)[0])
+    }
+}
+
+pub(crate) struct Exp {}
+
+impl MathOperation for Exp {
+    fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
+        Ok(a.overflowing_pow(b as u32)[0])
     }
 }
 
