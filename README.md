@@ -2,11 +2,13 @@
 
 <img src="https://github.com/Ashy5000/cryptocurrency/blob/master/assets/logos/logo_classic.png?raw=true" alt="Polycash logo" width="200" />
 
-(Polycash has no association with the Polygon blockchain, despite the similar naming.)
+>[!NOTE]
+>Polycash has no association with the Polygon blockchain, despite the similar naming.
 
 The home of a power-efficient, secure, quantum-resistant, and modern cryptocurrency blockchain designed to resolve the issues presented by the traditional PoW (Proof of Work) incentive mechanism while maintaining decentralization. Written in Golang and Rust for secure algorithm implementations, lightweight networking, memory safety, speed, and reliability.
 
-[Discussions](https://github.com/Ashy5000/cryptocurrency/discussions) are now available! You can use discussions for asking questions, giving feedback, or really anything else related to the project.
+>[!TIP]
+>[Discussions](https://github.com/Ashy5000/cryptocurrency/discussions) are now available! You can use discussions for asking questions, giving feedback, or really anything else related to the project.
 
 ## Modified PoW protocol
 
@@ -24,32 +26,29 @@ This blockchain utilizes the Dilithium3 signature algorithm, a quantum-resistant
 
 The roadmap for this repository looks something like this:
 
-**Development**: Implementing a blockchain and networking system, along with the specific changes to the PoW and networking protocols in order to increase the effectiveness, speed, reliability, and efficiency of the blockchain. Creating a README that documents the design decisions of the blockchain and network and how to use the software. Licensing the software with the GNU General Purpose License v3.0. Performing small scale, local tests on various operating systems and architectures to ensure the software works correctly.
+**Development** (COMPLETE): Implementing a blockchain and networking system, along with the specific changes to the PoW and networking protocols in order to increase the effectiveness, speed, reliability, and efficiency of the blockchain. Creating a README that documents the design decisions of the blockchain and network and how to use the software. Licensing the software with the GNU General Purpose License v3.0. Performing small scale, local tests on various operating systems and architectures to ensure the software works correctly.
 
-**Testnet**: Running a testing network to verfify the correct operation of the software. Expirementing with its ability to verify large amounts of transactions at once. Making adjustments if neccessary to increase the speed, reliability, and efficiency of the blockchain. Running small-scale tests on the cryptocurrency's financial model.
+**Testnet** (ACTIVE): Running a testing network to verfify the correct operation of the software. Expirementing with its ability to verify large amounts of transactions at once. Making adjustments if neccessary to increase the speed, reliability, and efficiency of the blockchain. Running small-scale tests on the cryptocurrency's financial model.
 
-**Production**: Launching the final product, fixing any issues if and when they arrive.
+**Production** (COMING UP): Launching the final product, fixing any issues if and when they arrive.
 
 ## Directory structure
 
 The root directory of this project is occupied by the Golang source code that nodes run in order to interact with each other and the decentralized blockchain. In the `peer_server` directory, there is Rust code that can be run by servers to maintain a list of peers in the network. Nodes can connect to these servers or maintain their own lists. Using this code is optional, and its only purpose is to make it faster to discover peers. Thirdly, the `gui_wallet` directory contains Rust code for a GUI wallet to make transactions easier to make. Note that you will still have to generate a key using the `keygen` command in the interactive console (see _To run as a client_ below).
 
 ## Setup & Usage
-
-For a simpler guide, see the [welcome](docs/welcome.md) page.
-
-_Note: A node must have a publicly accessible IP address in order to join the network. You may have to set up port forwarding on your router._
+>[!IMPORTANT]
+>A node must have a publicly accessible IP address in order to join the network. You may have to set up port forwarding on your router.
 
 Prerequisites:
 - [go](https://go.dev/doc/install)
-- [liboqs-go](https://github.com/open-quantum-safe/liboqs-go)
+- [liboqs-go](https://github.com/open-quantum-safe/liboqs-go#installation)
 - [rust](https://www.rust-lang.org/tools/install)
 
 Run the install script:
 ```bash
 curl https://raw.githubusercontent.com/Ashy5000/cryptocurrency/master/install.sh | bash
 ```
-You don't need to authenticate as root for installation.
 
 ### To run as a client:
 
@@ -70,15 +69,18 @@ Commands:
 - `decrypt`: decrypt the private key so you can use it
 - `send {recipient} {amount}`: send {amount} tokens to {recipient}
 - `sendL2 {recipient} {amount}`: send {amount} tokens to {recipient} via the layer 2 rollup system (alpha)
-- `balance {key}`: get the balance associated with the public key {key}
+- `balance {key}`: get the balance associated with the public key {key} (tip: running `balance` without passing {key} will get your own balance)
 - `savestate`: save a backup of the current state of the blockchain to a file
 - `loadstate`: load a backup of the current state of the blockchain from a file
 - `addpeer {ip}`: connect to a peer
 - `startAnalysisConsole`: start a console for analyzing the status and history of the blockchain and network
-- `bootstrap`: connect to your peers' peers for increased speed
+- `bootstrap`: connect to your peers' peers for increased speed, reliability, and decentralization
 - `exit`: exit the console
 
-To get started, run `keygen` to generate a new key. To get your balance, find your public key in the `key.json` file (the long number following `"Y":`), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key. When you're done, type `encrypt` to encrypt your private key and store it safely. You can decrypt it later to use it again with `decrypt`. You must use a passcode that is a multiple of 16 characters long for encryption and decryption. Write it down somewhere safe, as you will not be able to access your private key without it.
+To get started, run `keygen` to generate a new key. To get your balance, find your public key in the `key.json` file (the long number following `"Y":`), and run `balance {YOUR KEY HERE}`. To send currency, type `send {RECIPIENT PUBLIC KEY} {AMOUNT}`. You'll have to ask the recipient for their public key. When you're done, type `encrypt` to encrypt your private key and store it safely. You can decrypt it later to use it again with `decrypt`. You must use a passcode that is a multiple of 16 characters long for encryption and decryption.
+
+>[!CAUTION]
+>Write your passcode down somewhere safe. If you lose it, there is no "forgot my password" option like in many Web 2.0 applications-- your funds will be irrecoverable.
 
 ### To run a node:
 

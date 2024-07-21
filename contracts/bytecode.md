@@ -40,3 +40,6 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 | GetFromState | 1C   | Location  | Dst    | ResDst |
 
 `0x00000000` is a pre-initialized buffer. It is used for capturing global errors.
+
+`Exit`: The `Exit` instruction exits a smart contract with an exit code determined by the `Status` parameter.
+`ExitBfr`: The `ExitBfr` instruction 
