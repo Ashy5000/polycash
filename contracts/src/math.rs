@@ -61,6 +61,9 @@ pub(crate) struct Modulo;
 
 impl MathOperation for Modulo {
     fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
+        if b == 0 {
+            return Ok(0);
+        }
         Ok(a % b)
     }
 }
