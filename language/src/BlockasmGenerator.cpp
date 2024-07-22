@@ -31,7 +31,7 @@ BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, int nextAlloca
 
 std::string BlockasmGenerator::GenerateBlockasm() {
     int nextLabel = 0;
-    auto l = Linker({"string.blockasm"});
+    auto l = Linker({"string.blockasm", "format.blockasm"});
     for(int i = 0; i < tokens.size(); i++) {
         if(const Token token = tokens[i]; token.type == TokenType::system_at) {
             std::tuple tuple = GenerateSystemFunctionBlockasm(i, nextAllocatedLocation, vars, l);
@@ -135,7 +135,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     }
                     paramLocs.emplace_back(exprLoc);
                 }
-                std::tuple functionCallTuple = l.CallFunction(functionName, paramLocs);
+                std::tuple functionCallTuple = l.CallFunction(functionName, paramLocs, vars);
                 std::string functionCallBlockasm = std::get<0>(functionCallTuple);
                 blockasm << functionCallBlockasm;
             }

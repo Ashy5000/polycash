@@ -9,6 +9,8 @@
 #include <sstream>
 #include <tuple>
 
+#include "Variable.h"
+
 Linker::Linker(const std::vector<std::string> &entries) {
     libs = {};
     functionsInjected = {};
@@ -20,7 +22,7 @@ Linker::Linker(const std::vector<std::string> &entries) {
     }
 }
 
-void Linker::InjectIfNotPresent(std::string name, std::stringstream &blockasm) {
+void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &blockasm) {
     for(const InjectedFunction& fn: functionsInjected) {
         if(fn.name == name) {
             return;
@@ -111,7 +113,7 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
     blockasm << temp;
 }
 
-std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std::vector<int> paramLocs) {
+std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std::vector<int> paramLocs, std::vector<Variable>& vars) {
     Type t;
     for(const InjectedFunction& func : functionsInjected) {
         if(func.name == name) {
@@ -119,7 +121,7 @@ std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std:
             for(int i = 0; i < paramLocs.size(); i++) {
                 int fromLoc = paramLocs[i];
                 int toLoc = 0;
-                for(BlockasmLib lib : libs) {
+                for(const BlockasmLib& lib : libs) {
                     for(Function libFunc : lib.functions) {
                         if(libFunc.name == func.name) {
                             toLoc = libFunc.sig.locations[i];
@@ -127,6 +129,16 @@ std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std:
                             break;
                         }
                     }
+                }
+                bool exists = false;
+                for(const Variable& var : vars) {
+                    if(var.location == toLoc) {
+                        exists = true;
+                    }
+                }
+                if(!exists) {
+                    vars.emplace_back("", toLoc, Type::type_placeholder);
+                    blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << toLoc << " 0x00000000" << std::endl;
                 }
                 blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << fromLoc << " 0x";
                 blockasm << std::setfill('0') << std::setw(8) << std::hex << toLoc << " 0x00000000" << std::endl;

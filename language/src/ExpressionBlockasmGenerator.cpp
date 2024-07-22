@@ -13,7 +13,7 @@
 #include "OperatorType.h"
 #include "Variable.h"
 
-std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, const std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
+std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
     if(expression.type != TokenType::expr) {
         std::cerr << "Expected expression when generating Blockasm." << std::endl;
         exit(EXIT_FAILURE);
@@ -79,24 +79,24 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
         }
         std::vector<Token> params;
         std::string functionName = tokens[1].value;
-        for(int j = 3; j < tokens.size(); j++) {
-            if(tokens[j].type == TokenType::expr) {
-                params.emplace_back(tokens[j]);
+        for(auto & token : tokens[3].children) {
+            if(token.type == TokenType::expr) {
+                params.emplace_back(token);
             }
-            if(tokens[j].type == TokenType::newline) {
+            if(token.type == TokenType::newline) {
                 break;
             }
         }
         std::vector<int> paramLocs;
-        for(Token param : params) {
-            std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(param, nextAllocatedLocation, vars, blockasm, l);
+        for(const Token& param : params) {
+            std::tuple exprTuple = GenerateBlockasmFromExpression(param, nextAllocatedLocation, vars, blockasm, l);
             int exprLoc = std::get<0>(exprTuple);
             if(exprLoc >= nextAllocatedLocation) {
                 nextAllocatedLocation = exprLoc + 1;
             }
             paramLocs.emplace_back(exprLoc);
         }
-        std::tuple functionCallTuple = l.CallFunction(functionName, paramLocs);
+        std::tuple functionCallTuple = l.CallFunction(functionName, paramLocs, vars);
         std::string functionCallBlockasm = std::get<0>(functionCallTuple);
         blockasm << functionCallBlockasm;
         Type t = std::get<1>(functionCallTuple);

@@ -14,13 +14,13 @@
 
 const std::vector SYSTEM_FUNCTIONS = {
     SystemFunction(
-        [](const std::vector<Token>& params, int &nextAllocatedLocation, const std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
             Signature sig = Signature({Type::uint64}, Type::type_placeholder);
             ParamsParser pp = ParamsParser(params, {sig});
             std::tuple<std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars, blockasm, l);
             std::vector<int> locations = std::get<0>(parsingResult);
             int exitCodeLocation = locations[0];
-            blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation;
+            blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation << " 0x00000000";
             if(exitCodeLocation >= nextAllocatedLocation) {
                 nextAllocatedLocation = exitCodeLocation + 1;
             }

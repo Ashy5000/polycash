@@ -14,7 +14,7 @@
 
 class ExpressionBlockasmGenerator {
 public:
-    static std::tuple<int, Type> GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, const std::vector<Variable> &vars, std::stringstream &blockasm, Linker &l);
+    static std::tuple<int, Type> GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, std::vector<Variable> &vars, std::stringstream &blockasm, Linker &l);
 };
 
 

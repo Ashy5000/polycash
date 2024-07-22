@@ -6,14 +6,15 @@
 #define LINKER_H
 #include "BlockasmLib.h"
 #include "InjectedFunction.h"
+#include "Variable.h"
 
 
 class Linker {
     std::vector<InjectedFunction> functionsInjected;
 public:
     std::vector<BlockasmLib> libs;
-    void InjectIfNotPresent(std::string name, std::stringstream &blockasm);
-    [[nodiscard]] std::tuple<std::string, Type> CallFunction(const std::string &name, std::vector<int> paramLocs);
+    void InjectIfNotPresent(const std::string& name, std::stringstream &blockasm);
+    [[nodiscard]] std::tuple<std::string, Type> CallFunction(const std::string &name, std::vector<int> paramLocs, std::vector<Variable>& vars);
 
     static void SkipLibs(std::stringstream &blockasm);
 
