@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
-    math::{execute_math_operation, Add, And, Divide, Eq, Multiply, Not, Or, Subtract, Modulo, Exp},
+    math::{execute_math_operation, Add, And, Divide, Eq, Less, Multiply, Not, Or, Subtract, Modulo, Exp},
     syntax_tree::SyntaxTree,
 };
 
@@ -209,6 +209,17 @@ pub fn run_vm(
             "Eq" => {
                 execute_math_operation(
                     Eq {},
+                    buffers,
+                    line.args[0].clone(),
+                    line.args[1].clone(),
+                    line.args[2].clone(),
+                    line.args[3].clone(),
+                );
+                gas_used += 0.5;
+            }
+            "Less" => {
+                execute_math_operation(
+                    Less {},
                     buffers,
                     line.args[0].clone(),
                     line.args[1].clone(),

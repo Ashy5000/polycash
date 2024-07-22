@@ -108,6 +108,18 @@ impl MathOperation for Eq {
     }
 }
 
+pub(crate) struct Less {}
+
+impl MathOperation for Less {
+    fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
+        if a < b {
+            Ok(1)
+        } else {
+            Ok(0)
+        }
+    }
+}
+
 pub(crate) fn execute_math_operation(
     operation: impl MathOperation,
     buffers: &mut HashMap<String, Buffer>,
