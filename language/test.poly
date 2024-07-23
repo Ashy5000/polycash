@@ -1,10 +1,12 @@
 /string_len
 /get_digit
+/digit_to_string
 str == ("Hello, world!")
 length == (!string_len((str)))
 if(length = 13) {
     @io::print("String is 13 characters long.");
 }
-digit == (!get_digit((length), (2)))
+digit == (!get_digit((length), (1)))
 @io::print(digit);
-@contract::exit(0);
+digitStr == (!digit_to_string((digit)))
+@io::print(digitStr);

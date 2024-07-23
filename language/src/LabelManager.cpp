@@ -10,7 +10,7 @@ LabelManager::LabelManager(std::string blockasm) {
     std::istringstream iss(blockasm);
     int labelPosition = 1;
     for (std::string line; std::getline(iss, line); ) {
-        if(line.at(0) != ';') {
+        if(line.size() < 1 || line.at(0) != ';') {
             labelPosition++;
             continue;
         }

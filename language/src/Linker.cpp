@@ -73,6 +73,9 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
                         } else {
                             source += line + "\n";
                         }
+                        if(line.substr(0, 3) == "Ret") {
+                            break;
+                        }
                     }
                     j++;
                 }
@@ -143,7 +146,7 @@ std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std:
                 blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << fromLoc << " 0x";
                 blockasm << std::setfill('0') << std::setw(8) << std::hex << toLoc << " 0x00000000" << std::endl;
             }
-            blockasm << "Call " << func.offset << std::endl;
+            blockasm << "Call " << std::dec << func.offset << std::endl;
             return std::make_tuple(blockasm.str(), t);
         }
     }

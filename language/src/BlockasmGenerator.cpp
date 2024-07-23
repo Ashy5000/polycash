@@ -208,6 +208,6 @@ std::tuple<std::vector<Variable>, int> BlockasmGenerator::GenerateSystemFunction
     exit(EXIT_FAILURE);
 }
 
-int BlockasmGenerator::GetNextAllocatedLocation() {
+int BlockasmGenerator::GetNextAllocatedLocation() const {
     return nextAllocatedLocation;
 }

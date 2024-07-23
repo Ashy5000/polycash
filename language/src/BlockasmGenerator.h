@@ -19,7 +19,7 @@ public:
     std::string GenerateBlockasm();
     std::tuple<std::vector<Variable>, int> GenerateSystemFunctionBlockasm(int i, int &nextAllocatedLocation, std::vector<Variable> vars, Linker l);
     explicit BlockasmGenerator(std::vector<Token> tokens_p, int nextAllocatedLocation_p, std::vector<Variable> vars_p, bool useLinker_p);
-    int GetNextAllocatedLocation();
+    int GetNextAllocatedLocation() const;
 private:
     std::stringstream blockasm;
     std::vector<Token> tokens;
