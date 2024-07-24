@@ -1,6 +1,7 @@
 /string_len
 /get_digit
 /digit_to_string
+/int_len
 str == ("Hello, world!")
 length == (!string_len((str)))
 if(length = 13) {
@@ -10,3 +11,5 @@ digit == (!get_digit((length), (1)))
 @io::print(digit);
 digitStr == (!digit_to_string((digit)))
 @io::print(digitStr);
+numDigits == (!int_len((length)))
+@io::print(numDigits);
