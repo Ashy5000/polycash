@@ -14,6 +14,7 @@ use crate::{
     math::{execute_math_operation, Add, And, Divide, Eq, Less, Multiply, Not, Or, Subtract, Modulo, Exp},
     syntax_tree::SyntaxTree,
 };
+use crate::stack::Stack;
 
 pub fn vm_access_buffer(
     buffers: &mut HashMap<String, Buffer>,
@@ -60,6 +61,7 @@ pub fn run_vm(
     let mut should_increment;
     let mut gas_used = 0.0;
     let mut origins = vec![];
+    let mut stack = Stack{frames: vec![]};
     while line_number < syntax_tree.lines.len() {
         let line = syntax_tree.lines[line_number].clone();
         should_increment = true;
@@ -342,11 +344,16 @@ pub fn run_vm(
                 gas_used += 1.0;
             }
             "Call" => {
+                stack.push(buffers);
                 origins.push(line_number + 1);
                 line_number = line.args[0].parse::<usize>().unwrap() - 1;
                 should_increment = false;
             }
             "Ret" => {
+                let frame_buffers = stack.pop();
+                let return_value_tmp = buffers.get("00000001").unwrap().clone();
+                *buffers = frame_buffers;
+                buffers.insert("00000001".to_owned(), return_value_tmp);
                 line_number = *origins.last().expect("Could not get last origin");
                 origins.remove(origins.len() - 1);
                 should_increment = false;

@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use crate::buffer::Buffer;
+
 // Copyright 2024, Asher Wrobel
 /*
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -6,11 +9,23 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-mod blockutil;
-pub mod buffer;
-pub mod math;
-pub mod read_contract;
-pub mod sanitization;
-pub mod syntax_tree;
-pub mod vm;
-pub mod stack;
+pub struct StackFrame {
+    pub buffers: HashMap<String, Buffer>
+}
+
+pub struct Stack {
+    pub frames: Vec<StackFrame>
+}
+
+impl Stack {
+    pub fn push(&mut self, buffers_param: &HashMap<String, Buffer>) {
+        let mut buffers = buffers_param.clone();
+        let frame = StackFrame {
+            buffers: buffers.clone()
+        };
+        self.frames.push(frame);
+    }
+    pub fn pop(&mut self) -> HashMap<String, Buffer> {
+        self.frames.pop().unwrap().buffers
+    }
+}

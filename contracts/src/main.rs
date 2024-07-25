@@ -13,6 +13,7 @@ mod read_contract;
 mod sanitization;
 mod syntax_tree;
 mod vm;
+mod stack;
 
 use crate::{buffer::Buffer, vm::run_vm};
 
