@@ -2,14 +2,11 @@
 /get_digit
 /digit_to_string
 /int_len
+/int_to_string
 str == ("Hello, world!")
 length == (!string_len((str)))
 if(length = 13) {
     @io::print("String is 13 characters long.");
 }
-digit == (!get_digit((length), (1)))
-@io::print(digit);
-digitStr == (!digit_to_string((digit)))
-@io::print(digitStr);
-numDigits == (!int_len((length)))
-@io::print(numDigits);
+lengthStr == (!int_to_string((length)))
+@io::print(lengthStr);

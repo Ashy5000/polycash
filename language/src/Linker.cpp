@@ -70,6 +70,23 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
                                 adjustedLine << " ";
                             }
                             source += adjustedLine.str() + "\n";
+                        } else if(line.at(0) == '%') {
+                            std::string name = line.substr(1);
+                            InjectIfNotPresent(name, blockasm);
+                            int offset = -1;
+                            for(const InjectedFunction& func : functionsInjected) {
+                                if(func.name == name) {
+                                    offset = func.offset;
+                                    break;
+                                }
+                            }
+                            if(offset == -1) {
+                                std::cerr << "Function not found!" << std::endl;
+                                exit(EXIT_FAILURE);
+                            }
+                            source += "Call ";
+                            source += std::to_string(offset);
+                            source += "\n";
                         } else {
                             source += line + "\n";
                         }

@@ -50,6 +50,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                         nextAllocatedLocation = exprLoc + 1;
                     }
                     Type type = std::get<1>(exprTuple);
+                    blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
                     blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x";
                     blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
                     Variable var = Variable(varName, nextAllocatedLocation, type);
