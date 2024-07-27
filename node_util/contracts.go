@@ -67,7 +67,7 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 	}
 	contractStr := c.Contents
 	hash := sha256.Sum256([]byte(contractStr))
-	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm", hex.EncodeToString(hash[:])).Output()
+	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:])).Output()
 	if err != nil {
 		fmt.Println("Errored with output:", string(out))
 		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))

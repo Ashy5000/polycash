@@ -5,5 +5,5 @@ echo "Building node software... ('consensus client')"
 go build -o builds/node/node
 echo "Building smart contract software... ('execution client')"
 cd contracts
-cargo build
+cargo build --release
 cd ..
