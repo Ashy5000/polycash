@@ -8,15 +8,22 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 use crate::sanitization::sanitize_node_console_command;
+use smartstring::alias::String;
 
 pub struct BlockUtilInterface {
     node_executable_path: String,
 }
 
+impl Default for BlockUtilInterface {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BlockUtilInterface {
     pub fn new() -> Self {
         Self {
-            node_executable_path: "builds/node/node".to_owned(),
+            node_executable_path: "builds/node/node".into(),
         }
     }
     pub fn get_nth_block_property(&self, n: i64, property: String) -> (String, bool) {
@@ -24,21 +31,21 @@ impl BlockUtilInterface {
         let command = format!("sync;getNthBlock {} {}", n, property);
         if !sanitize_node_console_command(&command) {
             println!("Forbidden command");
-            return ("".to_string(), false);
+            return ("".into(), false);
         }
-        let output = Command::new(self.node_executable_path.clone())
+        let output = Command::new(&*self.node_executable_path.clone())
             .arg("--command")
             .arg(command)
             .output();
         let output = output.expect("Failed to execute node script");
-        let output = String::from_utf8(output.stdout).expect("Failed to convert output to string");
+        let output = std::string::String::from_utf8(output.stdout).expect("Failed to convert output to string");
         // Remove the newline character
         let output = output.trim().to_string();
         // Split the output by the newline character
         let output = output.split("\n").collect::<Vec<&str>>();
         // Get the last element of the output
         // This is neccessary because the previous lines contain logs
-        let output = output[output.len() - 1].to_string();
+        let output = output[output.len() - 1].into();
         (output, true)
     }
     pub fn get_nth_transaction_property(
@@ -54,21 +61,21 @@ impl BlockUtilInterface {
         );
         if !sanitize_node_console_command(&command) {
             println!("Forbidden command");
-            return ("".to_string(), false);
+            return ("".into(), false);
         }
-        let output = Command::new(self.node_executable_path.clone())
+        let output = Command::new(&*self.node_executable_path.clone())
             .arg("--command")
             .arg(command)
             .output();
         let output =
-            String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+            std::string::String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
         // Remove the newline character
         let output = output.trim().to_string();
         // Split the output by the newline character
         let output = output.split("\n").collect::<Vec<&str>>();
         // Get the last element of the output
         // This is neccessary because the previous lines contain logs
-        let output = output[output.len() - 1].to_string();
+        let output = output[output.len() - 1].into();
         (output, true)
     }
     pub fn get_from_state(&self, property: String) -> (Vec<u8>, bool) {
@@ -77,12 +84,12 @@ impl BlockUtilInterface {
             println!("Forbidden command");
             return (vec![], false);
         }
-        let output = Command::new(self.node_executable_path.clone())
+        let output = Command::new(&*self.node_executable_path.clone())
             .arg("--command")
             .arg(command)
             .output();
         let output =
-            String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+            std::string::String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
         let output = output.trim().to_string();
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();
@@ -94,16 +101,15 @@ impl BlockUtilInterface {
     }
     pub fn get_blockchain_len(&self) -> u64 {
         let command = "sync;getBlockchainLen";
-        let output = Command::new(self.node_executable_path.clone())
+        let output = Command::new(&*self.node_executable_path.clone())
             .arg("--command")
             .arg(command)
             .output();
         let output =
-            String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+            std::string::String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
         let output = output.trim().to_string();
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();
-        let len = output.parse::<u64>().unwrap(); // Long Live the Turbofish.
-        len
+        output.parse::<u64>().unwrap() // Long Live the Turbofish.
     }
 }

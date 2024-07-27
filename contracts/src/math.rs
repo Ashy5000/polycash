@@ -1,3 +1,4 @@
+use rustc_hash::FxHashMap;
 // Copyright 2024, Asher Wrobel
 /*
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -7,8 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 use crate::{buffer::Buffer, vm};
-
-use std::collections::HashMap;
+use smartstring::alias::String;
 
 pub(crate) trait MathOperation {
     fn execute(&self, a: u64, b: u64) -> Result<u64, String>;
@@ -43,7 +43,7 @@ pub(crate) struct Divide {}
 impl MathOperation for Divide {
     fn execute(&self, a: u64, b: u64) -> Result<u64, String> {
         if b == 0 {
-            return Err("Division by zero".to_string());
+            return Err("Division by zero".into());
         }
         Ok(a.overflowing_div(b).0)
     }
@@ -122,7 +122,7 @@ impl MathOperation for Less {
 
 pub(crate) fn execute_math_operation(
     operation: impl MathOperation,
-    buffers: &mut HashMap<String, Buffer>,
+    buffers: &mut FxHashMap<String, Buffer>,
     a: String,
     b: String,
     res: String,
@@ -148,13 +148,12 @@ pub(crate) fn execute_math_operation(
         buffer_1 = buffers.get(&b).unwrap();
     }
     let buffer_0_u64 = buffer_0.as_u64().unwrap();
-    let result_u64;
-    if std::any::type_name_of_val(&operation) != "contracts::math::Not" {
+    let result_u64 = if std::any::type_name_of_val(&operation) != "contracts::math::Not" {
         let buffer_1_u64 = buffer_1.as_u64().unwrap();
-        result_u64 = operation.execute(buffer_0_u64, buffer_1_u64);
+        operation.execute(buffer_0_u64, buffer_1_u64)
     } else {
-        result_u64 = operation.execute(buffer_0_u64, 0);
-    }
+        operation.execute(buffer_0_u64, 0)
+    };
     let buffer_result = buffers.get_mut(&res).unwrap();
     buffer_result.load_u64(result_u64.expect("Error storing result in buffer"));
 }

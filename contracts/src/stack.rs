@@ -1,5 +1,6 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use crate::buffer::Buffer;
+use smartstring::alias::String;
 
 // Copyright 2024, Asher Wrobel
 /*
@@ -10,7 +11,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 pub struct StackFrame {
-    pub buffers: HashMap<String, Buffer>
+    pub buffers: FxHashMap<String, Buffer>
 }
 
 pub struct Stack {
@@ -18,14 +19,13 @@ pub struct Stack {
 }
 
 impl Stack {
-    pub fn push(&mut self, buffers_param: &HashMap<String, Buffer>) {
-        let buffers = buffers_param;
+    pub fn push(&mut self, buffers_param: &FxHashMap<String, Buffer>) {
         let frame = StackFrame {
-            buffers: buffers.clone()
+            buffers: buffers_param.clone()
         };
         self.frames.push(frame);
     }
-    pub fn pop(&mut self) -> HashMap<String, Buffer> {
+    pub fn pop(&mut self) -> FxHashMap<String, Buffer> {
         self.frames.pop().unwrap().buffers
     }
 }
