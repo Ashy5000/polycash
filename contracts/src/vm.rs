@@ -63,7 +63,7 @@ pub fn run_vm(
     let mut origins = vec![];
     let mut stack = Stack{frames: vec![]};
     while line_number < syntax_tree.lines.len() {
-        let line = syntax_tree.lines[line_number].clone();
+        let line = &syntax_tree.lines[line_number];
         should_increment = true;
         match line.command.as_str() {
             "Exit" => {

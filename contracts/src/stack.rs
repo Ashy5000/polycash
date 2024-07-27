@@ -19,7 +19,7 @@ pub struct Stack {
 
 impl Stack {
     pub fn push(&mut self, buffers_param: &HashMap<String, Buffer>) {
-        let buffers = buffers_param.clone();
+        let buffers = buffers_param;
         let frame = StackFrame {
             buffers: buffers.clone()
         };
