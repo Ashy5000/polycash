@@ -9,7 +9,7 @@ You should have received a copy of the GNU General Public License along with thi
 use crate::send::send;
 use iced::widget::{button, column, container, row, rule, scrollable, text, text_input, Space};
 use iced::{Alignment, Element, Sandbox, Settings};
-use clipboard::{ClipboardContext, ClipboardProvider};
+use clippers::Clipboard;
 
 mod send;
 mod sync;
@@ -92,9 +92,8 @@ impl Sandbox for App {
             }
             Message::Copy => {
                 let public_key = key::get_public_key().expect("Failed to get public key");
-                let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-                ctx.set_contents(public_key.clone()).unwrap();
-                assert_eq!(ctx.get_contents().unwrap(), public_key);
+                let mut clipboard = Clipboard::get();
+                clipboard.write_text(public_key).unwrap();
             }
         }
     }
