@@ -49,22 +49,22 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool) {
 	// Request the signature from the peer
 	req, err := http.NewRequest("GET", peer_ip+"/identify", bytes.NewBuffer(data))
 	if err != nil {
-		panic(err)
+		return PublicKey{}, false
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		panic(err)
+		return PublicKey{}, false
 	}
 	// Read the response
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		return PublicKey{}, false
 	}
 	// Unmarshal the response
 	var proof AuthenticationProof
 	err = json.Unmarshal(body, &proof)
 	if err != nil {
-		panic(err)
+		return PublicKey{}, false
 	}
 	// Verify the signature
 	isValid := VerifyAuthenticationProof(&proof, digest[:])
