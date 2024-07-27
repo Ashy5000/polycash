@@ -58,13 +58,13 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool, error) {
 	// Read the response
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return PublicKey{}, false
+		return PublicKey{}, false, err
 	}
 	// Unmarshal the response
 	var proof AuthenticationProof
 	err = json.Unmarshal(body, &proof)
 	if err != nil {
-		return PublicKey{}, false
+		return PublicKey{}, false, err
 	}
 	// Verify the signature
 	isValid := VerifyAuthenticationProof(&proof, digest[:])
