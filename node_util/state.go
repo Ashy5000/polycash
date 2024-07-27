@@ -9,23 +9,28 @@ You should have received a copy of the GNU General Public License along with thi
 package node_util
 
 type State struct {
-	Data map[uint64][]byte
+	Data      map[string][]byte
+	Contracts map[uint64]Contract
 }
 
 type StateTransition struct {
-	UpdatedData map[uint64][]byte
+	UpdatedData  map[string][]byte
+	NewContracts map[uint64]Contract
 }
 
 func TransitionState(state State, transition StateTransition) State {
 	for key, value := range transition.UpdatedData {
 		state.Data[key] = value
 	}
+	for key, value := range transition.NewContracts {
+		state.Contracts[key] = value
+	}
 	return state
 }
 
 func CalculateCurrentState() State {
 	state := State{
-		Data: make(map[uint64][]byte),
+		Data: make(map[string][]byte),
 	}
 	for _, block := range Blockchain {
 		state = TransitionState(state, block.Transition)

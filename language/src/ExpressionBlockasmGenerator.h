@@ -9,11 +9,12 @@
 
 #include "Token.h"
 #include "Variable.h"
+#include "Linker.h"
 
 
 class ExpressionBlockasmGenerator {
 public:
-    static std::tuple<std::string, int> GenerateBlockasmFromExpression(const Token &expression, int nextAllocatedLocation, const std::vector<Variable> &vars);
+    static std::tuple<int, Type> GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, std::vector<Variable> &vars, std::stringstream &blockasm, Linker &l);
 };
 
 

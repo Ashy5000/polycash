@@ -26,7 +26,11 @@ func RequestTimeVerification(block Block) ([]Signature, []PublicKey) {
 	}
 	for _, peer := range GetPeers() {
 		// Get the peer's public key
-		peerKey, validSig := RequestAuthentication(peer)
+		peerKey, validSig, err := RequestAuthentication(peer)
+		if err != nil {
+			Log("Peer down.", true)
+			continue
+		}
 		if !validSig {
 			Log("Peer has invalid signature.", true)
 			continue

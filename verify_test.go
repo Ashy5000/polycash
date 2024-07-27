@@ -16,6 +16,7 @@ import (
 	"time"
 
 	. "cryptocurrency/node_util"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -79,11 +80,12 @@ func TestVerifyMiner(t *testing.T) {
 		miner := key.PublicKey
 		miner.Y = []byte("123")
 		Blockchain = nil
+		LoadEnv()
 		Append(GenesisBlock())
 		Append(Block{
 			Transactions:      []Transaction{},
 			Miner:             miner,
-			PreviousBlockHash: HashBlock(GenesisBlock()),
+			PreviousBlockHash: HashBlock(GenesisBlock(), 0),
 			Difficulty:        1,
 		})
 		result := VerifyMiner(key.PublicKey)
@@ -121,7 +123,7 @@ func TestVerifyBlock(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		result := VerifyBlock(block)
+		result := VerifyBlock(block, 0)
 		assert.True(t, result)
 	})
 	t.Run("It should return false if the block has an invalid transaction", func(t *testing.T) {
@@ -145,11 +147,11 @@ func TestVerifyBlock(t *testing.T) {
 					SenderSignature: Signature{S: sig},
 				},
 			},
-			PreviousBlockHash: HashBlock(GenesisBlock()),
+			PreviousBlockHash: HashBlock(GenesisBlock(), 0),
 			Miner:             key.PublicKey,
 			Difficulty:        1,
 		}
-		result := VerifyBlock(block)
+		result := VerifyBlock(block, 0)
 		assert.False(t, result)
 	})
 }

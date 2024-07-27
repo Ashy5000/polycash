@@ -6,6 +6,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+use smartstring::alias::String;
 #[derive(Debug, Clone)]
 pub struct Line {
     pub command: String,
@@ -14,7 +15,7 @@ pub struct Line {
 
 pub(crate) fn build_line() -> Line {
     Line {
-        command: "".to_owned(),
+        command: "".into(),
         args: Vec::new(),
     }
 }
@@ -31,25 +32,29 @@ impl SyntaxTree {
             let parts_iter = asm_line.split(" ");
             let mut parts = Vec::new();
             for mut part in parts_iter {
-                if part == ";".to_owned() {
+                if part == ";" {
                     break
                 }
                 let part_chars = &part.chars();
-                let first_two_chars: String = part_chars.to_owned().into_iter().take(2).collect();
+                let first_two_chars: String = part_chars.to_owned().take(2).collect();
                 let part_string;
-                if first_two_chars == "0x".to_owned() {
-                    part_string = part_chars.to_owned().into_iter().skip(2).take(part.len() - 2).collect::<String>().to_owned();
+                if first_two_chars == "0x" {
+                    part_string = part_chars.to_owned().skip(2).take(part.len() - 2).collect::<String>().to_owned();
                     part = part_string.as_str();
                 }
                 parts.push(part.to_owned())
             }
-            if parts.len() == 0 {
+            if parts.is_empty() {
                 continue
             }
             let mut line = build_line();
-            line.command = parts[0].to_owned();
+            line.command = parts[0].parse().unwrap();
             let args = parts.split_off(1);
-            line.args = args;
+            let mut args_smart: Vec<smartstring::alias::String> = vec![];
+            for arg in args {
+                args_smart.push(arg.parse().unwrap());
+            }
+            line.args = args_smart;
             self.lines.push(line);
         }
     }

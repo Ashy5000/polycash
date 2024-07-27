@@ -44,6 +44,10 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 	var amountSpentInCurrentBlock float64
 	for _, transaction := range MiningTransactions {
 		if bytes.Equal(transaction.Sender.Y, senderKey.Y) {
+			if amountSpentInCurrentBlock+transaction.Amount > amountSpentInCurrentBlock {
+				Warn("Overflow detected.")
+				return false
+			}
 			amountSpentInCurrentBlock += transaction.Amount
 		}
 	}
@@ -56,6 +60,9 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 }
 
 func VerifyMiner(miner PublicKey) bool {
+	if Env.Upgrades.Jinan <= len(Blockchain) {
+		return true
+	}
 	if IsNewMiner(miner, len(Blockchain)) && GetMinerCount(len(Blockchain)) >= GetMaxMiners() {
 		Log(fmt.Sprintf("Miner count: %d", GetMinerCount(len(Blockchain))), true)
 		Log(fmt.Sprintf("Maximum miner count: %d", GetMaxMiners()), true)
@@ -87,7 +94,7 @@ func DetectFork(block Block) bool {
 			Log("The node software is designed to handle this edge case, so operations can continue as normal.", false)
 			Log("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.", true)
 			Log("The blockchain will be re-synced to stay on the longest chain.", true)
-			SyncBlockchain()
+			SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Wait for finality when switching chains
 			return true
 		}
 	}
@@ -96,8 +103,8 @@ func DetectFork(block Block) bool {
 
 func DetectDuplicateBlock(hashBytes [64]byte) bool {
 	isDuplicate := false
-	for _, b := range Blockchain {
-		if HashBlock(b) == hashBytes {
+	for i, b := range Blockchain {
+		if HashBlock(b, i) == hashBytes {
 			isDuplicate = true
 		}
 	}
@@ -123,7 +130,7 @@ func VerifySmartContractTransactions(block Block) bool {
 	// Execute the smart contracts
 	var smartContractCreatedTransactions []Transaction
 	var fullTransition = StateTransition{
-		UpdatedData: make(map[uint64][]byte),
+		UpdatedData: make(map[string][]byte),
 	}
 	for _, contract := range smartContracts {
 		transactions, transition, gasUsed, err := contract.Execute()
@@ -159,19 +166,18 @@ func VerifySmartContractTransactions(block Block) bool {
 	return true
 }
 
-func VerifyBlock(block Block) bool {
-	isValid := true
-	isValid = VerifyTransactions(block.Transactions) && isValid
-	hashBytes := HashBlock(block)
+func VerifyBlock(block Block, blockHeight int) bool {
+	isValid := VerifyTransactions(block.Transactions)
+	hashBytes := HashBlock(block, blockHeight)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	isValid = hash <= MaximumUint64/block.Difficulty && isValid
 	isValid = !DetectDuplicateBlock(hashBytes) && isValid
 	isValid = !DetectFork(block) && isValid
-	if len(Blockchain) > 0 && block.PreviousBlockHash != HashBlock(Blockchain[len(Blockchain)-1]) {
+	if len(Blockchain) > 0 && block.PreviousBlockHash != HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1) {
 		Log("Block has invalid previous block hash. Ignoring block request.", true)
 		Log("The block could be on a different fork.", true)
 		Log("The blockchain will be re-synced to stay on the longest chain.", true)
-		SyncBlockchain()
+		SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Wait for finality when switching chains
 		isValid = false
 	}
 	isValid = VerifyMiner(block.Miner) && isValid

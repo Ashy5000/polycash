@@ -12,23 +12,24 @@ import (
 	"testing"
 
 	. "cryptocurrency/node_util"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDecodePublicKey(t *testing.T) {
 	t.Run("It returns a non-nil PublicKey when the key is valid", func(t *testing.T) {
 		// Act
-		key := DecodePublicKey("1234")
+		key := DecodePublicKey("[50]")
 		// Assert
 		assert.NotNil(t, key)
 	})
 	t.Run("It returns a PublicKey that, when encoded, is the same as the original key", func(t *testing.T) {
 		// Arrange
-		originalKey := "1234"
+		originalKey := "[50]"
 		// Act
 		key := DecodePublicKey(originalKey)
 		// Assert
-		assert.Equal(t, "[210]", EncodePublicKey(key))
+		assert.Equal(t, "[50]", EncodePublicKey(key))
 	})
 }
 
@@ -45,10 +46,12 @@ func TestEncodePublicKey(t *testing.T) {
 	})
 	t.Run("It returns a string that, when decoded, is the same as the original key", func(t *testing.T) {
 		// Arrange
-		originalKey := "1234"
+		originalKey := PublicKey{
+			Y: []byte("1234"),
+		}
 		// Act
-		key := DecodePublicKey(originalKey)
+		key := EncodePublicKey(originalKey)
 		// Assert
-		assert.Equal(t, "[210]", EncodePublicKey(key))
+		assert.Equal(t, originalKey, DecodePublicKey(key))
 	})
 }

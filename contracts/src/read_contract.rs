@@ -7,14 +7,16 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 use std::{env, fs};
+use smartstring::alias::String;
 
 pub fn read_contract() -> String {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        panic!("Expected exactly 1 argument, got {}", args.len())
+    let args: Vec<std::string::String> = env::args().collect();
+    if args.len() != 3 {
+        panic!("Expected exactly 3 arguments, got {}", args.len())
     }
     let contract_path = &args[1];
-    let contents = fs::read_to_string(contract_path)
-        .expect("Should have been able to read smart contract file");
-    contents
+    fs::read_to_string(contract_path)
+        .expect("Should have been able to read smart contract file")
+        .parse()
+        .unwrap()
 }

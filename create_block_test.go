@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	. "cryptocurrency/node_util"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -76,7 +77,7 @@ func TestCreateBlock(t *testing.T) {
 			panic(err)
 		}
 		// Assert
-		hashBytes := HashBlock(block)
+		hashBytes := HashBlock(block, 0)
 		hash := binary.BigEndian.Uint64(hashBytes[:])
 		assert.True(t, hash < maxHash)
 	})

@@ -10,17 +10,61 @@ package main
 
 import (
 	. "cryptocurrency/node_util"
-	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHashBlock(t *testing.T) {
 	t.Run("It returns a checksum of the block", func(t *testing.T) {
 		// Arrange
-		block := Block{}
+		key := PublicKey{
+			Y: []byte("123"),
+		}
+		block := Block{
+			Transactions: []Transaction{
+				Transaction{
+					Sender:    key,
+					Recipient: key,
+					Amount:    0,
+					Contracts: []Contract{
+						Contract{
+							Contents: "",
+							Parties:  nil,
+							GasUsed:  0,
+							Location: 0,
+							Loaded:   false,
+						},
+					},
+				},
+			},
+			Miner:                           key,
+			Nonce:                           0,
+			MiningTime:                      0,
+			Difficulty:                      0,
+			PreviousBlockHash:               [64]byte{},
+			Timestamp:                       time.Time{},
+			PreMiningTimeVerifierSignatures: []Signature{},
+			PreMiningTimeVerifiers:          []PublicKey{},
+			TimeVerifierSignatures:          []Signature{},
+			TimeVerifiers:                   []PublicKey{},
+			Transition: StateTransition{
+				UpdatedData: map[string][]byte{},
+				NewContracts: map[uint64]Contract{
+					0: Contract{
+						Contents: "",
+						Parties:  nil,
+						GasUsed:  0,
+						Location: 0,
+						Loaded:   false,
+					},
+				},
+			},
+		}
 		var emptyHash [32]byte
 		// Act
-		hash := HashBlock(block)
+		hash := HashBlock(block, 10)
 		// Assert
 		assert.NotEqual(t, emptyHash, hash)
 	})

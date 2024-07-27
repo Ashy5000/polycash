@@ -11,8 +11,11 @@ package node_util
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -28,9 +31,33 @@ type Contract struct {
 	Contents string
 	Parties  []ContractParty
 	GasUsed  float64
+	Location uint64
+	Loaded   bool
+}
+
+var ExternalStateWriteableValue = []byte("ExternalStateWriteableValue")
+
+func (c Contract) IsNewContract() bool {
+	return c.Location == 0
+}
+
+func (c Contract) LoadContract() {
+	state := CalculateCurrentState()
+	for _, contract := range state.Contracts {
+		if contract.Location == c.Location {
+			c.Contents = contract.Contents
+			c.Parties = contract.Parties
+			c.GasUsed = contract.GasUsed
+			c.Loaded = true
+			break
+		}
+	}
 }
 
 func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
+	if !c.Loaded {
+		c.LoadContract()
+	}
 	if !VerifySmartContract(c) {
 		Warn("Invalid contract detected.")
 		return make([]Transaction, 0), StateTransition{}, 0, nil
@@ -38,15 +65,19 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 	if err := os.WriteFile("contract.blockasm", []byte(c.Contents), 0666); err != nil {
 		return nil, StateTransition{}, 0, err
 	}
-	out, err := exec.Command("./contracts/target/debug/contracts", "contract.blockasm").Output()
+	contractStr := c.Contents
+	hash := sha256.Sum256([]byte(contractStr))
+	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:])).Output()
 	if err != nil {
+		fmt.Println("Errored with output:", string(out))
+		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))
 		return nil, StateTransition{}, 0, err
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	transactions := make([]Transaction, 0)
 	gasUsed := 0.0
 	transition := StateTransition{
-		UpdatedData: make(map[uint64][]byte),
+		UpdatedData: make(map[string][]byte),
 	}
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -59,18 +90,28 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 					stateChangeString := line[14:]
 					parts := strings.Split(stateChangeString, "|")
 					address := parts[0]
-					addressUint64, err := strconv.ParseUint(address, 10, 32)
-					if err != nil {
-						return nil, StateTransition{}, 0, err
-					}
 					valueHex := parts[1]
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {
 						return nil, StateTransition{}, 0, err
 					}
-					transition.UpdatedData[addressUint64] = valueBytes
-					continue
+					transition.UpdatedData[address] = valueBytes
+				} else if line[:24] == "External state change: " {
+					stateChangeString := line[24:]
+					parts := strings.Split(stateChangeString, "|")
+					address := parts[0]
+					valueHex := parts[1]
+					valueBytes, err := hex.DecodeString(valueHex)
+					if err != nil {
+						return nil, StateTransition{}, 0, err
+					}
+					if !bytes.Equal(CalculateCurrentState().Data[address], ExternalStateWriteableValue) {
+						Warn("Contract attempted to modify external state not marked as writeable.")
+						return nil, StateTransition{}, 0, errors.New("contract attempted to modify external state not marked as writeable")
+					}
+					transition.UpdatedData[address] = valueBytes
 				}
+				continue
 			}
 			gasUsed, err = strconv.ParseFloat(line[10:], 64)
 			if err != nil {
@@ -118,6 +159,11 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 			FromSmartContract: true,
 		}
 		transactions = append(transactions, transaction)
+	}
+	if c.IsNewContract() {
+		transition.NewContracts = map[uint64]Contract{
+			c.Location: c,
+		}
 	}
 	return transactions, transition, gasUsed, nil
 }

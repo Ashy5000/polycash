@@ -20,7 +20,7 @@ pub(crate) fn sync() -> f64 {
     let output = Command::new("env")
         .arg("-C")
         .arg("..")
-        .arg("./builds/node/node_linux-amd64")
+        .arg("./builds/node/node")
         .arg("-command")
         .arg("sync;balance ".to_owned() + public_key)
         .output()

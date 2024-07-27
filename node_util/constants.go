@@ -8,13 +8,13 @@ You should have received a copy of the GNU General Public License along with thi
 */
 package node_util
 
-// Security level
-var CurrentSecurityLevel = 0
-
 // Difficulty
 var InitialBlockDifficulty = uint64(50000)
 var MinimumBlockDifficulty = uint64(50000)
 var MaximumUint64 = ^uint64(0)
+
+// Finality
+const BlocksUntilFinality = 3
 
 // Rewards
 var BlocksBeforeReward = 3

@@ -9,6 +9,7 @@
 
 #include "BlockasmGenerator.h"
 #include "Parser.h"
+#include "LabelManager.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -23,8 +24,10 @@ int main(int argc, char* argv[]) {
     }
     std::string contents = contents_stream.str();
     std::vector<Token> tokens = Parser::parse_tokens(contents);
-    auto generator = BlockasmGenerator(tokens);
+    auto generator = BlockasmGenerator(tokens, 0x00001000, {}, true);
     std::string blockasm = generator.GenerateBlockasm();
+    auto lm = LabelManager(blockasm);
+    blockasm = lm.ReplaceLabels(blockasm);
     if (std::ofstream targetAsm("out.blockasm"); targetAsm.is_open()) {
         targetAsm << blockasm << std::endl;
         targetAsm.close();

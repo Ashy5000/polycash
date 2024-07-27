@@ -77,6 +77,7 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
+		signatureBytes = []byte(strings.Replace(string(signatureBytes), `"`, "", -1))
 		signatureStr := `"` + string(signatureBytes) + `"`
 		if n != len(i.BodySignatures)-1 {
 			signatureStr += "#"

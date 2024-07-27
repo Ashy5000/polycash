@@ -5,3 +5,7 @@ contracts/target
 nohup.out
 contract.blockasm
 language/cmake-build-debug
+builds/node/node
+/perf.data
+/perf.data.old
+/flamegraph.svg

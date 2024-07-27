@@ -18,4 +18,18 @@ add_executable(plc src/main.cpp
         src/Type.h
         src/Operator.h
         src/OperatorType.h
+        src/Signature.cpp
+        src/Signature.h
+        src/ParamsParser.cpp
+        src/ParamsParser.h
+        src/SystemFunction.h
+        src/SystemFunctions.h
+        src/BlockasmLib.cpp
+        src/BlockasmLib.h
+        src/Function.h
+        src/Linker.cpp
+        src/Linker.h
+        src/InjectedFunction.h
+        src/LabelManager.cpp
+        src/LabelManager.h
 )

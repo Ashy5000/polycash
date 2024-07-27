@@ -13,12 +13,14 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -42,7 +44,7 @@ func GetKey(path string) PrivateKey {
 	return key
 }
 
-func SyncBlockchain() {
+func SyncBlockchain(finalityBlockHeight int) {
 	longestLength := 0
 	var longestBlockchain []Block
 	errCount := 0
@@ -63,19 +65,28 @@ func SyncBlockchain() {
 		}
 		length := len(peerBlockchain)
 		// Check to ensure proof of work is valid
+		createsFork := false
 		for i, block := range peerBlockchain {
 			if i == 0 {
 				continue
 			}
-			previousBlockHash := HashBlock(peerBlockchain[i-1])
+			previousBlockHash := HashBlock(peerBlockchain[i-1], i-1)
 			if !bytes.Equal(block.PreviousBlockHash[:], previousBlockHash[:]) {
-				Log("Invalid blockchain received from peer.", true)
-				continue
+				Log("Invalid blockchain received from peer: incorrect previous block hash", true)
+				fmt.Println(block.PreviousBlockHash)
+				fmt.Println(previousBlockHash)
+				goto INVALID
 			}
-			blockHash := HashBlock(block)
+			blockHash := HashBlock(block, i)
 			if binary.BigEndian.Uint64(blockHash[:]) > MaximumUint64/block.Difficulty {
-				Log("Invalid blockchain received from peer.", true)
-				continue
+				Log("Invalid blockchain received from peer: proof of work", false)
+				fmt.Println("Failed at block", i)
+				goto INVALID
+			}
+			if i < len(Blockchain)-1 {
+				if blockHash != HashBlock(Blockchain[i], i) {
+					createsFork = true
+				}
 			}
 			// Get the correct difficulty for the block
 			lastMinedBlock := peerBlockchain[i-1]
@@ -90,14 +101,24 @@ func SyncBlockchain() {
 			}
 			correctDifficulty := GetDifficulty(lastTime, lastDifficulty)
 			if block.Difficulty != correctDifficulty {
-				Log("Invalid blockchain received from peer.", true)
-				continue
+				Log("Invalid blockchain received from peer: incorrect difficulty", false)
+				goto INVALID
+			}
+		}
+		if createsFork {
+			// Require finality
+			if length < finalityBlockHeight {
+				Log("Ignoring blockchain received from peer due to lack of finality.", false)
+				goto INVALID
 			}
 		}
 		if length > longestLength {
 			longestLength = length
 			longestBlockchain = peerBlockchain
 		}
+		break
+	INVALID:
+		errCount++
 	}
 	if errCount >= len(GetPeers()) {
 		Log("Failed to sync blockchain with any peers.", true)
@@ -123,7 +144,7 @@ func GetBalance(key []byte) float64 {
 		for _, transaction := range block.Transactions {
 			if bytes.Equal(transaction.Sender.Y, key) {
 				total -= transaction.Amount
-				if len(Blockchain) > 50 { // Fees start after 50 blocks
+				if i > 50 { // Fees start after 50 blocks
 					fee := TransactionFee + (BodyFeePerByte * float64(len(transaction.Body)))
 					for _, contract := range transaction.Contracts {
 						fee += GasPrice * contract.GasUsed
@@ -137,7 +158,7 @@ func GetBalance(key []byte) float64 {
 		if bytes.Equal(block.Miner.Y, key) {
 			lastBlock := Blockchain[i-1]
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
-			if len(Blockchain) > 50 { // Fees start after 50 blocks
+			if i > 50 { // Fees start after 50 blocks
 				fees := 0.0
 				for _, transaction := range block.Transactions {
 					fees += TransactionFee
@@ -146,10 +167,11 @@ func GetBalance(key []byte) float64 {
 						fees += GasPrice * contract.GasUsed
 					}
 				}
+				miningTotal += fees
 			}
 			// Get number of miners at the time of mining
 			minerCount := GetMinerCount(i)
-			reward := CalculateBlockReward(minerCount)
+			reward := CalculateBlockReward(minerCount, i)
 			miningTotal += reward
 			blocksMined++
 		}
@@ -206,14 +228,31 @@ func Send(receiver string, amount string, transactionBody []byte) {
 	}
 }
 
-func DeploySmartContract(contractPath string) error {
-	file, err := ioutil.ReadFile(contractPath)
-	if err != nil {
-		return err
+func DeploySmartContract(contractPath string, contractLocation string) error {
+	if contractPath == "" && contractLocation == "" {
+		return errors.New("must provide contract path or location")
 	}
-	contract := Contract{
-		Contents: string(file),
-		Parties:  make([]ContractParty, 0),
+	var contract Contract
+	if contractPath != "" {
+		file, err := ioutil.ReadFile(contractPath)
+		if err != nil {
+			return err
+		}
+		contract = Contract{
+			Contents: string(file),
+			Parties:  make([]ContractParty, 0),
+			GasUsed:  0,
+			Location: 0,
+			Loaded:   true,
+		}
+	} else {
+		contractLocationUint, err := strconv.ParseUint(contractLocation, 10, 64)
+		if err != nil {
+			return err
+		}
+		contract = Contract{
+			Location: contractLocationUint,
+		}
 	}
 	key := GetKey("")
 	deployer := GetKey("").PublicKey

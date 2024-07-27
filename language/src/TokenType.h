@@ -19,7 +19,16 @@ enum class TokenType {
     newline,
     concat,
     add,
+    sub,
+    mul,
+    div,
     comma,
+    eq,
+    string_lit,
+    excl,
+    open_curly,
+    close_curly,
+    block,
 };
 
 

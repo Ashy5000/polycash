@@ -12,6 +12,7 @@ import (
 	. "cryptocurrency/node_interface"
 	. "cryptocurrency/node_util"
 	. "cryptocurrency/rollup"
+	. "cryptocurrency/testing"
 	"flag"
 	"net/http"
 )
@@ -22,11 +23,17 @@ func main() {
 	port := flag.String("port", "8080", "Port to listen on (server only)")
 	command := flag.String("command", "exit", "Run a command and exit")
 	Verbose = flag.Bool("verbose", false, "Set to true to enable verbose logging")
+	benchmark := flag.Bool("benchmark", false, "Set to true to enable benchmarking")
 	flag.Parse()
+	LoadEnv()
 	LoadStateCmd(nil)
-	SyncBlockchain()
+	SyncBlockchain(-1)
 	if len(Blockchain) == 0 {
 		Append(GenesisBlock())
+	}
+	if *benchmark {
+		Benchmark()
+		return
 	}
 	if *mine {
 		*serve = true
@@ -40,6 +47,8 @@ func main() {
 	} else {
 		if *command == "exit" {
 			StartCmdLine()
+		} else if *command == "test" {
+			StartTest()
 		} else {
 			RunCmd(*command)
 		}
