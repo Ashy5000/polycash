@@ -267,9 +267,9 @@ func HandleVerifyTimeRequest(w http.ResponseWriter, req *http.Request) {
 		// Get the time mining finished
 		if Env.Upgrades.Yangon <= len(Blockchain) && Env.Upgrades.Yangon != -1 {
 			previousBlockFinishedTime := Blockchain[len(Blockchain)-1].Timestamp.Add(Blockchain[len(Blockchain)-1].MiningTime)
-			currentTime = previousBlockFinishedTime.Add(block.MiningTime)
+			miningFinishedTime = previousBlockFinishedTime.Add(block.MiningTime)
 		} else {
-			currentTime = block.Timestamp.Add(block.MiningTime)
+			miningFinishedTime = block.Timestamp.Add(block.MiningTime)
 		}
 		// Check if the time the block was mined is within a reasonable range of the current time
 		// It cannot be in the future, and it cannot be more than 10 seconds in the past

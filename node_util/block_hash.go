@@ -64,6 +64,10 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 		if err != nil {
 			panic(err)
 		}
+		blockCpy.MiningTime = time.Minute
+		blockCpy.TimeVerifiers = []PublicKey{}
+		blockCpy.TimeVerifierSignatures = []Signature{}
+		blockCpy.Timestamp = time.Time{}
 		for i := range block.Transactions {
 			blockCpy.Transactions[i].Timestamp = time.Time{}
 			blockCpy.Transactions[i].Body = []byte{}

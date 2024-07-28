@@ -100,7 +100,7 @@ func CreateBlock() (Block, error) {
 		}
 	}
 	timeVerificationTimestamp := time.Now()
-	if Env.Upgrades.Yangon <= len(Blockchain) {
+	if Env.Upgrades.Yangon <= len(Blockchain) && Env.Upgrades.Yangon != -1 {
 		block.MiningTime = timeVerificationTimestamp.Sub(previousBlock.Timestamp.Add(previousBlock.MiningTime))
 	} else {
 		block.MiningTime = time.Since(start)
