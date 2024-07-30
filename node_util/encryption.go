@@ -38,7 +38,7 @@ func EncryptKey(password string) {
 	}
 	block, err := aes.NewCipher([]byte(password))
 	if err != nil {
-		Error("Error creating cipher. Ensure that the password is a multiple of 16 characters long.", false)
+		Error("Error creating cipher. Ensure that the password is 16, 24, or 32 characters long.", false)
 		return
 	}
 	gcm, err := cipher.NewGCM(block)
