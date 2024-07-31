@@ -12,6 +12,7 @@ import (
 	"bufio"
 	. "cryptocurrency/analysis"
 	. "cryptocurrency/node_util"
+	. "cryptocurrency/node_util/oracle"
 	. "cryptocurrency/rollup"
 	"encoding/hex"
 	"encoding/json"
