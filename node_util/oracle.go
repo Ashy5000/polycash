@@ -8,7 +8,15 @@ You should have received a copy of the GNU General Public License along with thi
 */
 package node_util
 
+import (
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+)
+
 type OracleType uint64
+
+const ORACLE_RESPONSE_PREFIX = "ORACLE"
 
 const (
 	NilType OracleType = iota
@@ -50,4 +58,17 @@ func (o *Oracle) Step() {
 		o.Responses = append(o.Responses, CalculateOracleResponse(req))
 	}
 	o.Requests = []OracleRequest{}
+}
+
+func (o *Oracle) WriteResponses(transition StateTransition) {
+	for _, res := range o.Responses {
+		requestStr := []byte(fmt.Sprintf("%v", res.Request))
+		requestHash := sha256.Sum256(requestStr)
+		key := fmt.Sprintf("%s%s", ORACLE_RESPONSE_PREFIX, string(requestHash[:]))
+		val, err := json.Marshal(res)
+		if err != nil {
+			panic(err)
+		}
+		transition.UpdatedData[key] = val
+	}
 }
