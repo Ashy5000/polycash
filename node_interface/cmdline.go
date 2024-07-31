@@ -47,6 +47,7 @@ var commands = map[string]func([]string){
 	"startAnalysisConsole": StartAnalysisConsoleCmd,
 	"sendWithBody":         SendWithBodyCmd,
 	"getBlockchainLen":     GetBlockchainLenCmd,
+	"queryOracle":          QueryOracleCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -338,6 +339,24 @@ func StartAnalysisConsoleCmd(fields []string) {
 
 func GetBlockchainLenCmd(fields []string) {
 	fmt.Println(len(Blockchain))
+}
+
+func QueryOracleCmd(fields []string) {
+	query_type_int, err := strconv.ParseInt(fields[0], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	var query_body []byte
+	_, err = hex.Decode(query_body, []byte(fields[1]))
+	if err != nil {
+		return
+	}
+	query := OracleQuery{
+		Body: query_body,
+		Type: OracleQueryType(query_type_int),
+	}
+	res := CalculateOracleResponse(query)
+	fmt.Println(string(res.Body))
 }
 
 func RunCmd(input string) {

@@ -620,6 +620,22 @@ pub fn run_vm(
                 let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
                 dst_buffer.contents = contents_vec_u8;
             }
+            "QueryOracle" => unsafe {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[2].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[3].clone());
+                }
+                let query_type = (*vm_access_buffer(buffers, line.args[0].clone(), line.args[3].clone())).as_u64().unwrap();
+                let query_body = vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[3].clone());
+                let query_result = blockutil_interface.query_oracle(query_type, query_body);
+                if !query_result.1 {
+                    vm_throw_local_error(buffers, line.args[3].clone());
+                }
+                let res_bfr = vm_access_buffer(buffers, line.args[0].clone(), line.args[3].clone());
+                (*res_bfr).contents = query_result.0;
+            }
             &_ => vm_throw_global_error(buffers),
         }
         if should_increment {

@@ -93,9 +93,7 @@ impl BlockUtilInterface {
         let output = output.trim().to_string();
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();
-        println!("output: {}", output);
         let data_hex: String = output.chars().skip(6).collect();
-        println!("data_hex: {}", data_hex);
         let data = hex::decode(data_hex).expect("Decoding failed");
         (data, true)
     }
@@ -111,5 +109,25 @@ impl BlockUtilInterface {
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();
         output.parse::<u64>().unwrap() // Long Live the Turbofish.
+    }
+    pub fn query_oracle(&self, query_type: u64, query_body: Vec<u8>) -> (Vec<u8>, bool) {
+        let query_body_hex = hex::encode(query_body);
+        let command = format!("queryOracle {} {}", query_type, query_body_hex);
+        if !sanitize_node_console_command(&command) {
+            println!("Forbidden command");
+            return (vec![], false);
+        }
+        let output = Command::new(&*self.node_executable_path.clone())
+            .arg("--command")
+            .arg(command)
+            .output();
+        let output =
+            std::string::String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+        let output = output.trim().to_string();
+        let output = output.split("\n").collect::<Vec<&str>>();
+        let output = output[output.len() - 1].to_string();
+        let response_body_hex: String = output.chars().skip(6).collect();
+        let response_body: Vec<u8> = hex::decode(response_body_hex).unwrap();
+        (response_body, true)
     }
 }
