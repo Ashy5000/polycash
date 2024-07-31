@@ -149,6 +149,9 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         if(c == '/') {
             tokens.emplace_back(Token{TokenType::div, {}});
         }
+        if(c == '^') {
+            tokens.emplace_back(Token{TokenType::exp, {}});
+        }
         if(c == ',') {
             tokens.emplace_back(Token{TokenType::comma, {}});
         }

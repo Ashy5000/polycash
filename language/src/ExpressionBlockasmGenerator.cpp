@@ -126,6 +126,10 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
             type = OperatorType::div;
             break;
         }
+        if(t.type == TokenType::exp) {
+            type = OperatorType::exp;
+            break;
+        }
         if(t.type == TokenType::eq) {
             type = OperatorType::eq;
             break;
@@ -174,6 +178,12 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
     }
     if(type == OperatorType::div) {
         blockasm << "Div 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
+        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000";
+        return std::make_tuple(nextAllocatedLocation + 1, Type::uint64);
+    }
+    if(type == OperatorType::exp) {
+        blockasm << "Exp 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
         blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000";
         return std::make_tuple(nextAllocatedLocation + 1, Type::uint64);

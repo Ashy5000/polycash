@@ -22,6 +22,7 @@ enum class TokenType {
     sub,
     mul,
     div,
+    exp,
     comma,
     eq,
     string_lit,

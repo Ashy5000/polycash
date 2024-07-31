@@ -14,7 +14,8 @@ enum class OperatorType {
     sub,
     mul,
     div,
-    eq
+    eq,
+    exp
 };
 
 
