@@ -21,6 +21,7 @@ type NetworkUpgrades struct {
 	Yangon      int `json:"yangon"`
 	Washington  int `json:"washington"`
 	Dalian      int `json:"dalian"`
+	Qingdao     int `json:"qingdao"`
 }
 
 type Environment struct {

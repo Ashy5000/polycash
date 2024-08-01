@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func GetDifficulty(lastTime time.Duration, lastDifficulty uint64) uint64 {
+func GetDifficulty(lastTime time.Duration, lastDifficulty uint64, transactionCount int, blockchainLen int) uint64 {
 	// The target time for a block is 1 minute.
 	// The difficulty is adjusted on a per-miner, per-block basis.
 	// To give faster miners a (small) advantage, the difficulty is divided by the result of a modified sigmoid function.
@@ -30,6 +30,9 @@ func GetDifficulty(lastTime time.Duration, lastDifficulty uint64) uint64 {
 		adjustment = (1 / (1 + math.Pow(math.E, -(1/Mdpm)*(x-Mdpm)))) + 0.5
 	}
 	difficultyAfterAdjustment := float64(difficultyBeforeAdjustment) / adjustment
+	if Env.Upgrades.Qingdao <= blockchainLen {
+		difficultyAfterAdjustment /= float64(transactionCount)
+	}
 	difficultyUint64 := uint64(difficultyAfterAdjustment)
 	if difficultyUint64 > MinimumBlockDifficulty {
 		return difficultyUint64

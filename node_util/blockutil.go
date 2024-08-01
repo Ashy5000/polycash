@@ -99,7 +99,7 @@ func SyncBlockchain(finalityBlockHeight int) {
 				lastTime = lastMinedBlock.MiningTime
 				lastDifficulty = lastMinedBlock.Difficulty
 			}
-			correctDifficulty := GetDifficulty(lastTime, lastDifficulty)
+			correctDifficulty := GetDifficulty(lastTime, lastDifficulty, len(block.Transactions), i)
 			if block.Difficulty != correctDifficulty {
 				Log("Invalid blockchain received from peer: incorrect difficulty", false)
 				goto INVALID

@@ -187,7 +187,7 @@ func VerifyBlock(block Block, blockHeight int) bool {
 		lastMinedBlock.Difficulty = InitialBlockDifficulty
 		lastMinedBlock.MiningTime = time.Minute
 	}
-	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty)
+	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty, len(block.Transactions), blockHeight)
 	if block.Difficulty != correctDifficulty || block.Difficulty < MinimumBlockDifficulty {
 		Warn("Invalid difficulty detected.")
 		Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)

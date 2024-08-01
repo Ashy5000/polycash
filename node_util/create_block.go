@@ -35,7 +35,7 @@ func CreateBlock() (Block, error) {
 		Miner:                           GetKey("").PublicKey,
 		Nonce:                           0,
 		MiningTime:                      0,
-		Difficulty:                      GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty),
+		Difficulty:                      GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty, len(MiningTransactions), len(Blockchain)),
 		Timestamp:                       time.Now(),
 		PreMiningTimeVerifierSignatures: []Signature{},
 		PreMiningTimeVerifiers:          []PublicKey{},
@@ -89,7 +89,7 @@ func CreateBlock() (Block, error) {
 			} else {
 				block.PreviousBlockHash = [64]byte{}
 			}
-			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty)
+			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty, len(MiningTransactions), len(Blockchain))
 			block.Transactions = MiningTransactions
 			block.Nonce++
 			hashBytes = HashBlock(block, len(Blockchain))
