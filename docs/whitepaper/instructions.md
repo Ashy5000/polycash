@@ -64,6 +64,18 @@ The Div instruction, represented by the hex instruction code 0x0008, divides two
 
 Div [A] [B] [Out] [ResDst]
 
+**Exp**
+
+The Exp instruction, represented by the hex instruction code 0x001E, calculates the result of one unsigned 64-bit integer to the power of a second, storing the result in the buffer stored at Out. If A, B, or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst.
+
+Exp [A] [B] [Out] [ResDst]
+
+**Mod**
+
+The Exp instruction, represented by the hex instruction code 0x001F, calculates the remainder of dividing two unsigned 64-bit integers in the manner of the Div instruction. If B is equal to zero, the result is zero. The result is stored in the buffer stored at Out. If A, B, or Out do not hold memory locations with an initialized buffer, a local error is thrown into ResDst
+
+Mod [A] [B] [Out] [ResDst]
+
 5.1.3.3 Logical Instructions
 
 **And**
@@ -126,6 +138,32 @@ Jmp [Loc] [ResDst]
 
 **JmpCond**
 
-The JmpCond instruction, represented by the hex instruction code 0x0012, jumps to the instruction specified by the line number stored in the buffer at Loc if the buffer at Cond stores a value other than 0x0000000000000000. If Loc or Cond do not exist, a local error is thrown into ResDst.
+The JmpCond instruction, represented by the hex instruction code 0x0012, jumps to the instruction specified by the line number Loc if the buffer at Cond stores a value other than 0x0000000000000000. If Loc or Cond do not exist, a local error is thrown into ResDst.
 
 JmpCond [Loc] [Cond] [ResDst]
+
+**Call**
+
+The Call function, represented by the hex instruction code 0x0021, jumps to the line Loc. If Loc does not exist, a local error is thrown into ResDst.
+
+Call [Loc] [ResDst]
+
+**Ret**
+
+The Ret instruction, represented by the hex instruction code 0x0022, jumps to the line where the Call instruction was last run.
+
+Ret
+
+**5.1.3.5** Contract instructions
+
+**Exit**
+
+The Exit instruction, represented by the hex instruction code 0x0000, returns from the smart contract with exit code Status.
+
+Exit [Status]
+
+**ExitBfr**
+
+The ExitBfr instruction, represented by the hex instruction code 0x0001, returns from the smart contract with the exit code stored in the buffer at StatusBfr. If StatusBfr does not exist, a local error is thrown into ResDst.
+
+ExitBfr [StatusBfr] [ResDst]

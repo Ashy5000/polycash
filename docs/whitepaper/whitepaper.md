@@ -42,6 +42,8 @@ When difficulty is adjusted based on the time it takes for a miner to create blo
 
 **4 Miner Count Limits**
 
+***Miner count limits were removed in the Jinan upgrade.***
+
 In order to decrease the energy usage of the network and to slow the growth in the number of time verifiers, the number of miners in the network is limited to a maximum. If a miner with a public key not present as the miner in any previous block creates and broadcasts a new block and the number of unique public keys present as miners in the blockchain equals or exceeds the maximum, the block is rejected. After a miner has created one block, it can continue to create blocks even if the maximum number of miners have been reached- they are already registered. After they are registered, they do not have a strong motivation to use more energy to mine faster past a certain point, as the sigmoid difficulty function does not significantly reward faster miners after a point. This motivates miners to use a low to medium mining rate to optimize their profits- past a certain mining rate, energy costs outweigh mining reward benefits. This decreases the energy usage of the network.
 
 &nbsp;&nbsp;&nbsp;&nbsp;To calculate the maximum number of miners at the current time, divide the number of blocks in the blockchain by 20, rounding up.
@@ -70,6 +72,10 @@ Errors are split into two types: local errors and global errors. Local errors wr
 
 See [Polycash VM Spec](https://github.com/ashy5000/cryptocurrency/blob/master/docs/whitepaper/instructions.md) for extended subsection 5.1.3 on the VM instruction set.
 
+5.1.3 Inter-Contract Communication
+
+To enable communication between contracts, there is a constant, known as the External State Writeable Value (ESWV), which can be stored at a location in a contract's state. Then, any other contract may choose to write a different value to that location, despite their lack of write access to it in normal circumstances. Because the location will now contain a value other than the ESWV, it isn't writeable and hence "locked". In a similar way that a mutex prevents simultaneous writes to a location in memory, external writeable state will lock when it is written to and will unlock when the smart contract controlling the writeable state sets it back to the ESWV.
+
 **6 Transaction Body**
 
 To allow data to be sent through the blockchain, a body may be attached to each transaction containing data of any form. A data fee is paid to the miner of that block of a size proportional to the amount of data transferred, in bytes.
@@ -78,13 +84,11 @@ To allow data to be sent through the blockchain, a body may be attached to each 
 
 **7 Hashrate Forking Prevention**
 
-It is crucial to prevent miners from forking their hashrate through multiple wallet addresses, circumventing the difficulty adjustment algorithm. Three major strategies are applied to this issue.
+It is crucial to prevent miners from forking their hashrate through multiple wallet addresses, circumventing the difficulty adjustment algorithm. Two major strategies are applied to this issue.
 
-1. Maximum Miner Count
-   Maximum miner count, as addressed previously, can limit the number of miners in the network and thus the number of wallet addresses miners can fork their mining power into.
-2. Block Reward Locking
+1. Block Reward Locking
    Block reward locking prevents miners gaining block rewards until they have mined at least 3 blocks, lowering the efficiency of mining rate forking.
-3. Block Reward Adjustment
+2. Block Reward Adjustment
    Block Reward Adjustment decreases the block reward for each new miner that mines a block by 1% in order to impose a net loss of profits on miners that fork their hashrate. This is the most effective approach.
 
 **7.1 Block Reward Adjustment**

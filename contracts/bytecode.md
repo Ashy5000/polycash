@@ -10,7 +10,7 @@ CMD  PARAMREF0 PARAMREF1 PARAMREF2 ... PARAMREFN PARAMEND
 | Command                | Code | Param0    | Param1 | Param2 | Param3 | Param4 |
 |------------------------|------|-----------|--------|--------|--------|--------|
 | Exit                   | 00   | Status    |
-| ExitBfr                | 01   | StatusBfr |
+| ExitBfr                | 01   | StatusBfr | ResDst |
 | InitBfr                | 02   | Loc       | ResDst |
 | CpyBfr                 | 03   | Src       | Dst    | ResDst |
 | FreeBfr                | 04   | Loc       | ResDst |
