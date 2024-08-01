@@ -104,16 +104,16 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
         return std::make_tuple(0x00000001, t);
     }
     OperatorType type = OperatorType::type_placeholder;
-    int i = 0;
-    for(;i < expression.children.size(); i++) {
-        Token t = expression.children[i];
+    int operatorPos = 0;
+    for(;operatorPos < expression.children.size(); operatorPos++) {
+        Token t = expression.children[operatorPos];
         type = OperatorTypeFromToken(t);
         if(type != OperatorType::type_placeholder) {
             break;
         }
     }
-    std::vector preOperatorTokens(expression.children.begin(), expression.children.begin() + i);
-    std::vector postOperatorTokens(expression.children.begin() + i + 1, expression.children.end());
+    std::vector preOperatorTokens(expression.children.begin(), expression.children.begin() + operatorPos);
+    std::vector postOperatorTokens(expression.children.begin() + operatorPos + 1, expression.children.end());
     Token preOperatorExpr = Token({TokenType::expr, {}});
     preOperatorExpr.children = preOperatorTokens;
     Token postOperatorExpr = Token({TokenType::expr, {}});

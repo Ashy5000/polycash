@@ -32,6 +32,7 @@ std::string OperatorToString(Operator o) {
         case OperatorType::eq:
             return "Eq";
     }
+    return "";
 }
 
 Type OperatorToType(Operator o) {
@@ -53,6 +54,7 @@ Type OperatorToType(Operator o) {
         case OperatorType::eq:
             return Type::boolean;
     }
+    return Type::type_placeholder;
 }
 
 
