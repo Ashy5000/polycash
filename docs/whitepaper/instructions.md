@@ -167,3 +167,23 @@ Exit [Status]
 The ExitBfr instruction, represented by the hex instruction code 0x0001, returns from the smart contract with the exit code stored in the buffer at StatusBfr. If StatusBfr does not exist, a local error is thrown into ResDst.
 
 ExitBfr [StatusBfr] [ResDst]
+
+**5.1.3.5** Logging instructions
+
+**Stdout**
+
+The Stdout instruction, represented by the hex instruction code 0x0014, prints the data in the buffer at the location Bfr in a debugging format. If Bfr does not exist, a local error is thrown into ResDst.
+
+Stdout [Bfr] [ResDst]
+
+**Stderr**
+
+The Stderr instruction, represented by the hex instruction code 0x0015, prints the data in the buffer at the location Bfr in a debugging format into STDERR. If Bfr does not exist, a local error is thrown into ResDst.
+
+Stdout [Bfr] [ResDst]
+
+**PrintStr**
+
+The PrintStr instruction, represented by the hex instruction code 0x0023, prints the ASCII string stored in the buffer at StrBfr. If StrBfr does not exist, a local error is thrown into ResDst.
+
+PrintStr [StrBfr] [ResDst]
