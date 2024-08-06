@@ -596,13 +596,38 @@ pub fn run_vm(
                 gas_used += 3.0;
                 gas_used += 0.6 * contents_vec_u8.len() as f64;
             }
-            "GetFromState" => {
+            "GetFromState" => unsafe {
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
                     || !vm_check_buffer_initialization(buffers, line.args[1].clone())
                 {
                     vm_throw_local_error(buffers, line.args[2].clone());
                 }
-                let location = std::str::from_utf8(&vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone())).expect("Could not convert state location to string").to_owned();
+                let location = (*vm_access_buffer(buffers, line.args[0].clone(), line.args[1].clone())).as_u64().unwrap() as usize;
+                let location = format!("{}{}", contract_hash.clone(), location);
+                let contents_vec_u8: Vec<u8>;
+                match tmp_state.get(&*location) {
+                    Some(value) => {
+                        contents_vec_u8 = value.to_vec();
+                    }
+                    None => {
+                        let success: bool;
+                        (contents_vec_u8, success) = blockutil_interface.get_from_state(location.parse().unwrap());
+                        if !success {
+                            vm_throw_local_error(buffers, line.args[2].clone());
+                        }
+                    }
+                }
+                let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
+                dst_buffer.contents = contents_vec_u8;
+            }
+            "GetFromStateExternal" => {
+                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+                {
+                    vm_throw_local_error(buffers, line.args[2].clone());
+                }
+                let location_vec_u8 = &vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone());
+                let location = hex::encode(location_vec_u8);
                 let contents_vec_u8: Vec<u8>;
                 match tmp_state.get(&*location) {
                     Some(value) => {
