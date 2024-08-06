@@ -85,6 +85,7 @@ pub fn run_vm(
     let mut gas_used = 0.0;
     let mut origins = vec![];
     let mut stack = Stack{frames: vec![]};
+    let mut tmp_state: FxHashMap<String, Vec<u8>> = Default::default();
     while line_number < syntax_tree.lines.len() {
         let line = &syntax_tree.lines[line_number];
         should_increment = true;
@@ -574,7 +575,9 @@ pub fn run_vm(
                 let contents_vec_u8 =
                     vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[2].clone());
                 let contents_hex = hex::encode(contents_vec_u8.clone());
-                println!("State change: {}{}|{}", contract_hash.clone(), location, contents_hex);
+                let full_location = format!("{}{}", contract_hash.clone(), location);
+                println!("State change: {}|{}", full_location, contents_hex);
+                tmp_state.insert(full_location.parse().unwrap(), contents_vec_u8.clone());
                 gas_used += 3.0;
                 gas_used += 0.6 * contents_vec_u8.len() as f64;
             }
@@ -589,6 +592,7 @@ pub fn run_vm(
                     vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[2].clone());
                 let contents_hex = hex::encode(contents_vec_u8.clone());
                 println!("External state change: {}|{}", location, contents_hex);
+                tmp_state.insert(format!("{}", location).parse().unwrap(), contents_vec_u8.clone());
                 gas_used += 3.0;
                 gas_used += 0.6 * contents_vec_u8.len() as f64;
             }
@@ -599,9 +603,18 @@ pub fn run_vm(
                     vm_throw_local_error(buffers, line.args[2].clone());
                 }
                 let location = std::str::from_utf8(&vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone())).expect("Could not convert state location to string").to_owned();
-                let (contents_vec_u8, success) = blockutil_interface.get_from_state(location.parse().unwrap());
-                if !success {
-                    vm_throw_local_error(buffers, line.args[2].clone());
+                let contents_vec_u8: Vec<u8>;
+                match tmp_state.get(&*location) {
+                    Some(value) => {
+                        contents_vec_u8 = value.to_vec();
+                    }
+                    None => {
+                        let success: bool;
+                        (contents_vec_u8, success) = blockutil_interface.get_from_state(location.parse().unwrap());
+                        if !success {
+                            vm_throw_local_error(buffers, line.args[2].clone());
+                        }
+                    }
                 }
                 let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
                 dst_buffer.contents = contents_vec_u8;
@@ -621,6 +634,7 @@ pub fn run_vm(
                 dst_buffer.contents = contents_vec_u8;
             }
             "QueryOracle" => unsafe {
+                gas_used += 10.0;
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
                     || !vm_check_buffer_initialization(buffers, line.args[1].clone())
                     || !vm_check_buffer_initialization(buffers, line.args[2].clone())

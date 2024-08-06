@@ -2,27 +2,27 @@ extern crate contracts;
 
 #[cfg(test)]
 mod vm_test {
-
+    use rustc_hash::FxHashMap;
+    use smartstring::alias::String;
     use contracts::buffer::Buffer;
-
     #[test]
     fn test_vm_check_buffer_initialization() {
-        let mut buffers: FxHashMap<String, Buffer> = FxHashMap::new();
-        let initialization = contracts::vm::vm_check_buffer_initialization(&mut buffers, "00000000".to_owned());
+        let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
+        let initialization = contracts::vm::vm_check_buffer_initialization(&mut buffers, "00000000".parse().unwrap());
         assert!(!initialization);
         buffers.insert(
-            "12341234".to_owned(),
+            "12341234".parse().unwrap(),
             Buffer { contents: Vec::new() }
         );
-        let initialization = contracts::vm::vm_check_buffer_initialization(&mut buffers, "12341234".to_owned());
+        let initialization = contracts::vm::vm_check_buffer_initialization(&mut buffers, "12341234".parse().unwrap());
         assert!(initialization);
     }
 
     #[test]
     fn test_vm_throw_global_error() {
-        let mut buffers: FxHashMap<String, Buffer> = FxHashMap::new();
+        let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
         buffers.insert(
-            "00000000".to_owned(),
+            "00000000".parse().unwrap(),
             Buffer { contents: Vec::new() }
         );
         contracts::vm::vm_throw_global_error(&mut buffers);
@@ -37,12 +37,12 @@ mod vm_test {
 
     #[test]
     fn test_vm_throw_local_error() {
-        let mut buffers: FxHashMap<String, Buffer> = FxHashMap::new();
+        let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
         buffers.insert(
-            "12341234".to_owned(),
+            "12341234".parse().unwrap(),
             Buffer { contents: Vec::new() }
         );
-        contracts::vm::vm_throw_local_error(&mut buffers, "12341234".to_owned());
+        contracts::vm::vm_throw_local_error(&mut buffers, "12341234".parse().unwrap());
         let mut found_buffer = true;
         if let Some(x) = buffers.get("12341234") {
             found_buffer = true;
