@@ -644,20 +644,6 @@ pub fn run_vm(
                 let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
                 dst_buffer.contents = contents_vec_u8;
             }
-            "GetFromStateWithPrefix" => {
-                if !vm_check_buffer_initialization(buffers, line.args[0].clone())
-                    || !vm_check_buffer_initialization(buffers, line.args[1].clone())
-                {
-                    vm_throw_local_error(buffers, line.args[2].clone());
-                }
-                let location = std::str::from_utf8(&vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone())).expect("Could not convert state location to string").to_owned();
-                let (contents_vec_u8, success) = blockutil_interface.get_from_state(contract_hash.clone() + &*location);
-                if !success {
-                    vm_throw_local_error(buffers, line.args[2].clone());
-                }
-                let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
-                dst_buffer.contents = contents_vec_u8;
-            }
             "QueryOracle" => unsafe {
                 gas_used += 10.0;
                 if !vm_check_buffer_initialization(buffers, line.args[0].clone())
