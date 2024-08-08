@@ -25,6 +25,7 @@ private:
     std::vector<Token> tokens;
     std::vector<Variable> vars;
     int nextAllocatedLocation;
+    int nextAllocatedStateLocation;
     bool useLinker;
 };
 

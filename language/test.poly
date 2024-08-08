@@ -3,8 +3,8 @@
 /digit_to_string
 /int_len
 /int_to_string
-str == ("Hello, world!")
-length == (!string_len((str)))
+'str == ("Hello, world!")
+length == (!string_len(('str)))
 if(length = 13) {
     @io::print("String is 13 characters long.");
 }

@@ -20,6 +20,7 @@
 BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, int nextAllocatedLocation_p, std::vector<Variable> vars_p, bool useLinker_p) {
     tokens = std::move(tokens_p);
     nextAllocatedLocation = nextAllocatedLocation_p;
+    nextAllocatedStateLocation = 0;
     blockasm = {};
     useLinker = useLinker_p;
     if(useLinker) {
@@ -50,13 +51,29 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                         nextAllocatedLocation = exprLoc + 1;
                     }
                     Type type = std::get<1>(exprTuple);
-                    blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
-                    blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x";
-                    blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
-                    Variable var = Variable(varName, nextAllocatedLocation, type);
-                    nextAllocatedLocation++;
-                    vars.emplace_back(var);
-                    i += 6;
+                    if(varName.at(0) == '\'') {
+                        blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+                        blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x";
+                        blockasm << std::setfill('0') << std::setw(16) << std::hex << nextAllocatedStateLocation << " 0x00000000" << std::endl;
+                        nextAllocatedLocation++;
+                        nextAllocatedStateLocation++;
+                        blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+                        blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x";
+                        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+                        blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation - 1 << " 0x";
+                        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+                        nextAllocatedLocation++;
+                        Variable var = Variable(varName, nextAllocatedStateLocation, type);
+                        vars.emplace_back(var);
+                    } else {
+                        blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+                        blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x";
+                        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
+                        Variable var = Variable(varName, nextAllocatedLocation, type);
+                        nextAllocatedLocation++;
+                        vars.emplace_back(var);
+                        i += 6;
+                    }
                 } else {
                     // e.g. existingVar = 5
                     std::string varName = token.value;
