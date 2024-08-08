@@ -10,11 +10,13 @@ Most widely-used cryptocurrency blockchains utilize the PoW (Proof of Work) or P
 
 **1 Introduction**
 
-In the current day, financial institutions have largely become adopted as a mediary for digital transactions. Using financial institutions relies on trust, an issue attempted to be resolved by blockchain-based cryptocurrencies. However, blockchains are becoming increasingly centralized when using the existing PoW of PoS consensus algorithms. In PoW, large mining pools have large influence over the state of the blockchain, and cooperation between multiple pools could lead to a 51% attack on the network. In PoS, individuals with large amounts of stake are able to have influence over the blockchain and the network in a similar manner. There are also other issues. PoW uses large amounts of energy, and PoS has low resistance to a 51% attack, as only a third of nodes must be malicious to take over the network and blockchain.
+In the current day, financial institutions have largely become adopted as an intermediary for digital transactions. Using financial institutions relies on trust, an issue attempted to be resolved by blockchain-based cryptocurrencies. However, blockchains are becoming increasingly centralized when using the existing PoW of PoS consensus algorithms. In PoW, large mining pools have large influence over the state of the blockchain, and cooperation between multiple pools could lead to a 51% attack on the network. In PoS, individuals with large amounts of stake are able to have influence over the blockchain and the network in a similar manner. It also presents a feedback loop as entities holding large amounts of stake can restake their profits, which can create even more profits to restake. PoW also presents a large barrier to entry. Expensive mining hardware must be purchased to become a miner, which decreases decentralization due to the lower number of nodes. PoS suffers from the weak subjectivity problem, where the state of the blockchain up to *n* blocks in the past must be retrieved from a trusted source, where *n* represents the minimum amount of time funds must be staked before withdraws are permitted. The combinations of these issues in both PoW and PoS makes the need for a new consensus mechanism apparent.
 
 &nbsp;&nbsp;&nbsp;&nbsp;To resolve these issues, a new consensus algorithm is needed: the APoW (Adjusted Proof of Work) algorithm. Instead of giving blockchain power directly proportional to mining power, APoW calculates block speed on a per-miner basis. It decreases target time (base 1 minute) by up to 50% for a miner with infinite mining rate, and increases target time by up to 50% for a miner with zero mining rate. This leads to an increase of decentralization in the blockchain and the network, and allows for a lower energy requirement than with a standard PoW blockchain.
 
-&nbsp;&nbsp;&nbsp;&nbsp;To adapt to the updated algorithm, multiple protocol changes must be put into place to ensure the security and reliability of the APoW blockchain.
+&nbsp;&nbsp;&nbsp;&nbsp;Another issue facing modern blockchains is the threat of quantum computing, specifically Shor's algorithm, which could, in theory, break the elliptic curve cryptography blockchains typically use for digital signatures. However, new alternatives have become available, such as the CRYSTALS-Dilithium family of public-key cryptography algorithms. Post-quantum public key cryptography algorithms must soon take on an important role in blockchain systems in order to future-proof their core systems.
+
+A new blockchain, Polycash, is introduced to implement solutions to these issues. It utilizes the APoW consensus algorithm, Dilithium3 quantum-resistant signatures, and a new incentives system to increase decentralization, security, and efficiency.
 
 **2 Adjusted Proof of Work**
 
@@ -24,15 +26,15 @@ To increase decentralization in the blockchain, a new consensus algorithm, Adjus
 
 $$\frac{1}{1+e^\frac{-(x-mdpm)}{mdpm}}$$
 
-1 DPM (Difficulty Point per Minute) represents the speed of a miner that can mine a block with difficulty 1 in 1 minute.
+*n* DPM (Difficulty Points per Minute) represents the speed of a miner that can mine a block with difficulty *n* in 1 minute.
 
 _x_ represents the difficulty of the previous block the miner has created divided by the time it took to mine it, measured in DPM.
 
-_mdpm_ is a constant representing 1 million DPM
+_mdpm_ is a constant representing 1 million DPM.
 
-&nbsp;&nbsp;&nbsp;&nbsp;Dividing the difficulty by the result of the above formula allows faster miners an advantage, but not to the degree of standard PoW systems.
+&nbsp;&nbsp;&nbsp;&nbsp;Dividing the difficulty by the result of the above formula allows faster miners a small advantage to encourage contributing compute to the network, but not to the degree of standard PoW systems.
 
-&nbsp;&nbsp;&nbsp;&nbsp;To determine if a cryptographic proof of work is valid, the SHA-3-512 hash of the block, represented in this case as an unsigned 64-bit integer, must be less than the maximum value of an unsigned 64-bit integer (18446744073709551615) divided by the block’s difficulty. This means if block _A_ has difficulty _D<sub>a</sub>_ and block B has difficulty _D<sub>b</sub>_, and if _D<sub>b</sub> _/ _D<sub>a</sub>_ = _n_, then block B is expected to take _n_ times longer to mine than block _A_. In other words, difficulty is proportional to mining time.
+&nbsp;&nbsp;&nbsp;&nbsp;To determine if a cryptographic proof of work is valid, the SHA3-512 hash of the block, represented in this case as an unsigned 64-bit integer, must be less than the maximum value of an unsigned 64-bit integer (18446744073709551615) divided by the block’s difficulty. This means if block _A_ has difficulty _D<sub>a</sub>_ and block B has difficulty _D<sub>b</sub>_, and if _D<sub>b</sub> _/ _D<sub>a</sub>_ = _n_, then block B is expected to take _n_ times longer to mine than block _A_. In other words, difficulty is proportional to mining time.
 
 **3 Time Verifiers**
 
@@ -72,7 +74,7 @@ Errors are split into two types: local errors and global errors. Local errors wr
 
 See [Polycash VM Spec](https://github.com/ashy5000/cryptocurrency/blob/master/docs/whitepaper/instructions.md) for extended subsection 5.1.3 on the VM instruction set.
 
-5.1.3 Inter-Contract Communication
+**5.1.3 Inter-Contract Communication**
 
 To enable communication between contracts, there is a constant, known as the External State Writeable Value (ESWV), which can be stored at a location in a contract's state. Then, any other contract may choose to write a different value to that location, despite their lack of write access to it in normal circumstances. Because the location will now contain a value other than the ESWV, it isn't writeable and hence "locked". In a similar way that a mutex prevents simultaneous writes to a location in memory, external writeable state will lock when it is written to and will unlock when the smart contract controlling the writeable state sets it back to the ESWV.
 
