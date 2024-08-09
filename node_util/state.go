@@ -20,6 +20,9 @@ type StateTransition struct {
 
 func TransitionState(state State, transition StateTransition) State {
 	for key, value := range transition.UpdatedData {
+    if len(value) == 0 || value == nil {
+      continue
+    }
 		state.Data[key] = value
 	}
 	for key, value := range transition.NewContracts {
@@ -36,4 +39,12 @@ func CalculateCurrentState() State {
 		state = TransitionState(state, block.Transition)
 	}
 	return state
+}
+
+func GetFromState(location string, state State) []byte {
+  val, ok := state.Data[location];
+  if ok {
+    return val;
+  }
+  return []byte{};
 }
