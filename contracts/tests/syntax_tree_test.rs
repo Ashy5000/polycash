@@ -2,7 +2,6 @@ extern crate contracts;
 
 #[cfg(test)]
 mod syntax_tree_test {
-    use smartstring::alias::String;
     #[test]
     fn test_syntax_tree() {
         let tree = contracts::syntax_tree::SyntaxTree {
