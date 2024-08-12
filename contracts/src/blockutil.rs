@@ -10,6 +10,7 @@ You should have received a copy of the GNU General Public License along with thi
 use crate::sanitization::sanitize_node_console_command;
 use smartstring::alias::String;
 
+#[derive(Clone)]
 pub struct BlockUtilInterface {
     node_executable_path: String,
 }

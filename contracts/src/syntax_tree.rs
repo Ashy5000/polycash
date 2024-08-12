@@ -65,3 +65,4 @@ pub fn build_syntax_tree() -> SyntaxTree {
         lines: Vec::new(),
     }
 }
+
