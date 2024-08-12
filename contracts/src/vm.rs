@@ -17,7 +17,7 @@ use crate::{
 use crate::stack::Stack;
 use smartstring::alias::String;
 
-const VM_NIL: *const c_void = 0x0000 as *const c_void;
+pub const VM_NIL: *const c_void = 0x0000 as *const c_void;
 
 #[inline(always)]
 pub fn vm_access_buffer_contents(
