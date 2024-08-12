@@ -83,7 +83,6 @@ pub fn run_vm(
     let mut line_number = 0;
     let mut should_increment;
     let mut gas_used = 0.0;
-    let mut origins = vec![];
     let mut stack = Stack{frames: vec![]};
     let mut tmp_state: FxHashMap<String, Vec<u8>> = Default::default();
     while line_number < syntax_tree.lines.len() {
@@ -368,18 +367,16 @@ pub fn run_vm(
                 gas_used += 1.0;
             }
             "Call" => {
-                stack.push(buffers);
-                origins.push(line_number + 1);
+                stack.push(buffers, line_number + 1);
                 line_number = line.args[0].parse::<usize>().unwrap() - 1;
                 should_increment = false;
             }
             "Ret" => unsafe {
-                let frame_buffers = stack.pop();
+                let frame = stack.pop();
                 let return_value_tmp = (*vm_access_buffer(buffers, "00000001".parse().unwrap(), "00000000".parse().unwrap())).clone();
-                *buffers = frame_buffers;
+                *buffers = frame.buffers;
                 buffers.insert("00000001".into(), return_value_tmp);
-                line_number = *origins.last().expect("Could not get last origin");
-                origins.remove(origins.len() - 1);
+                line_number = frame.origin;
                 should_increment = false;
             }
             "Stdout" => {
