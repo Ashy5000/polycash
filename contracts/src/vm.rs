@@ -841,13 +841,13 @@ pub fn run_vm(
     syntax_tree: SyntaxTree,
     buffers: &mut FxHashMap<String, Buffer>,
     blockutil_interface: BlockUtilInterface,
-    contract_hash: String
+    contract_hash: String,
+    max_iters: i64,
 ) -> (i64, f64) {
     let mut line_number = 0;
     let mut gas_used = 0.0;
     let mut stack = Stack{frames: vec![]};
     let mut tmp_state: FxHashMap<String, Vec<u8>> = Default::default();
-    let max_iters = 100;
     let mut iters = 0;
     while line_number < syntax_tree.lines.len() {
         iters += 1;

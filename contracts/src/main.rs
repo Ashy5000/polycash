@@ -39,7 +39,7 @@ fn main() -> ExitCode {
     let blockutil_interface = blockutil::BlockUtilInterface::default();
     let args: Vec<std::string::String> = env::args().collect();
     let contract_hash = &args[2];
-    let (exit_code, gas_used) = run_vm(tree, &mut buffers, blockutil_interface, contract_hash.parse().unwrap());
+    let (exit_code, gas_used) = run_vm(tree, &mut buffers, blockutil_interface, contract_hash.parse().unwrap(), 1_000_000_000);
     println!("Gas used: {}", gas_used);
     ExitCode::from(exit_code as u8)
 }
