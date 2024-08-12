@@ -98,4 +98,23 @@ mod vm_test {
         }
         assert!(found_buffer);
     }
+
+    #[test]
+    fn test_vm_exit() {
+        let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
+        buffers.insert(
+            "00000000".parse().unwrap(),
+            Buffer { contents: Vec::new() }
+        );
+        let contents = "\
+            Exit 1234
+        ";
+        let mut tree = contracts::syntax_tree::build_syntax_tree();
+        tree.create(contents.parse().unwrap());
+        let blockutil_interface = contracts::blockutil::BlockUtilInterface::new();
+        let contract_hash = "00000000000000000000000000000000";
+        let (exit_code, gas_used) = contracts::vm::run_vm(tree, &mut buffers, blockutil_interface, contract_hash.parse().unwrap());
+        assert_eq!(exit_code, 1234);
+        assert_eq!(gas_used, 1.0);
+    }
 }
