@@ -17,30 +17,17 @@ mod stack;
 
 use std::env;
 use std::process::ExitCode;
-use crate::{buffer::Buffer, vm::run_vm};
-use smartstring::alias::String;
-
-use rustc_hash::FxHashMap;
+use crate::vm::run_vm;
 
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
 fn main() -> ExitCode {
     let contract_contents = read_contract::read_contract();
-    let mut tree = syntax_tree::build_syntax_tree();
-    tree.create(contract_contents);
-    let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
-    buffers.insert(
-        "00000000".into(),
-        Buffer {
-            contents: Vec::new(),
-        },
-    );
-    let blockutil_interface = blockutil::BlockUtilInterface::default();
     let args: Vec<std::string::String> = env::args().collect();
     let contract_hash = &args[2];
     let gas_limit: f64 = args[3].parse().unwrap();
-    let (exit_code, gas_used) = run_vm(tree, &mut buffers, blockutil_interface, contract_hash.parse().unwrap(), gas_limit);
+    let (exit_code, gas_used) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit);
     println!("Gas used: {}", gas_used);
     ExitCode::from(exit_code as u8)
 }

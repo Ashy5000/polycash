@@ -12,7 +12,7 @@ use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
     math::{execute_math_operation, Add, And, Divide, Eq, Less, Multiply, Not, Or, Subtract, Modulo, Exp},
-    syntax_tree::{SyntaxTree, Line},
+    syntax_tree::{SyntaxTree, Line, build_syntax_tree},
 };
 use crate::stack::Stack;
 use smartstring::alias::String;
@@ -837,27 +837,40 @@ pub fn vm_execute_instruction(
     }
 }
 
-pub fn run_vm(
+pub fn vm_simulate(
     syntax_tree: SyntaxTree,
     buffers: &mut FxHashMap<String, Buffer>,
+    stack: &mut Stack,
     blockutil_interface: BlockUtilInterface,
     contract_hash: String,
     gas_limit: f64,
 ) -> (i64, f64) {
     let mut line_number = 0;
     let mut gas_used = 0.0;
-    let mut stack = Stack{frames: vec![]};
     let mut tmp_state: FxHashMap<String, Vec<u8>> = Default::default();
     while line_number < syntax_tree.lines.len() {
         if gas_used > gas_limit {
             return (2, gas_limit);
         }
         let line = &syntax_tree.lines[line_number];
-        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), line_number, &mut gas_used, &mut stack, &mut tmp_state);
+        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), line_number, &mut gas_used, stack, &mut tmp_state);
         if let Some(exit_details) = res.exit_details {
             return (exit_details.exit_code, exit_details.gas_used);
         }
         line_number = res.next_line_number;
     }
     (0, gas_used)
+}
+
+pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64) -> (i64, f64) {
+    let mut tree = build_syntax_tree();
+    tree.create(contract_contents);
+    let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
+    buffers.insert(
+        "00000000".parse().unwrap(),
+        Buffer { contents: vec![] }
+    );
+    let interface = BlockUtilInterface::new();
+    let mut stack = Stack{frames: vec![]};
+    vm_simulate(tree, &mut buffers, &mut stack, interface, contract_hash, gas_limit)
 }
