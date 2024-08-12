@@ -81,7 +81,7 @@ pub struct VmExitDetails {
 
 pub struct VmInstructionResult {
     exit_details: Option<VmExitDetails>,
-    next_line_number: usize,
+    next_pc: usize,
 }
 
 pub fn vm_execute_instruction(
@@ -89,7 +89,7 @@ pub fn vm_execute_instruction(
     buffers: &mut FxHashMap<String, Buffer>,
     blockutil_interface: BlockUtilInterface,
     contract_hash: String,
-    line_number: usize,
+    pc: usize,
     gas_used: &mut f64,
     stack: &mut Stack,
     tmp_state: &mut FxHashMap<String, Vec<u8>>
@@ -102,7 +102,7 @@ pub fn vm_execute_instruction(
                     exit_code: line.args[0].parse::<i64>().unwrap(),
                     gas_used: *gas_used,
                 }),
-                next_line_number: 0,
+                next_pc: 0,
             };
         }
         "ExitBfr" => {
@@ -120,7 +120,7 @@ pub fn vm_execute_instruction(
                     exit_code: exit_code as i64,
                     gas_used: *gas_used
                 }),
-                next_line_number: 0,
+                next_pc: 0,
             }
         }
         "InitBfr" => {
@@ -134,7 +134,7 @@ pub fn vm_execute_instruction(
             *gas_used += line.args[0].len() as f64 / 10.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "CpyBfr" => {
@@ -160,7 +160,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "FreeBfr" => {
@@ -173,7 +173,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "BfrStat" => {
@@ -188,7 +188,7 @@ pub fn vm_execute_instruction(
             *gas_used += 1.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "BfrLen" => {
@@ -203,7 +203,7 @@ pub fn vm_execute_instruction(
             }
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Add" => {
@@ -218,7 +218,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Sub" => {
@@ -233,7 +233,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Mul" => {
@@ -248,7 +248,7 @@ pub fn vm_execute_instruction(
             *gas_used += 1.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Div" => {
@@ -263,7 +263,7 @@ pub fn vm_execute_instruction(
             *gas_used += 1.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Exp" => {
@@ -278,7 +278,7 @@ pub fn vm_execute_instruction(
             *gas_used += 1.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Mod" => {
@@ -293,7 +293,7 @@ pub fn vm_execute_instruction(
             *gas_used += 1.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         },
         "Eq" => {
@@ -308,7 +308,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Less" => {
@@ -323,7 +323,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "And" => {
@@ -338,7 +338,7 @@ pub fn vm_execute_instruction(
             *gas_used += 1.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Or" => {
@@ -353,7 +353,7 @@ pub fn vm_execute_instruction(
             *gas_used += 1.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Not" => {
@@ -368,7 +368,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "App" => {
@@ -385,7 +385,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Slice" => unsafe {
@@ -407,7 +407,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Shiftl" => unsafe {
@@ -428,7 +428,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Shiftr" => unsafe {
@@ -449,14 +449,14 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Jmp" => {
             *gas_used += 0.8;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line.args[0].parse::<usize>().unwrap() - 1,
+                next_pc: line.args[0].parse::<usize>().unwrap() - 1,
             }
         }
         "JmpCond" => {
@@ -467,20 +467,20 @@ pub fn vm_execute_instruction(
             if buffers.get(&line.args[0]).unwrap().as_u64() != Ok(0) {
                 VmInstructionResult {
                     exit_details: None,
-                    next_line_number: line.args[1].parse::<usize>().unwrap() - 1,
+                    next_pc: line.args[1].parse::<usize>().unwrap() - 1,
                 }
             } else {
                 VmInstructionResult {
                     exit_details: None,
-                    next_line_number: line_number + 1
+                    next_pc: pc + 1
                 }
             }
         }
         "Call" => {
-            stack.push(buffers, line_number + 1);
+            stack.push(buffers, pc + 1);
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line.args[0].parse::<usize>().unwrap() - 1,
+                next_pc: line.args[0].parse::<usize>().unwrap() - 1,
             }
         }
         "Ret" => unsafe {
@@ -490,7 +490,7 @@ pub fn vm_execute_instruction(
             buffers.insert("00000001".into(), return_value_tmp);
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: frame.origin,
+                next_pc: frame.origin,
             }
         }
         "Stdout" => {
@@ -501,7 +501,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "PrintStr" => unsafe {
@@ -513,7 +513,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Stderr" => {
@@ -524,7 +524,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "SetCnst" => unsafe {
@@ -538,7 +538,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "Tx" => {
@@ -573,7 +573,7 @@ pub fn vm_execute_instruction(
             *gas_used += 4.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "GetNthBlk" => unsafe {
@@ -627,7 +627,7 @@ pub fn vm_execute_instruction(
             *gas_used += 3.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "GetNthTx" => {
@@ -693,7 +693,7 @@ pub fn vm_execute_instruction(
             *gas_used += 3.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "ChainLen" => {
@@ -706,7 +706,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "UpdateState" => {
@@ -726,7 +726,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.6 * contents_vec_u8.len() as f64;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "UpdateStateExternal" => {
@@ -745,7 +745,7 @@ pub fn vm_execute_instruction(
             *gas_used += 0.6 * contents_vec_u8.len() as f64;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "GetFromState" => unsafe {
@@ -774,7 +774,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "GetFromStateExternal" => {
@@ -803,7 +803,7 @@ pub fn vm_execute_instruction(
             *gas_used += 2.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         "QueryOracle" => unsafe {
@@ -825,13 +825,13 @@ pub fn vm_execute_instruction(
             *gas_used += 10.0;
             VmInstructionResult {
                 exit_details: None,
-                next_line_number: line_number + 1,
+                next_pc: pc + 1,
             }
         }
         &_ => {
             vm_throw_global_error(buffers);
             VmInstructionResult{
-                exit_details: None, next_line_number: line_number + 1
+                exit_details: None, next_pc: pc + 1
             }
         },
     }
@@ -841,25 +841,25 @@ pub fn vm_simulate(
     syntax_tree: SyntaxTree,
     buffers: &mut FxHashMap<String, Buffer>,
     stack: &mut Stack,
+    state_cache: &mut FxHashMap<String, Vec<u8>>,
+    gas_used: &mut f64,
     blockutil_interface: BlockUtilInterface,
     contract_hash: String,
     gas_limit: f64,
+    pc: &mut usize,
 ) -> (i64, f64) {
-    let mut line_number = 0;
-    let mut gas_used = 0.0;
-    let mut tmp_state: FxHashMap<String, Vec<u8>> = Default::default();
-    while line_number < syntax_tree.lines.len() {
-        if gas_used > gas_limit {
+    while *pc < syntax_tree.lines.len() {
+        if *gas_used > gas_limit {
             return (2, gas_limit);
         }
-        let line = &syntax_tree.lines[line_number];
-        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), line_number, &mut gas_used, stack, &mut tmp_state);
+        let line = &syntax_tree.lines[*pc];
+        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_cache);
         if let Some(exit_details) = res.exit_details {
             return (exit_details.exit_code, exit_details.gas_used);
         }
-        line_number = res.next_line_number;
+        *pc = res.next_pc;
     }
-    (0, gas_used)
+    (0, *gas_used)
 }
 
 pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64) -> (i64, f64) {
@@ -872,5 +872,8 @@ pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64) 
     );
     let interface = BlockUtilInterface::new();
     let mut stack = Stack{frames: vec![]};
-    vm_simulate(tree, &mut buffers, &mut stack, interface, contract_hash, gas_limit)
+    let mut state_cache: FxHashMap<String, Vec<u8>> = FxHashMap::default();
+    let mut pc: usize = 0;
+    let mut gas_used = 0.0;
+    vm_simulate(tree, &mut buffers, &mut stack, &mut state_cache, &mut gas_used, interface, contract_hash, gas_limit, &mut pc)
 }
