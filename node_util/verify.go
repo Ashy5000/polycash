@@ -113,39 +113,34 @@ func DetectDuplicateBlock(hashBytes [64]byte) bool {
 
 func VerifySmartContractTransactions(block Block) bool {
 	// Ensure the transactions created by smart contracts are valid
-	// Get the smart contracts
-	var smartContracts []Contract
-	for _, transaction := range block.Transactions {
-		if transaction.Contracts != nil {
-			smartContracts = append(smartContracts, transaction.Contracts...)
-		}
-	}
-	// Validate the smart contracts
-	for _, contract := range smartContracts {
-		if !VerifySmartContract(contract) {
-			Warn("Block has invalid smart contract. Ignoring block request.")
-			return false
-		}
-	}
-	// Execute the smart contracts
+	// Iterate through smart contracts
 	var smartContractCreatedTransactions []Transaction
 	var fullTransition = StateTransition{
 		UpdatedData: make(map[string][]byte),
 	}
-	for _, contract := range smartContracts {
-		transactions, transition, gasUsed, err := contract.Execute()
-		if err != nil {
-			continue
-		}
-		smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
-		if gasUsed != contract.GasUsed {
-			Warn("Block has invalid smart contract gas usage. Ignoring block request.")
-			return false
-		}
-		// Add transition to fullTransition
-		for location, value := range transition.UpdatedData {
-			fullTransition.UpdatedData[location] = value
-		}
+	for _, transaction := range block.Transactions {
+    for _, contract := range transaction.Contracts {
+      // Validate the contract
+      if !VerifySmartContract(contract) {
+        Warn("Block has invalid smart contract. Ignoring block request.")
+        return false
+      }
+      // Execute the contract
+      transactions, transition, gasUsed, err := contract.Execute(GetBalance(transaction.Sender.Y))
+      if err != nil {
+        continue
+      }
+      smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
+      // Check gas usage 
+      if gasUsed != contract.GasUsed {
+        Warn("Block has invalid smart contract gas usage. Ignoring block request.")
+        return false
+      }
+      // Add transition to fullTransition
+      for location, value := range transition.UpdatedData {
+        fullTransition.UpdatedData[location] = value
+      }
+    }
 	}
 	if !reflect.DeepEqual(fullTransition.UpdatedData, block.Transition.UpdatedData) {
 		Warn("Block has invalid state transition. Ignoring block request.")

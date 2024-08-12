@@ -95,7 +95,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 	if len(transaction.Contracts) > 0 {
 		for i, contract := range transaction.Contracts {
 			executeResult, transition,
-				gasUsed, err := contract.Execute()
+				gasUsed, err := contract.Execute(GetBalance(senderKey.Y))
 			NextTransitions[hash] = transition
 			if err != nil {
 				Warn("Error executing contract: " + err.Error())

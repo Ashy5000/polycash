@@ -54,7 +54,7 @@ func (c Contract) LoadContract() {
 	}
 }
 
-func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
+func (c Contract) Execute(max_gas float64) ([]Transaction, StateTransition, float64, error) {
 	if !c.Loaded {
 		c.LoadContract()
 	}
@@ -67,7 +67,7 @@ func (c Contract) Execute() ([]Transaction, StateTransition, float64, error) {
 	}
 	contractStr := c.Contents
 	hash := sha256.Sum256([]byte(contractStr))
-	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:])).Output()
+	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%d", max_gas)).Output()
 	if err != nil {
 		fmt.Println("Errored with output:", string(out))
 		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))

@@ -842,17 +842,15 @@ pub fn run_vm(
     buffers: &mut FxHashMap<String, Buffer>,
     blockutil_interface: BlockUtilInterface,
     contract_hash: String,
-    max_iters: i64,
+    gas_limit: f64,
 ) -> (i64, f64) {
     let mut line_number = 0;
     let mut gas_used = 0.0;
     let mut stack = Stack{frames: vec![]};
     let mut tmp_state: FxHashMap<String, Vec<u8>> = Default::default();
-    let mut iters = 0;
     while line_number < syntax_tree.lines.len() {
-        iters += 1;
-        if iters > max_iters {
-            return (0, gas_used);
+        if gas_used > gas_limit {
+            return (2, gas_limit);
         }
         let line = &syntax_tree.lines[line_number];
         let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), line_number, &mut gas_used, &mut stack, &mut tmp_state);
