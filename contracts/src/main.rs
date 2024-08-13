@@ -14,6 +14,7 @@ mod sanitization;
 mod syntax_tree;
 mod vm;
 mod stack;
+mod state;
 
 use std::env;
 use std::process::ExitCode;

@@ -12,7 +12,7 @@ use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
     math::{execute_math_operation, Add, And, Divide, Eq, Less, Multiply, Not, Or, Subtract, Modulo, Exp},
-    syntax_tree::{SyntaxTree, Line, build_syntax_tree},
+    syntax_tree::{SyntaxTree, Line, build_syntax_tree}, state::StateManager,
 };
 use crate::stack::Stack;
 use smartstring::alias::String;
@@ -92,7 +92,7 @@ pub fn vm_execute_instruction(
     pc: usize,
     gas_used: &mut f64,
     stack: &mut Stack,
-    tmp_state: &mut FxHashMap<String, Vec<u8>>
+    state_manager: &mut StateManager
 ) -> VmInstructionResult {
     match line.command.as_str() {
         "Exit" => {
@@ -718,10 +718,8 @@ pub fn vm_execute_instruction(
             let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
             let contents_vec_u8 =
                 vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[2].clone());
-            let contents_hex = hex::encode(contents_vec_u8.clone());
             let full_location = format!("{}{}", contract_hash.clone(), location);
-            println!("State change: {}|{}", full_location, contents_hex);
-            tmp_state.insert(full_location.parse().unwrap(), contents_vec_u8.clone());
+            state_manager.write(full_location, contents_vec_u8.clone());
             *gas_used += 3.0;
             *gas_used += 0.6 * contents_vec_u8.len() as f64;
             VmInstructionResult {
@@ -738,9 +736,7 @@ pub fn vm_execute_instruction(
             let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
             let contents_vec_u8 =
                 vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[2].clone());
-            let contents_hex = hex::encode(contents_vec_u8.clone());
-            println!("External state change: {}|{}", location, contents_hex);
-            tmp_state.insert(format!("{}", location).parse().unwrap(), contents_vec_u8.clone());
+            state_manager.write(format!("{}", location), contents_vec_u8.clone());
             *gas_used += 3.0;
             *gas_used += 0.6 * contents_vec_u8.len() as f64;
             VmInstructionResult {
@@ -756,19 +752,7 @@ pub fn vm_execute_instruction(
             }
             let location = (*vm_access_buffer(buffers, line.args[0].clone(), line.args[1].clone())).as_u64().unwrap() as usize;
             let location = format!("{}{}", contract_hash.clone(), location);
-            let contents_vec_u8: Vec<u8>;
-            match tmp_state.get(&*location) {
-                Some(value) => {
-                    contents_vec_u8 = value.to_vec();
-                }
-                None => {
-                    let success: bool;
-                    (contents_vec_u8, success) = blockutil_interface.get_from_state(location.parse().unwrap());
-                    if !success {
-                        vm_throw_local_error(buffers, line.args[2].clone());
-                    }
-                }
-            }
+            let contents_vec_u8 = state_manager.get(location).unwrap();
             let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
             dst_buffer.contents = contents_vec_u8;
             *gas_used += 2.0;
@@ -785,19 +769,7 @@ pub fn vm_execute_instruction(
             }
             let location_vec_u8 = &vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone());
             let location = hex::encode(location_vec_u8);
-            let contents_vec_u8: Vec<u8>;
-            match tmp_state.get(&*location) {
-                Some(value) => {
-                    contents_vec_u8 = value.to_vec();
-                }
-                None => {
-                    let success: bool;
-                    (contents_vec_u8, success) = blockutil_interface.get_from_state(location.parse().unwrap());
-                    if !success {
-                        vm_throw_local_error(buffers, line.args[2].clone());
-                    }
-                }
-            }
+            let contents_vec_u8: Vec<u8> = state_manager.get(location).unwrap();
             let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
             dst_buffer.contents = contents_vec_u8;
             *gas_used += 2.0;
@@ -841,7 +813,7 @@ pub fn vm_simulate(
     syntax_tree: SyntaxTree,
     buffers: &mut FxHashMap<String, Buffer>,
     stack: &mut Stack,
-    state_cache: &mut FxHashMap<String, Vec<u8>>,
+    state_manager: &mut StateManager,
     gas_used: &mut f64,
     blockutil_interface: BlockUtilInterface,
     contract_hash: String,
@@ -853,12 +825,14 @@ pub fn vm_simulate(
             return (2, gas_limit);
         }
         let line = &syntax_tree.lines[*pc];
-        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_cache);
+        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager);
         if let Some(exit_details) = res.exit_details {
+            state_manager.flush();
             return (exit_details.exit_code, exit_details.gas_used);
         }
         *pc = res.next_pc;
     }
+    state_manager.flush();
     (0, *gas_used)
 }
 
@@ -872,8 +846,8 @@ pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64) 
     );
     let interface = BlockUtilInterface::new();
     let mut stack = Stack{frames: vec![]};
-    let mut state_cache: FxHashMap<String, Vec<u8>> = FxHashMap::default();
     let mut pc: usize = 0;
     let mut gas_used = 0.0;
-    vm_simulate(tree, &mut buffers, &mut stack, &mut state_cache, &mut gas_used, interface, contract_hash, gas_limit, &mut pc)
+    let mut state_manager = StateManager::new(interface.clone(), contract_hash.to_string());
+    vm_simulate(tree, &mut buffers, &mut stack, &mut state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc)
 }

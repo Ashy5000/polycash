@@ -109,4 +109,17 @@ mod vm_test {
         assert_eq!(exit_code, 1234);
         assert_eq!(gas_used, 1.0);
     }
+
+    #[test]
+    fn test_vm_exit_bfr() {
+        let contents = "\
+            InitBfr 0x00000001 0x00000000
+            SetCnst 0x00000001 0x0000000000000007 0x00000000
+            ExitBfr 0x00000001 0x00000000
+        ";
+        let contract_hash = "00000000000000000000000000000000";
+        let (exit_code, gas_used) = contracts::vm::run_vm(contents.parse().unwrap(), contract_hash.parse().unwrap(), 1000.0);
+        assert_eq!(exit_code, 7);
+        assert_eq!(gas_used, 1.0);
+    }
 }
