@@ -27,6 +27,22 @@ impl BlockUtilInterface {
             node_executable_path: "builds/node/node".into(),
         }
     }
+    pub fn read_contract(&self, location: u64) -> Result<String, String> {
+        let command = format!("readSmartContract {}", location);
+        if !sanitize_node_console_command(&command) {
+            println!("Forbidden command");
+            return Err("Forbidden command".into());
+        }
+        let output = Command::new(&*self.node_executable_path.clone())
+            .arg("--command")
+            .arg(command)
+            .output();
+        let output = output.expect("Failed to execute node script");
+        let output = std::string::String::from_utf8(output.stdout).expect("Failed to convert output to string");
+        // Remove the newline character
+        let output = output.trim().to_string();
+        Ok(output.parse().unwrap())
+    }
     pub fn get_nth_block_property(&self, n: i64, property: String) -> (String, bool) {
         // Run the node script to get a property of the nth block
         let command = format!("sync;getNthBlock {} {}", n, property);

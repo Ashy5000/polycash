@@ -12,10 +12,11 @@ use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
     math::{execute_math_operation, Add, And, Divide, Eq, Less, Multiply, Not, Or, Subtract, Modulo, Exp},
-    syntax_tree::{SyntaxTree, Line, build_syntax_tree}, state::StateManager,
+    syntax_tree::{SyntaxTree, Line, build_syntax_tree, self}, state::StateManager,
 };
 use crate::stack::Stack;
 use smartstring::alias::String;
+use ring::digest;
 
 pub const VM_NIL: *const c_void = 0x0000 as *const c_void;
 
@@ -92,7 +93,8 @@ pub fn vm_execute_instruction(
     pc: usize,
     gas_used: &mut f64,
     stack: &mut Stack,
-    state_manager: &mut StateManager
+    state_manager: &mut StateManager,
+    gas_limit: f64,
 ) -> VmInstructionResult {
     match line.command.as_str() {
         "Exit" => {
@@ -800,6 +802,36 @@ pub fn vm_execute_instruction(
                 next_pc: pc + 1,
             }
         }
+        "Invoke" => unsafe {
+            *gas_used += 3.0;
+            let location = line.args[0].parse::<u64>().expect("Failed to parse location");
+            let contents = blockutil_interface.read_contract(location).expect("Failed to read invoked contract");
+            let mut tree = syntax_tree::build_syntax_tree();
+            tree.create(contents.clone());
+            let child_hash = hex::encode(digest::digest(&digest::SHA256, contents.as_ref()).as_ref());
+            stack.push(buffers, pc + 1);
+            let mut child_pc = 0;
+            vm_simulate(
+                tree,
+                buffers,
+                stack,
+                state_manager,
+                gas_used,
+                blockutil_interface,
+                child_hash.into(),
+                gas_limit,
+                &mut child_pc
+            );
+            let frame = stack.pop();
+            let return_value_tmp = vm_access_buffer(buffers, "00000001".parse().unwrap(), "00000000".parse().unwrap());
+            *buffers = frame.buffers;
+            if return_value_tmp != VM_NIL as *mut Buffer {
+                buffers.insert("00000001".into(), (*return_value_tmp).clone());
+            }
+            VmInstructionResult{
+                exit_details: None, next_pc: pc + 1
+            }
+        }
         &_ => {
             vm_throw_global_error(buffers);
             VmInstructionResult{
@@ -825,7 +857,7 @@ pub fn vm_simulate(
             return (2, gas_limit);
         }
         let line = &syntax_tree.lines[*pc];
-        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager);
+        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager, gas_limit);
         if let Some(exit_details) = res.exit_details {
             state_manager.flush();
             return (exit_details.exit_code, exit_details.gas_used);
