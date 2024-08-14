@@ -811,6 +811,7 @@ pub fn vm_execute_instruction(
             let child_hash = hex::encode(digest::digest(&digest::SHA256, contents.as_ref()).as_ref());
             stack.push(buffers, pc + 1);
             let mut child_pc = 0;
+            buffers.clear();
             vm_simulate(
                 tree,
                 buffers,
