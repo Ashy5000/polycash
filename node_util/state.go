@@ -34,6 +34,7 @@ func TransitionState(state State, transition StateTransition) State {
 func CalculateCurrentState() State {
 	state := State{
 		Data: make(map[string][]byte),
+    Contracts: make(map[uint64]Contract),
 	}
 	for _, block := range Blockchain {
 		state = TransitionState(state, block.Transition)

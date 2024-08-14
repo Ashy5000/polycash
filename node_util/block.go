@@ -123,6 +123,7 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	contractsStr := strings.Replace(parts[5], "'", `"`, -1)
 	err = json.Unmarshal([]byte(contractsStr), &contracts)
 	if err != nil {
+    fmt.Println("Error unmarshaling smart contracts")
 		return err
 	}
 	i.Contracts = contracts

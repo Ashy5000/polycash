@@ -89,10 +89,20 @@ func SyncBlockchain(finalityBlockHeight int) {
 				}
 			}
 			// Get the correct difficulty for the block
-			lastMinedBlock := peerBlockchain[i-1]
+			var lastMinedBlock Block
+			lastMinedBlock.Difficulty = MaximumUint64
+			j := i - 1
+			for j >= 0 {
+				prevBlock := peerBlockchain[j]
+				if bytes.Equal(prevBlock.Miner.Y, block.Miner.Y) {
+					lastMinedBlock = prevBlock
+					break
+				}
+				j--
+			}
 			var lastTime time.Duration
 			var lastDifficulty uint64
-			if i == 1 {
+			if i == 1 || lastMinedBlock.Difficulty == MaximumUint64 {
 				lastTime = time.Minute
 				lastDifficulty = MinimumBlockDifficulty
 			} else {
@@ -101,6 +111,9 @@ func SyncBlockchain(finalityBlockHeight int) {
 			}
 			correctDifficulty := GetDifficulty(lastTime, lastDifficulty, len(block.Transactions), i)
 			if block.Difficulty != correctDifficulty {
+				fmt.Println(correctDifficulty)
+				fmt.Println(lastTime)
+				fmt.Println(lastDifficulty)
 				Log("Invalid blockchain received from peer: incorrect difficulty", false)
 				goto INVALID
 			}
@@ -304,11 +317,10 @@ func DeploySmartContract(contractPath string, contractLocation string) error {
 	return nil
 }
 
-func GetLastMinedBlock() (Block, bool) {
-	pubKey := GetKey("").PublicKey.Y
+func GetLastMinedBlock(key []byte) (Block, bool) {
 	for i := len(Blockchain) - 1; i > 0; i-- {
 		block := Blockchain[i]
-		if bytes.Equal(block.Miner.Y, pubKey) {
+		if bytes.Equal(block.Miner.Y, key) {
 			return block, true
 		}
 	}

@@ -67,9 +67,10 @@ func (c Contract) Execute(max_gas float64) ([]Transaction, StateTransition, floa
 	}
 	contractStr := c.Contents
 	hash := sha256.Sum256([]byte(contractStr))
-	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%d", max_gas)).Output()
+	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%f", max_gas)).Output()
 	if err != nil {
 		fmt.Println("Errored with output:", string(out))
+		fmt.Println("Error: ", err)
 		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))
 		return nil, StateTransition{}, 0, err
 	}

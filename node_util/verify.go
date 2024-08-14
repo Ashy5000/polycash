@@ -119,28 +119,28 @@ func VerifySmartContractTransactions(block Block) bool {
 		UpdatedData: make(map[string][]byte),
 	}
 	for _, transaction := range block.Transactions {
-    for _, contract := range transaction.Contracts {
-      // Validate the contract
-      if !VerifySmartContract(contract) {
-        Warn("Block has invalid smart contract. Ignoring block request.")
-        return false
-      }
-      // Execute the contract
-      transactions, transition, gasUsed, err := contract.Execute(GetBalance(transaction.Sender.Y))
-      if err != nil {
-        continue
-      }
-      smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
-      // Check gas usage 
-      if gasUsed != contract.GasUsed {
-        Warn("Block has invalid smart contract gas usage. Ignoring block request.")
-        return false
-      }
-      // Add transition to fullTransition
-      for location, value := range transition.UpdatedData {
-        fullTransition.UpdatedData[location] = value
-      }
-    }
+		for _, contract := range transaction.Contracts {
+			// Validate the contract
+			if !VerifySmartContract(contract) {
+				Warn("Block has invalid smart contract. Ignoring block request.")
+				return false
+			}
+			// Execute the contract
+			transactions, transition, gasUsed, err := contract.Execute(GetBalance(transaction.Sender.Y) / GasPrice)
+			if err != nil {
+				continue
+			}
+			smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
+			// Check gas usage
+			if gasUsed != contract.GasUsed {
+				Warn("Block has invalid smart contract gas usage. Ignoring block request.")
+				return false
+			}
+			// Add transition to fullTransition
+			for location, value := range transition.UpdatedData {
+				fullTransition.UpdatedData[location] = value
+			}
+		}
 	}
 	if !reflect.DeepEqual(fullTransition.UpdatedData, block.Transition.UpdatedData) {
 		Warn("Block has invalid state transition. Ignoring block request.")
@@ -166,7 +166,9 @@ func VerifyBlock(block Block, blockHeight int) bool {
 	hashBytes := HashBlock(block, blockHeight)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	isValid = hash <= MaximumUint64/block.Difficulty && isValid
-	isValid = !DetectDuplicateBlock(hashBytes) && isValid
+	if DetectDuplicateBlock(hashBytes) {
+    return false
+	}
 	isValid = !DetectFork(block) && isValid
 	if len(Blockchain) > 0 && block.PreviousBlockHash != HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1) {
 		Log("Block has invalid previous block hash. Ignoring block request.", true)
@@ -177,7 +179,7 @@ func VerifyBlock(block Block, blockHeight int) bool {
 	}
 	isValid = VerifyMiner(block.Miner) && isValid
 	// Get the correct difficulty for the block
-	lastMinedBlock, found := GetLastMinedBlock()
+	lastMinedBlock, found := GetLastMinedBlock(block.Miner.Y)
 	if !found {
 		lastMinedBlock.Difficulty = InitialBlockDifficulty
 		lastMinedBlock.MiningTime = time.Minute

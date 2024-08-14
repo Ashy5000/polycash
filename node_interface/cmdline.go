@@ -49,6 +49,7 @@ var commands = map[string]func([]string){
 	"sendWithBody":         SendWithBodyCmd,
 	"getBlockchainLen":     GetBlockchainLenCmd,
 	"queryOracle":          QueryOracleCmd,
+  "readSmartContract":    ReadSmartContractCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -358,6 +359,20 @@ func QueryOracleCmd(fields []string) {
 	}
 	res := CalculateOracleResponse(query)
 	fmt.Println(string(res.Body))
+}
+
+func ReadSmartContractCmd(fields []string) {
+  loc, err := strconv.ParseUint(fields[1], 10, 64)
+  if err != nil {
+    panic(err)
+  }
+  state := CalculateCurrentState()
+  for l, c := range state.Contracts {
+    if l == loc {
+      fmt.Println(c.Contents)
+      break
+    }
+  }
 }
 
 func RunCmd(input string) {

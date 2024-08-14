@@ -25,7 +25,7 @@ func CreateBlock() (Block, error) {
 		return Block{}, errors.New("pool dry")
 	}
 	start := time.Now()
-	previousBlock, previousBlockFound := GetLastMinedBlock()
+	previousBlock, previousBlockFound := GetLastMinedBlock(GetKey("").PublicKey.Y)
 	if !previousBlockFound {
 		previousBlock.Difficulty = InitialBlockDifficulty
 		previousBlock.MiningTime = time.Minute
@@ -56,11 +56,15 @@ func CreateBlock() (Block, error) {
 	for hash > MaximumUint64/block.Difficulty {
 		block.Transition = StateTransition{
 			UpdatedData: make(map[string][]byte),
+      NewContracts: make(map[uint64]Contract),
 		}
 		for _, PartialStateTransition := range NextTransitions {
 			for address, data := range PartialStateTransition.UpdatedData {
 				block.Transition.UpdatedData[address] = data
 			}
+      for address, contract := range PartialStateTransition.NewContracts {
+        block.Transition.NewContracts[address] = contract
+      }
 		}
 		i := 0
 		for _, transaction := range MiningTransactions {
@@ -79,7 +83,7 @@ func CreateBlock() (Block, error) {
 			i++
 		}
 		if len(MiningTransactions) > 0 {
-			previousBlock, previousBlockFound = GetLastMinedBlock()
+			previousBlock, previousBlockFound = GetLastMinedBlock(GetKey("").PublicKey.Y)
 			if !previousBlockFound {
 				previousBlock.Difficulty = InitialBlockDifficulty
 				previousBlock.MiningTime = time.Minute
