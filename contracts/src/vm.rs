@@ -806,7 +806,7 @@ pub fn vm_execute_instruction(
             *gas_used += 3.0;
             let location = line.args[0].parse::<u64>().expect("Failed to parse location");
             let contents = blockutil_interface.read_contract(location).expect("Failed to read invoked contract");
-            let mut tree = syntax_tree::build_syntax_tree();
+            let mut tree = build_syntax_tree();
             tree.create(contents.clone());
             let child_hash = hex::encode(digest::digest(&digest::SHA256, contents.as_ref()).as_ref());
             stack.push(buffers, pc + 1);
