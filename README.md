@@ -7,10 +7,12 @@
 
 <img src="https://github.com/Ashy5000/cryptocurrency/blob/master/assets/logos/logo_classic.png?raw=true" alt="Polycash logo" width="200" />
 
+The home of a power-efficient, secure, quantum-resistant, and modern cryptocurrency blockchain designed to resolve the issues presented by existing consensus mechanisms while maintaining decentralization. Written in Golang, Rust, and C++.
+
+Technical docs are located in the [wiki](https://github.com/Ashy5000/polycash/wiki).
+
 >[!NOTE]
 >Polycash has no association with the Polygon blockchain, despite the similar naming.
-
-The home of a power-efficient, secure, quantum-resistant, and modern cryptocurrency blockchain designed to resolve the issues presented by existing consensus mechanisms while maintaining decentralization. Written in Golang, Rust, and C++.
 
 **Comparison**
 
