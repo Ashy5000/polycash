@@ -7,7 +7,7 @@
 
 <img src="https://github.com/Ashy5000/cryptocurrency/blob/master/assets/logos/logo_classic.png?raw=true" alt="Polycash logo" width="200" />
 
-The home of a power-efficient, secure, quantum-resistant, and modern cryptocurrency blockchain designed to resolve the issues presented by existing consensus mechanisms while maintaining decentralization. Written in Golang, Rust, and C++.
+The home of a power-efficient, secure, quantum-resistant, and modern blockchain and smart contract platform designed to resolve the issues presented by existing consensus mechanisms while improving upon decentralization. Written in Golang, Rust, and C++.
 
 Technical docs are located in the [wiki](https://github.com/Ashy5000/polycash/wiki).
 
