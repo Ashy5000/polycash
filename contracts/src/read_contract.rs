@@ -12,7 +12,7 @@ use smartstring::alias::String;
 pub fn read_contract() -> String {
     let args: Vec<std::string::String> = env::args().collect();
     if args.len() != 4 {
-        panic!("Expected exactly 3 arguments, got {}", args.len())
+        panic!("Expected exactly 4 arguments, got {}", args.len())
     }
     let contract_path = &args[1];
     fs::read_to_string(contract_path)
