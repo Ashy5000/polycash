@@ -78,16 +78,22 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                         nextAllocatedLocation = exprLoc + 1;
                     }
                     Type type = std::get<1>(exprTuple);
-                    for(const Variable &var : vars) {
+                    bool varFound = false;
+                    for(Variable &var : vars) {
                         if(var.name == varName) {
                             if(var.type != type) {
                                 std::cerr << "Expression type does not match variable type." << std::endl;
                                 exit(EXIT_FAILURE);
                             }
-                            blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << exprLoc << " 0x";
-                            blockasm << std::setfill('0') << std::setw(8) << var.location << " 0x00000000" << std::endl;
+                            blockasm << "Free 0x" << std::setfill('0') << std::setw(8) << std::hex << var.location << " 0x00000000" << std::endl;
+                            var.location = exprLoc;
+                            varFound = true;
                             break;
                         }
+                    }
+                    if(!varFound) {
+                        std::cerr << "Unknown variable " << varName << std::endl;
+                        exit(EXIT_FAILURE);
                     }
                     i += 5;
                 }
