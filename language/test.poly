@@ -10,3 +10,8 @@ if(length = 13) {
 }
 lengthStr == (!int_to_string((length)))
 @io::print(lengthStr);
+i == (0)
+for(i (0) (10)) {
+    @io::print("Loop!");
+}
+

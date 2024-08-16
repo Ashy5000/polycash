@@ -4,6 +4,7 @@
 
 #include "BlockasmGenerator.h"
 
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -108,9 +109,9 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     exit(EXIT_FAILURE);
                 }
                 blockasm << std::endl;
-                blockasm << "Not 0x" << std::setfill('0') << std::setw(8) << exprLoc << " 0x";
-                blockasm << std::setfill('0') << std::setw(8) << exprLoc << " 0x00000000" << std::endl;
-                blockasm << "JmpCond 0x" << std::setfill('0') << std::setw(8) << exprLoc << " ";
+                blockasm << "Not 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x";
+                blockasm << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x00000000" << std::endl;
+                blockasm << "JmpCond 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " ";
                 blockasm << "<" << nextLabel << " 0x00000000" << std::endl;
                 BlockasmGenerator subGenerator = BlockasmGenerator(tokens[i + 5].children, nextAllocatedLocation, vars, false);
                 blockasm << subGenerator.GenerateBlockasm();
@@ -119,7 +120,68 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     nextAllocatedLocation = subGeneratorNextAllocatedLocation + 1;
                 }
                 blockasm << "; LABEL " << nextLabel++ << std::endl;
-            }
+          } else if(token.value == "for") {
+              // for(i (0) (100)) {}
+              // for(IDENTIFIER (EXPR) (EXPR)) {BLOCK}
+              std::string varName = tokens[i + 2].children[0].value; // i: IDENTIFIER
+              int varLoc = -1;
+              for(Variable var : vars) {
+                 if(var.name == varName) {
+                     varLoc = var.location;
+                     break;
+                 }
+              }
+              if(varLoc == -1) {
+                  std::cerr << "Unknown variable " << varName << std::endl;
+                  exit(EXIT_FAILURE);
+              }
+              Token beginExprToken = tokens[i + 2].children[2]; // 0: EXPR
+              std::tuple beginExprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(beginExprToken, nextAllocatedLocation, vars, blockasm, l);
+              int beginExprLoc = std::get<0>(beginExprTuple);
+              if(beginExprLoc >= nextAllocatedLocation) {
+                  nextAllocatedLocation = beginExprLoc + 1;
+              }
+              Type beginExprType = std::get<1>(beginExprTuple);
+              if(beginExprType != Type::uint64) {
+                  std::cerr << "Begin expression of for loop has incorrect type" << std::endl;
+                  exit(EXIT_FAILURE);
+              }
+              Token endExprToken = tokens[i + 2].children[5]; // 100: EXPR
+              std::tuple endExprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(endExprToken, nextAllocatedLocation, vars, blockasm, l);
+              int endExprLoc = std::get<0>(endExprTuple);
+              if(endExprLoc >= nextAllocatedLocation) {
+                  nextAllocatedLocation = endExprLoc + 1;
+              }
+              Type endExprType = std::get<1>(endExprTuple);
+              if(endExprType != Type::uint64) {
+                std::cerr << "End expression of for loop has incorrect type" << std::endl;
+                exit(EXIT_FAILURE);
+              }
+              int labelId = nextLabel++;
+              int oneLoc = nextAllocatedLocation++;
+              blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << oneLoc << " 0x00000000" << std::endl;
+              blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << oneLoc << " 0x0000000000000001 0x00000000" << std::endl;
+              int cmpLoc = nextAllocatedLocation++;
+              blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << cmpLoc << " 0x00000000" << std::endl;
+              blockasm << "; LABEL " << labelId << std::endl;
+              blockasm << "Add 0x" << std::setfill('0') << std::setw(8) << std::hex << varLoc << " 0x";
+              blockasm << std::setfill('0') << std::setw(8) << std::hex << oneLoc << " 0x";
+              blockasm << std::setfill('0') << std::setw(8) << std::hex << varLoc << " 0x00000000" << std::endl;
+              Token blockToken = tokens[i + 5];
+              BlockasmGenerator subGenerator = BlockasmGenerator(blockToken.children, nextAllocatedLocation, vars, false);
+              blockasm << subGenerator.GenerateBlockasm();
+              int subGeneratorNextAllocatedLocation = subGenerator.nextAllocatedLocation;
+              if(subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
+                  nextAllocatedLocation = subGeneratorNextAllocatedLocation + 1;
+              }
+              blockasm << "Eq 0x" << std::setfill('0') << std::setw(8) << std::hex << varLoc << " 0x";
+              blockasm << std::setfill('0') << std::setw(8) << std::hex << endExprLoc << " 0x";
+              blockasm << std::setfill('0') << std::setw(8) << std::hex << cmpLoc << " 0x00000000" << std::endl;
+              blockasm << "Not 0x" << std::setfill('0') << std::setw(8) << std::hex << cmpLoc << " 0x";
+              blockasm << std::setfill('0') << std::setw(8) << std::hex << cmpLoc << " 0x00000000" << std::endl;
+              blockasm << "JmpCond 0x" << std::setfill('0') << std::setw(8) << std::hex << cmpLoc << " ";
+              blockasm << "<" << labelId << " 0x00000000" << std::endl;
+        }
         } else if(token.type == TokenType::div) {
             if(tokens[i + 1].type == TokenType::identifier) {
                 if(!useLinker) {

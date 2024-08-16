@@ -8,7 +8,7 @@
 LabelManager::LabelManager(std::string blockasm) {
     labels = {};
     std::istringstream iss(blockasm);
-    int labelPosition = 1;
+    int labelPosition = 0;
     for (std::string line; std::getline(iss, line); ) {
         if(line.size() < 1 || line.at(0) != ';') {
             labelPosition++;
