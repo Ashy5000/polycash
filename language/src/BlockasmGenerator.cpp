@@ -57,12 +57,11 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                         blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x";
                         blockasm << std::setfill('0') << std::setw(16) << std::hex << nextAllocatedStateLocation << " 0x00000000" << std::endl;
                         nextAllocatedLocation++;
-                        nextAllocatedStateLocation++;
-                        blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
                         blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation - 1 << " 0x";
                         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x00000000" << std::endl;
                         Variable var = Variable(varName, nextAllocatedStateLocation, type);
                         vars.emplace_back(var);
+                        nextAllocatedStateLocation++;
                     } else {
                         Variable var = Variable(varName, exprLoc, type);
                         nextAllocatedLocation++;

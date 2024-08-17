@@ -22,7 +22,11 @@ impl State for CachedState {
         self.contents.insert(location, contents);
     }
     fn get(&self, location: String) -> Result<Vec<u8>, String> {
-        Ok(self.contents[&location].clone())
+        if !self.contents.contains_key(&location) {
+            Err("Could not find key in cache".parse().unwrap())
+        } else {
+            Ok(self.contents[&location].clone())
+        }
     }
 }
 
@@ -39,10 +43,10 @@ impl OnchainState {
 
 impl State for OnchainState {
     fn write(&mut self, location: String, contents: Vec<u8>) {
-        if contents.starts_with(&self.prefix.as_bytes()) {
+        if location.as_bytes().starts_with(&self.prefix.as_bytes()) {
             println!("State change: {}|{}", location, String::from_utf8(contents).unwrap());
         } else {
-            println!("Onchain state change: {}|{}", location, String::from_utf8(contents).unwrap());
+            println!("External state change: {}|{}", location, String::from_utf8(contents).unwrap());
         }
     }
     fn get(&self, location: String) -> Result<Vec<u8>, String> {

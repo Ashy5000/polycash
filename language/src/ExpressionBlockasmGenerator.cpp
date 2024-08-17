@@ -52,23 +52,30 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
             return std::make_tuple(nextAllocatedLocation, Type::string);
         }
         if (expression.children[0].type == TokenType::identifier) {
-            // if (expression.children[0].value.at(0) == '\'') {
-            //     int location = -1;
-            //     for (const Variable &var: vars) {
-            //         if (var.name == expression.children[0].value) {
-            //             location = var.location;
-            //             break;
-            //         }
-            //     }
-            //     if (location == -1) {
-            //         std::cerr << "Undefined variable " << expression.children[0].value << "." << std::endl;
-            //         exit(EXIT_FAILURE);
-            //     }
-            //     blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
-            //     blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x";
-            //     blockasm << std::setfill('0') << std::setw(16) << std::hex << location << " 0x00000000" << std::endl;
-            //     blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
-            // } else {
+            if (expression.children[0].value.at(0) == '\'') {
+                int location = -1;
+                auto type = Type::type_placeholder;
+                for (const Variable &var: vars) {
+                    if (var.name == expression.children[0].value) {
+                        location = var.location;
+                        type = var.type;
+                        break;
+                    }
+                }
+                if (location == -1) {
+                    std::cerr << "Undefined variable " << expression.children[0].value << "." << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                int locationLoc = nextAllocatedLocation++;
+                blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << locationLoc << " 0x00000000" << std::endl;
+                blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << locationLoc << " 0x";
+                blockasm << std::setfill('0') << std::setw(16) << std::hex << location << " 0x00000000" << std::endl;
+                int resultLoc = nextAllocatedLocation++;
+                blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << resultLoc << " 0x00000000" << std::endl;
+                blockasm << "GetFromState 0x" << std::setfill('0') << std::setw(8) << std::hex << locationLoc << " 0x";
+                blockasm << std::setfill('0') << std::setw(8) << std::hex << resultLoc << " 0x00000000" << std::endl;
+                return std::make_tuple(resultLoc, type);
+            } else {
                 auto referencedVar = Variable("", 0, Type::type_placeholder);
                 for (const Variable &var: vars) {
                     if (var.name == expression.children[0].value) {
@@ -77,10 +84,10 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
                     }
                 }
                 return std::make_tuple(referencedVar.location, referencedVar.type);
-            // }
+            }
         }
         if(expression.children[0].type == TokenType::expr) {
-            std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(expression.children[0], nextAllocatedLocation, vars, blockasm, l);
+            std::tuple exprTuple = GenerateBlockasmFromExpression(expression.children[0], nextAllocatedLocation, vars, blockasm, l);
             return exprTuple;
         }
         std::cerr << "Unknown expression." << std::endl;
@@ -153,6 +160,4 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
     blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000";
     Type returnType = OperatorToType(Operator{type});
     return std::make_tuple(nextAllocatedLocation + 1, returnType);
-    std::cerr << "Unknown expression." << std::endl;
-    exit(EXIT_FAILURE);
 }
