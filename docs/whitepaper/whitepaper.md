@@ -78,6 +78,16 @@ See [Polycash VM Spec](https://github.com/ashy5000/cryptocurrency/blob/master/do
 
 To enable communication between contracts, there is a constant, known as the External State Writeable Value (ESWV), which can be stored at a location in a contract's state. Then, any other contract may choose to write a different value to that location, despite their lack of write access to it in normal circumstances. Because the location will now contain a value other than the ESWV, it isn't writeable and hence "locked". In a similar way that a mutex prevents simultaneous writes to a location in memory, external writeable state will lock when it is written to and will unlock when the smart contract controlling the writeable state sets it back to the ESWV.
 
+**5.1.4 State cache**
+
+To enable changes to state within a single transaction to take effect before the block containing it is finalized, each smart contract will read/write from/to a cache instead of from/to the finalized state, which is updated every time a new block is added or removed from the blockchain. When a contract attempts to read from state, it will first check if the requested data is in the state cache. If it is, it will use the state cache to resolve its query. If not, it will query the finalized state, storing the result in the cache. In a similar fashion, when a contract attempts to write to state, it will write directly to the state cache. At the end of execution, the contents of the cache are written into finalized state in a *flush* operation.
+
+**5.1.5 Smart Contract Packing**
+
+Without smart contract packing, smart contracts must wait 1 or more blocks for messages to be sent to and from other contracts, as the VM's state updates once per block. In addition, smart contracts have to wait for each other if they wish to send data to the same smart contract at the same time, as state can only hold one piece of data at a time which can only be reset once per block for the same reason that smart contracts have to wait for 1 block until another contract can read data the first contract has sent. To resolve these issues, the Polycash blockchain uses a method called *Smart Contract Packing* which can 'pack' multiple smart contracts into one transaction.
+
+Any smart contract being run directly by a transaction (a 'parent contract') may, using the `Invoke` instruction, run another smart contract that runs in a newly created stack frame and shares the parent contract's state cache.
+
 **6 Transaction Body**
 
 To allow data to be sent through the blockchain, a body may be attached to each transaction containing data of any form. A data fee is paid to the miner of that block of a size proportional to the amount of data transferred, in bytes.
@@ -88,9 +98,11 @@ To allow data to be sent through the blockchain, a body may be attached to each 
 
 It is crucial to prevent miners from forking their hashrate through multiple wallet addresses, circumventing the difficulty adjustment algorithm. Two major strategies are applied to this issue.
 
-1. Block Reward Locking
+1. *Block Reward Locking*
+
    Block reward locking prevents miners gaining block rewards until they have mined at least 3 blocks, lowering the efficiency of mining rate forking.
-2. Block Reward Adjustment
+2. *Block Reward Adjustment*
+
    Block Reward Adjustment decreases the block reward for each new miner that mines a block by 1% in order to impose a net loss of profits on miners that fork their hashrate. This is the most effective approach.
 
 **7.1 Block Reward Adjustment**
