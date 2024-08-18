@@ -31,6 +31,11 @@ type Environment struct {
 
 var Env Environment
 
+// LoadEnv loads the environment variables from the "env.json" file.
+//
+// It opens the file, reads its contents, and unmarshals the JSON data into the Env variable.
+// If there is an error opening or reading the file, it panics.
+// If there is an error unmarshaling the JSON data, it panics.
 func LoadEnv() {
 	envFile, err := os.Open("env.json")
 	if err != nil {

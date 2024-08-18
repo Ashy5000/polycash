@@ -14,6 +14,18 @@ import (
 
 var Blockchain []Block
 
+// GenesisBlock returns a new genesis block.
+//
+// It returns a Block struct with the following fields:
+// - Transactions: a slice of Transaction structs (nil)
+// - Miner: a PublicKey struct
+// - Nonce: an int64 with value 0
+// - MiningTime: an int64 with value 0
+// - Difficulty: an uint64 with value 0
+// - PreviousBlockHash: a [64]byte array with all elements set to 0
+// - Timestamp: a time.Time struct with the zero value
+// - TimeVerifierSignatures: a slice of Signature structs (empty)
+// - TimeVerifiers: a slice of PublicKey structs (empty)
 func GenesisBlock() Block {
 	return Block{
 		Transactions:           nil,
@@ -28,6 +40,10 @@ func GenesisBlock() Block {
 	}
 }
 
+// Append adds a new block to the blockchain.
+//
+// It takes a single parameter, `block`, of type `Block`, which represents the block to be appended to the blockchain.
+// This function does not return any value.
 func Append(block Block) {
 	Blockchain = append(Blockchain, block)
 }

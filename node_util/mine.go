@@ -16,6 +16,16 @@ import (
 
 var NextTransitions = make(map[[32]byte]StateTransition)
 
+// Mine mines a block by creating a new block and broadcasting it to peers.
+//
+// This function continuously mines blocks by calling the CreateBlock function.
+// If there is an error creating the block, the function continues to the next iteration.
+// After successfully creating a block, the function logs "Block mined successfully!" and "Broadcasting block to peers...".
+// The block is then marshaled into JSON format and broadcasted to all peers.
+// The broadcasting process involves sending an HTTP GET request to each peer's "/block" endpoint with the block data.
+// If there is an error creating the HTTP request or sending the request, the function logs "Peer down.".
+// After broadcasting the block to all peers, the function logs "All done!".
+// This process continues indefinitely.
 func Mine() {
 	for {
 		block, err := CreateBlock()

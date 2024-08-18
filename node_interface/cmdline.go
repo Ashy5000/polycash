@@ -49,7 +49,7 @@ var commands = map[string]func([]string){
 	"sendWithBody":         SendWithBodyCmd,
 	"getBlockchainLen":     GetBlockchainLenCmd,
 	"queryOracle":          QueryOracleCmd,
-  "readSmartContract":    ReadSmartContractCmd,
+	"readSmartContract":    ReadSmartContractCmd,
 }
 
 func SyncCmd(fields []string) {
@@ -215,6 +215,15 @@ func SaveStateCmd(fields []string) {
 	}
 }
 
+// LoadStateCmd loads the blockchain from a file.
+//
+// It reads the content of the "blockchain.json" file and unmarshals it into the Blockchain variable.
+// If any error occurs during the process, it panics.
+//
+// Parameters:
+// - fields: a slice of strings representing the command line fields.
+//
+// Return type: none.
 func LoadStateCmd(fields []string) {
 	// Load the blockchain from a file
 	blockchainJson, err := os.ReadFile("blockchain.json")
@@ -362,17 +371,17 @@ func QueryOracleCmd(fields []string) {
 }
 
 func ReadSmartContractCmd(fields []string) {
-  loc, err := strconv.ParseUint(fields[1], 10, 64)
-  if err != nil {
-    panic(err)
-  }
-  state := CalculateCurrentState()
-  for l, c := range state.Contracts {
-    if l == loc {
-      fmt.Println(c.Contents)
-      break
-    }
-  }
+	loc, err := strconv.ParseUint(fields[1], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	state := CalculateCurrentState()
+	for l, c := range state.Contracts {
+		if l == loc {
+			fmt.Println(c.Contents)
+			break
+		}
+	}
 }
 
 func RunCmd(input string) {

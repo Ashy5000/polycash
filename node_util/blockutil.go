@@ -44,6 +44,25 @@ func GetKey(path string) PrivateKey {
 	return key
 }
 
+// SyncBlockchain synchronizes the blockchain with other peers.
+//
+// It iterates over each peer, sends a GET request to the peer's blockchain endpoint,
+// and receives the response. It then parses the response body into a slice of Block
+// structs. It checks the validity of the received blockchain by verifying the previous
+// block hash and proof of work. If the blockchain is valid, it updates the longest blockchain
+// if it is longer than the current blockchain.
+//
+// The function takes an integer parameter `finalityBlockHeight` which represents the
+// minimum block height required for a blockchain to be considered final.
+//
+// If the blockchain is successfully synced, it logs a success message. If there is an
+// error with any peer, it logs an error message.
+//
+// Parameters:
+//   - finalityBlockHeight: an integer representing the minimum block height required for
+//     a blockchain to be considered final.
+//
+// Return type: None.
 func SyncBlockchain(finalityBlockHeight int) {
 	longestLength := 0
 	var longestBlockchain []Block
