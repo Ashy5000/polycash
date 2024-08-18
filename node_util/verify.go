@@ -37,7 +37,7 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 		panic(err)
 	}
 	if !isValid {
-		Warn("Invalid transaction signature detected")
+		Log("Invalid transaction signature detected", true)
 		return false
 	}
 	// Calculate amount spent so far in this block
@@ -45,7 +45,7 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 	for _, transaction := range MiningTransactions {
 		if bytes.Equal(transaction.Sender.Y, senderKey.Y) {
 			if amountSpentInCurrentBlock+transaction.Amount > amountSpentInCurrentBlock {
-				Warn("Overflow detected.")
+				Log("Overflow detected.", true)
 				return false
 			}
 			amountSpentInCurrentBlock += transaction.Amount
@@ -53,7 +53,7 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 	}
 	amountSpentInCurrentBlock -= amountFloat
 	if GetBalance(senderKey.Y) < amountSpentInCurrentBlock {
-		Warn("Double spending detected.")
+		Log("Double spending detected.", true)
 		return false
 	}
 	return true
@@ -119,7 +119,7 @@ func VerifySmartContractTransactions(block Block) bool {
 		for _, contract := range transaction.Contracts {
 			// Validate the contract
 			if !VerifySmartContract(contract) {
-				Warn("Block has invalid smart contract. Ignoring block request.")
+				Log("Block has invalid smart contract. Ignoring block request.", true)
 				return false
 			}
 			// Execute the contract
@@ -130,7 +130,7 @@ func VerifySmartContractTransactions(block Block) bool {
 			smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
 			// Check gas usage
 			if gasUsed != contract.GasUsed {
-				Warn("Block has invalid smart contract gas usage. Ignoring block request.")
+				Log("Block has invalid smart contract gas usage. Ignoring block request.", true)
 				return false
 			}
 			// Add transition to fullTransition
@@ -140,7 +140,7 @@ func VerifySmartContractTransactions(block Block) bool {
 		}
 	}
 	if !reflect.DeepEqual(fullTransition.UpdatedData, block.Transition.UpdatedData) {
-		Warn("Block has invalid state transition. Ignoring block request.")
+		Log("Block has invalid state transition. Ignoring block request.", true)
 		return false
 	}
 	// Get the smart contract created transactions in the block
@@ -152,7 +152,7 @@ func VerifySmartContractTransactions(block Block) bool {
 	}
 	// Check if the two lists are the same
 	if !reflect.DeepEqual(smartContractCreatedTransactions, smartContractCreatedTransactionsInBlock) {
-		Warn("Block has invalid smart contract transactions. Ignoring block request.")
+		Log("Block has invalid smart contract transactions. Ignoring block request.", true)
 		return false
 	}
 	return true
@@ -181,7 +181,7 @@ func VerifyBlock(block Block, blockHeight int) bool {
 	}
 	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty, len(block.Transactions), blockHeight)
 	if block.Difficulty != correctDifficulty || block.Difficulty < MinimumBlockDifficulty {
-		Warn("Invalid difficulty detected.")
+		Log("Invalid difficulty detected.", true)
 		Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)
 		Log(fmt.Sprintf("Expected difficulty: %d", correctDifficulty), true)
 		Log(fmt.Sprintf("Actual difficulty: %d", block.Difficulty), true)
@@ -220,7 +220,7 @@ func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signat
 				panic(err)
 			}
 			if !valid {
-				Warn("Invalid time verifier signature detected")
+				Log("Invalid time verifier signature detected", true)
 				return false
 			}
 		}
@@ -231,7 +231,7 @@ func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signat
 				panic(err)
 			}
 			if !valid {
-				Warn("Invalid time verifier signature detected")
+				Log("Invalid time verifier signature detected", true)
 				return false
 			}
 		}
@@ -284,7 +284,7 @@ func VerifySmartContract(contract Contract) bool {
 			panic(err)
 		}
 		if !isValid {
-			Warn("Invalid smart contract signature detected.")
+			Log("Invalid smart contract signature detected.", true)
 			return false
 		}
 	}
@@ -310,7 +310,7 @@ func VerifyAuthenticationProof(proof *AuthenticationProof, data []byte) bool {
 		panic(err)
 	}
 	if !isValid {
-		Warn("Invalid authentication proof signature detected.")
+		Log("Invalid authentication proof signature detected.", true)
 	}
 	return isValid
 }
