@@ -28,7 +28,8 @@ fn main() -> ExitCode {
     let args: Vec<std::string::String> = env::args().collect();
     let contract_hash = &args[2];
     let gas_limit: f64 = args[3].parse().unwrap();
-    let (exit_code, gas_used) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit);
+    let sender: Vec<u8> = args[4].clone().into();
+    let (exit_code, gas_used) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit, sender);
     println!("Gas used: {}", gas_used);
     ExitCode::from(exit_code as u8)
 }

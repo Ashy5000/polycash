@@ -95,6 +95,7 @@ pub fn vm_execute_instruction(
     stack: &mut Stack,
     state_manager: &mut StateManager,
     gas_limit: f64,
+    sender: &Vec<u8>
 ) -> VmInstructionResult {
     match line.command.as_str() {
         "Exit" => {
@@ -821,7 +822,8 @@ pub fn vm_execute_instruction(
                 blockutil_interface,
                 child_hash.into(),
                 gas_limit,
-                &mut child_pc
+                &mut child_pc,
+                sender
             );
             let frame = stack.pop();
             let return_value_tmp = vm_access_buffer(buffers, "00000001".parse().unwrap(), "00000000".parse().unwrap());
@@ -832,7 +834,17 @@ pub fn vm_execute_instruction(
             VmInstructionResult{
                 exit_details: None, next_pc: pc + 1
             }
-        }
+        },
+        "GetSender" => unsafe {
+            *gas_used += 1.0;
+            if !vm_check_buffer_initialization(buffers, line.args[0].clone()) {
+                vm_throw_local_error(buffers, line.args[1].clone());
+            }
+            (*vm_access_buffer(buffers, line.args[0].clone(), line.args[1].clone())).contents = sender.to_vec();
+            VmInstructionResult{
+                exit_details: None, next_pc: pc + 1
+            }
+        },
         &_ => {
             vm_throw_global_error(buffers);
             VmInstructionResult{
@@ -852,13 +864,14 @@ pub fn vm_simulate(
     contract_hash: String,
     gas_limit: f64,
     pc: &mut usize,
+    sender: &Vec<u8>
 ) -> (i64, f64) {
     while *pc < syntax_tree.lines.len() {
         if *gas_used > gas_limit {
             return (2, gas_limit);
         }
         let line = &syntax_tree.lines[*pc];
-        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager, gas_limit);
+        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager, gas_limit, sender);
         if let Some(exit_details) = res.exit_details {
             state_manager.flush();
             return (exit_details.exit_code, exit_details.gas_used);
@@ -869,7 +882,7 @@ pub fn vm_simulate(
     (0, *gas_used)
 }
 
-pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64) -> (i64, f64) {
+pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, sender: Vec<u8>) -> (i64, f64) {
     let mut tree = build_syntax_tree();
     tree.create(contract_contents);
     let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
@@ -882,5 +895,5 @@ pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64) 
     let mut pc: usize = 0;
     let mut gas_used = 0.0;
     let mut state_manager = StateManager::new(interface.clone(), contract_hash.to_string());
-    vm_simulate(tree, &mut buffers, &mut stack, &mut state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc)
+    vm_simulate(tree, &mut buffers, &mut stack, &mut state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender)
 }
