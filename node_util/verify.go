@@ -90,11 +90,8 @@ func DetectFork(block Block) bool {
 			break
 		}
 		if b.PreviousBlockHash == block.PreviousBlockHash {
-			Warn("Block creates a fork.")
-			Log("The node software is designed to handle this edge case, so operations can continue as normal.", false)
-			Log("This is most likely a result of latency between miners. If the issue persists, the network may be under attack or a bug may be present; please open an issue on the GitHub repository.", true)
-			Log("The blockchain will be re-synced to stay on the longest chain.", true)
-			SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Wait for finality when switching chains
+			Log("Block creates a fork. Possible reorg necessary.", true)
+			SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Reorg if other chain is more than `BlocksUntilFinality` blocks longer than the current chain
 			return true
 		}
 	}
@@ -167,14 +164,12 @@ func VerifyBlock(block Block, blockHeight int) bool {
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	isValid = hash <= MaximumUint64/block.Difficulty && isValid
 	if DetectDuplicateBlock(hashBytes) {
-    return false
+		return false
 	}
 	isValid = !DetectFork(block) && isValid
 	if len(Blockchain) > 0 && block.PreviousBlockHash != HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1) {
-		Log("Block has invalid previous block hash. Ignoring block request.", true)
-		Log("The block could be on a different fork.", true)
-		Log("The blockchain will be re-synced to stay on the longest chain.", true)
-		SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Wait for finality when switching chains
+		Log("Block has invalid previous block hash. Possible reorg is necessary.", true)
+		SyncBlockchain(len(Blockchain) + BlocksUntilFinality) // Reorg if other chain is more than `BlocksUntilFinality` blocks longer than the current chain
 		isValid = false
 	}
 	isValid = VerifyMiner(block.Miner) && isValid
