@@ -56,6 +56,7 @@ To enable cryptographically verified functionality on the blockchain, smart cont
 
 &nbsp;&nbsp;&nbsp;&nbsp;A smart contract may automatically make transactions on the behalf of another party, provided that party signs the smart contract when it is created, granting their approval of the instructions contained within it. This functionality is required to allow a contract to be deterministically executed without the need for trust of a party to fulfill their part of the agreement.
 
+&nbsp;&nbsp;&nbsp;&nbsp;Each transaction may contain one or more smart contracts. Each smart contract may be either populated or empty. Populated smart contracts contain the entire contents of the smart contract, alongside its signatures and other metadata. It does not contain the location of the smart contract, which serves as an ID. When a populated contract is sent to the network, it instantiates an entirely new contract on the blockchain and runs it. On the other hand, empty smart contracts contain nothing but the location of an existing contract. When one is sent to the network, an existing contract on the blockchain with the matching location is executed.
 
 **5.1 Virtual Machine**
 
@@ -65,7 +66,7 @@ Smart contracts running on the blockchain use the PVM (Polycash Virtual Machine)
 
 The memory of the Polycash virtual machine is contained within a set of virtual buffers, expandable sections of data with no fixed length. Different data types may be represented by different lengths and organizations of buffers. There are an unlimited number of buffers, and each is an unlimited size, so the virtual machine may hold as much data as it needs in memory, so long as it doesn't run out of gas (see section 5.1.7)
 
-The buffer at hex address 0x00000000, used for global errors is pre-initialized during the VM boot process.
+&nbsp;&nbsp;&nbsp;&nbsp;The buffer at hex address 0x00000000, used for global errors is pre-initialized during the VM boot process.
 
 **5.1.3 Errors**
 
