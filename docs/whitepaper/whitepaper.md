@@ -60,33 +60,39 @@ To enable cryptographically verified functionality on the blockchain, smart cont
 
 **5.1 Virtual Machine**
 
-Smart contracts running on the blockchain use a virtual machine with a custom instruction set to deterministically initiate transactions. It uses a Polycash-specific instruction set and assembly language to evaluate these contracts.
+Smart contracts running on the blockchain use the PVM (Polycash Virtual Machine) with a custom instruction set to deterministically initiate transactions. It uses a Polycash-specific instruction set and assembly language to evaluate these contracts.
 
 **5.1.1 Memory Management**
 
-The memory of the Polycash virtual machine is contained within a set of virtual “buffers”. These are not strictly buffers in the traditional sense. In Rust, the language the VM is written in, they are represented as a value of type Vec&lt;u8>. This means they are expandable lists of bytes with no fixed length. Different data types may be represented by different lengths and organizations of buffers. There are an unlimited number of buffers, and each is an unlimited size, so the virtual machine may hold as much data as it needs in memory (up to its memory limit).
+The memory of the Polycash virtual machine is contained within a set of virtual buffers, expandable sections of data with no fixed length. Different data types may be represented by different lengths and organizations of buffers. There are an unlimited number of buffers, and each is an unlimited size, so the virtual machine may hold as much data as it needs in memory, so long as it doesn't run out of gas (see section 5.1.7)
 
 The buffer at hex address 0x00000000, used for global errors is pre-initialized during the VM boot process.
 
-**5.1.2 Errors**
+**5.1.3 Errors**
 
 Errors are split into two types: local errors and global errors. Local errors write an error value (hex code 0x1) into a pre-initialized error buffer if an error occurs in an instruction. Global errors write an error value (also hex code 0x1) into the pre-initialized error buffer at 0x00000000. If the error buffer needed to throw a local error is not found, a global error is thrown.
 
 See [Polycash VM Spec](https://github.com/ashy5000/cryptocurrency/blob/master/docs/whitepaper/instructions.md) for extended subsection 5.1.3 on the VM instruction set.
 
-**5.1.3 Inter-Contract Communication**
+**5.1.4 Inter-Contract Communication**
 
 To enable communication between contracts, there is a constant, known as the External State Writeable Value (ESWV), which can be stored at a location in a contract's state. Then, any other contract may choose to write a different value to that location, despite their lack of write access to it in normal circumstances. Because the location will now contain a value other than the ESWV, it isn't writeable and hence "locked". In a similar way that a mutex prevents simultaneous writes to a location in memory, external writeable state will lock when it is written to and will unlock when the smart contract controlling the writeable state sets it back to the ESWV.
 
-**5.1.4 State cache**
+**5.1.5 State cache**
 
-To enable changes to state within a single transaction to take effect before the block containing it is finalized, each smart contract will read/write from/to a cache instead of from/to the finalized state, which is updated every time a new block is added or removed from the blockchain. When a contract attempts to read from state, it will first check if the requested data is in the state cache. If it is, it will use the state cache to resolve its query. If not, it will query the finalized state, storing the result in the cache. In a similar fashion, when a contract attempts to write to state, it will write directly to the state cache. At the end of execution, the contents of the cache are written into finalized state in a *flush* operation.
+To enable changes to state within a single transaction to take effect before the block containing it is finalized, each smart contract will read/write from/to a cache instead of from/to the finalized state, which is updated every time a new block is added or removed from the blockchain. When a contract attempts to read from state, it will first check if the requested data is in the state cache. If it is, it will use the state cache to resolve its query. If not, it will query the finalized state, storing the result in the cache. In a similar fashion, when a contract attempts to write to state, it will write directly to the state cache. At the end of execution, the contents of the cache are written into finalized state in a flush operation.
 
-**5.1.5 Smart Contract Packing**
+**5.1.6 Smart Contract Packing**
 
 Without smart contract packing, smart contracts must wait 1 or more blocks for messages to be sent to and from other contracts, as the VM's state updates once per block. In addition, smart contracts have to wait for each other if they wish to send data to the same smart contract at the same time, as state can only hold one piece of data at a time which can only be reset once per block for the same reason that smart contracts have to wait for 1 block until another contract can read data the first contract has sent. To resolve these issues, the Polycash blockchain uses a method called *Smart Contract Packing* which can 'pack' multiple smart contracts into one transaction.
 
-Any smart contract being run directly by a transaction (a 'parent contract') may, using the `Invoke` instruction, run another smart contract that runs in a newly created stack frame and shares the parent contract's state cache.
+Any smart contract may, using the `Invoke` instruction, run another smart contract (a 'child contract') that runs in a newly created stack frame and shares the parent contract's state cache. Any contract which uses the `Invoke` instruction in this way is known as a 'parent contract', and any smart contract called directly from a transaction, rather than from another smart contract using `Invoke`, is called a 'root contract', as it serves as the root node of a tree (the 'invocation tree') of smart contracts, all of which can be packed into a single transaction.
+
+Because a child smart contract will share the state cache of their parent, and thus the state cache of the invocation tree's root contract, they can communicate via the cache with any other contract in the tree without having to wait for read and write operations to the state to go through the finalized state, which, as mentioned previously, can only be updated once per block. This also allows for contracts that are frequently used by multiple other contracts (i.e. Uniswap) to handle many requests simultaneously, rather than having to wait for the finalized state's mutex mechanism to unlock, finalize, and lock each time a request is sent to it.
+
+**5.1.6 Gas Fees**
+
+The PVM's fee calculation uses a model similar to that of Ethereum, where each instruction costs a specific amount of 'gas'. One unit of gas is equal to 0.000001 PCSH (the native token of Polycash). When a smart contract begins execution, the PVM sets a gas limit for its execution equal to the total balance, measured in units of gas, of the contract's sender. During execution, the PVM keeps track of the amount of gas that has been spent so far. If at any point the amount of gas used exceeds the gas limit, the transaction that executed the contract is rejected as invalid.
 
 **6 Transaction Body**
 
