@@ -123,7 +123,7 @@ func VerifySmartContractTransactions(block Block) bool {
 				return false
 			}
 			// Execute the contract
-			transactions, transition, gasUsed, err := contract.Execute(GetBalance(transaction.Sender.Y) / GasPrice)
+			transactions, transition, gasUsed, err := contract.Execute(GetBalance(transaction.Sender.Y)/GasPrice, transaction.Sender)
 			if err != nil {
 				continue
 			}

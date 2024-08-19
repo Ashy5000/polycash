@@ -64,6 +64,15 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		Log("No new job. Ignoring mine request.", true)
 		return
 	}
+	for _, block := range Blockchain {
+		for _, transaction := range block.Transactions {
+			onchainHash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", transaction.Sender.Y, transaction.Recipient.Y, transaction.Amount, transaction.Timestamp)))
+			if onchainHash == hash {
+				Log("No new job. Ignoring mine request.", true)
+				return
+			}
+		}
+	}
 	if !VerifyTransaction(senderKey, recipientKey, strconv.FormatFloat(amount, 'f', -1, 64), timestamp, s.S) {
 		Log("Transaction is invalid. Ignoring transaction request.", true)
 		return

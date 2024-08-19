@@ -102,7 +102,7 @@ func TestGetLastMinedBlock(t *testing.T) {
 		}
 		Append(block)
 		// Act
-		lastMinedBlock, found := GetLastMinedBlock()
+		lastMinedBlock, found := GetLastMinedBlock(GetKey("").PublicKey.Y)
 		// Assert
 		assert.True(t, found)
 		assert.Equal(t, block, lastMinedBlock)
@@ -112,7 +112,7 @@ func TestGetLastMinedBlock(t *testing.T) {
 		Blockchain = nil
 		Append(GenesisBlock())
 		// Act
-		_, found := GetLastMinedBlock()
+		_, found := GetLastMinedBlock(GetKey("").PublicKey.Y)
 		// Assert
 		assert.False(t, found)
 	})
