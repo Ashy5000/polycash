@@ -113,7 +113,7 @@ It is crucial to prevent miners from forking their hashrate through multiple wal
 
 **7.1 Block Reward Adjustment**
 
-In order to create a net loss of tokens for miners forking their hashrate, a block reward adjustment system is used. For each new miner that joins the network, the block reward decreases by 1%. This change makes miners lose profit when forking their hashrate, instead of gaining tokens.
+In order to create a net loss of tokens for miners forking their hashrate, a block reward adjustment system is used. For each new miner that joins the network, the block reward decreases by 1%. This change makes miners lose profit when forking their hashrate, instead of gaining tokens. Although it is impossible to seperate the true identities of miners apart from their 'mining identities', public keys that are used for mining blocks, the block reward adjustment mechanism makes it unprofitable to hold over 100 actively mining identities.
 
 **Conclusion**
 
