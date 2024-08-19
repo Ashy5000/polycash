@@ -56,7 +56,6 @@ To enable cryptographically verified functionality on the blockchain, smart cont
 
 &nbsp;&nbsp;&nbsp;&nbsp;A smart contract may automatically make transactions on the behalf of another party, provided that party signs the smart contract when it is created, granting their approval of the instructions contained within it. This functionality is required to allow a contract to be deterministically executed without the need for trust of a party to fulfill their part of the agreement.
 
-&nbsp;&nbsp;&nbsp;&nbsp;Deploying a smart contract requires a deployment fee, paid to the miner by the node deploying the smart contract.
 
 **5.1 Virtual Machine**
 
@@ -86,9 +85,9 @@ To enable changes to state within a single transaction to take effect before the
 
 Without smart contract packing, smart contracts must wait 1 or more blocks for messages to be sent to and from other contracts, as the VM's state updates once per block. In addition, smart contracts have to wait for each other if they wish to send data to the same smart contract at the same time, as state can only hold one piece of data at a time which can only be reset once per block for the same reason that smart contracts have to wait for 1 block until another contract can read data the first contract has sent. To resolve these issues, the Polycash blockchain uses a method called *Smart Contract Packing* which can 'pack' multiple smart contracts into one transaction.
 
-Any smart contract may, using the `Invoke` instruction, run another smart contract (a 'child contract') that runs in a newly created stack frame and shares the parent contract's state cache. Any contract which uses the `Invoke` instruction in this way is known as a 'parent contract', and any smart contract called directly from a transaction, rather than from another smart contract using `Invoke`, is called a 'root contract', as it serves as the root node of a tree (the 'invocation tree') of smart contracts, all of which can be packed into a single transaction.
+&nbsp;&nbsp;&nbsp;&nbsp;Any smart contract may, using the `Invoke` instruction, run another smart contract (a 'child contract') that runs in a newly created stack frame and shares the parent contract's state cache. Any contract which uses the `Invoke` instruction in this way is known as a 'parent contract', and any smart contract called directly from a transaction, rather than from another smart contract using `Invoke`, is called a 'root contract', as it serves as the root node of a tree (the 'invocation tree') of smart contracts, all of which can be packed into a single transaction.
 
-Because a child smart contract will share the state cache of their parent, and thus the state cache of the invocation tree's root contract, they can communicate via the cache with any other contract in the tree without having to wait for read and write operations to the state to go through the finalized state, which, as mentioned previously, can only be updated once per block. This also allows for contracts that are frequently used by multiple other contracts (i.e. Uniswap) to handle many requests simultaneously, rather than having to wait for the finalized state's mutex mechanism to unlock, finalize, and lock each time a request is sent to it.
+&nbsp;&nbsp;&nbsp;&nbsp;Because a child smart contract will share the state cache of their parent, and thus the state cache of the invocation tree's root contract, they can communicate via the cache with any other contract in the tree without having to wait for read and write operations to the state to go through the finalized state, which, as mentioned previously, can only be updated once per block. This also allows for contracts that are frequently used by multiple other contracts (i.e. Uniswap) to handle many requests simultaneously, rather than having to wait for the finalized state's mutex mechanism to unlock, finalize, and lock each time a request is sent to it.
 
 **5.1.6 Gas Fees**
 
