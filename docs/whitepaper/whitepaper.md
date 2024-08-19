@@ -6,11 +6,11 @@
 
 **Abstract**
 
-Most widely-used cryptocurrency blockchains utilize the PoW (Proof of Work) or PoS (Proof of Stake) consensus algorithms. Unfortunately, these algorithms face a variety of issues. PoW decreases decentralization with mining pools and uses large amounts of energy, while PoS systems face lower resilience against so-called 51% attacks. In response to these issues, APoW(Adjusted Proof of Work) is introduced, using difficulty adjustment algorithms that increase decentralization and decrease power consumption in the blockchain. Combining this consensus algorithm with a new system of verification, time verifiers, creates Polycash, a blockchain designed to allow secure transactions and the operation of peer-to-peer applications to be conducted with increased decentralization and security as opposed to traditional solutions.
+Most widely used cryptocurrency blockchains utilize the PoW (Proof of Work) or PoS (Proof of Stake) consensus algorithms. Unfortunately, these algorithms face a variety of issues. PoW decreases decentralization with mining pools and uses large amounts of energy, while PoS systems face lower resilience against so-called 51% attacks. In response to these issues, APoW(Adjusted Proof of Work) is introduced, using difficulty adjustment algorithms that increase decentralization and decrease power consumption in the blockchain. Combining this consensus algorithm with a new system of fork prevention, time verification, creates Polycash, a blockchain designed to allow secure transactions and the operation of peer-to-peer applications to be conducted with increased decentralization and security as opposed to traditional solutions.
 
 **1 Introduction**
 
-In the current day, financial institutions have largely become adopted as an intermediary for digital transactions. Using financial institutions relies on trust, an issue attempted to be resolved by blockchain-based cryptocurrencies. However, blockchains are becoming increasingly centralized when using the existing PoW of PoS consensus algorithms. In PoW, large mining pools have large influence over the state of the blockchain, and cooperation between multiple pools could lead to a 51% attack on the network. In PoS, individuals with large amounts of stake are able to have influence over the blockchain and the network in a similar manner. It also presents a feedback loop as entities holding large amounts of stake can restake their profits, which can create even more profits to restake. PoW also presents a large barrier to entry. Expensive mining hardware must be purchased to become a miner, which decreases decentralization due to the lower number of nodes. PoS suffers from the weak subjectivity problem, where the state of the blockchain up to *n* blocks in the past must be retrieved from a trusted source, where *n* represents the minimum amount of time funds must be staked before withdraws are permitted. The combinations of these issues in both PoW and PoS makes the need for a new consensus mechanism apparent.
+In the current day, financial institutions have largely become adopted as an intermediary for digital transactions. Using financial institutions relies on trust, an issue attempted to be resolved by blockchain-based cryptocurrencies. However, blockchains are becoming increasingly centralized when using the existing PoW of PoS consensus algorithms. In PoW, large mining companies and pools have massive influence over the state of the blockchain, and cooperation between multiple pools could lead to a 51% attack on the network. In PoS, individuals with large amounts of stake influence the blockchain and the network in a similar manner. It also presents a feedback loop as entities holding large amounts of stake can restake their profits, netting them more gains. PoW also presents a large barrier to entry. Expensive mining hardware must be purchased to become a miner, which decreases decentralization due to the lower number of nodes. PoS suffers from the weak subjectivity problem, where the state of the blockchain up to *n* blocks in the past must be retrieved from a trusted source, where *n* represents the minimum amount of time funds must be staked before withdraws are permitted. The combinations of these issues in both PoW and PoS makes the need for a new consensus mechanism apparent.
 
 &nbsp;&nbsp;&nbsp;&nbsp;To resolve these issues, a new consensus algorithm is needed: the APoW (Adjusted Proof of Work) algorithm. Instead of giving blockchain power directly proportional to mining power, APoW calculates block speed on a per-miner basis. It decreases target time (base 1 minute) by up to 50% for a miner with infinite mining rate, and increases target time by up to 50% for a miner with zero mining rate. This leads to an increase of decentralization in the blockchain and the network, and allows for a lower energy requirement than with a standard PoW blockchain.
 
@@ -22,7 +22,7 @@ A new blockchain, Polycash, is introduced to implement solutions to these issues
 
 To increase decentralization in the blockchain, a new consensus algorithm, Adjusted Proof of Work (APoW), is employed. The algorithm’s aim is to increase the probability of a miner with a lower hashrate having the ability to create a block, and decrease the probability of a miner with a higher hashrate from doing the same. While the system is designed to maintain the higher chance of a higher hashrate miner winning a block, the gap between higher hashrate miners and lower hashrate miners narrows when using APoW.
 
-&nbsp;&nbsp;&nbsp;&nbsp;The mechanism utilized by APoW to increase decentralization in this manner is block difficulty. As opposed to the traditional PoW algorithm, APoW calculates difficulty on a per-miner basis, attempting to adjust the difficulty for that miner every block so the time it takes them to mine a block matches a target time. In order to encourage miners to contribute their computing power to the network while still giving lower hashrate miners a chance of successfully mining a block, a modified version of the sigmoid function is utilized to alter the target time for a given miner based on the difficulty of the previous block they mined:
+&nbsp;&nbsp;&nbsp;&nbsp;The mechanism utilized by APoW to increase decentralization in this manner is block difficulty. As opposed to the traditional PoW algorithm, APoW calculates difficulty on a per-miner basis, attempting to adjust the difficulty for that miner every block so the time it takes them to mine a block matches a target time. To encourage miners to contribute their computing power to the network while still giving lower hashrate miners a chance of successfully mining a block, a modified version of the sigmoid function is utilized to alter the target time for a given miner based on the difficulty of the previous block they mined:
 
 $$\frac{1}{1+e^\frac{-(x-mdpm)}{mdpm}}$$
 
@@ -34,7 +34,7 @@ _mdpm_ is a constant representing 1 million DPM.
 
 &nbsp;&nbsp;&nbsp;&nbsp;Dividing the difficulty by the result of the above formula allows faster miners a small advantage to encourage contributing compute to the network, but not to the degree of standard PoW systems.
 
-&nbsp;&nbsp;&nbsp;&nbsp;To determine if a cryptographic proof of work is valid, the SHA3-512 hash of the block, represented in this case as an unsigned 64-bit integer, must be less than the maximum value of an unsigned 64-bit integer (18446744073709551615) divided by the block’s difficulty. This means if block _A_ has difficulty _D<sub>a</sub>_ and block B has difficulty _D<sub>b</sub>_, and if _D<sub>b</sub> _/ _D<sub>a</sub>_ = _n_, then block B is expected to take _n_ times longer to mine than block _A_. In other words, difficulty is proportional to mining time.
+&nbsp;&nbsp;&nbsp;&nbsp;To determine if a cryptographic proof of work is valid, the SHA3-512 hash of the block, represented in this case as an unsigned 64-bit integer, must be less than the maximum value of an unsigned 64-bit integer (18446744073709551615) divided by the block’s difficulty. This means if block _A_ has difficulty _D<sub>a</sub>_ and block B has difficulty _D<sub>b</sub>_, and if _D<sub>b</sub>_/ _D<sub>a</sub>_ = _n_, then block B is expected to take _n_ times longer to mine than block _A_. In other words, difficulty is proportional to mining time.
 
 **3 Time Verifiers**
 
@@ -42,11 +42,11 @@ When difficulty is adjusted based on the time it takes for a miner to create blo
 
 &nbsp;&nbsp;&nbsp;&nbsp;In addition to the number of signatures a miner needs to create a valid block, the majority of the verifiers the miner gathers signatures from must also be verifiers in the previous block. This almost completely prevents a miner from gaining malicious verification. Even if a miner controls 51% percent of time verifiers, these verifiers must not sign blocks- if they did, they would contribute to the number of verifiers in a block, and the number of signatures the miner could receive in their malicious block would still drop by about 50%, below the required 25%. This means a miner must control over 75% of miners in the network _and_ 50% of the computing power. Without the second rule, miners controlling malicious verifiers could have those verifiers not sign blocks, so they would not contribute to the verifier count. Then, they could be used to verify the malicious block. However, none or very few of those verifiers will have verified the previous blocks, so with the second rule the malicious block will be invalid. This security measure, along with the next, creates an extremely secure blockchain with significant advantages over one using standard PoW.
 
-**4 Miner Count Limits**
+**4 Miner Count Limit**
 
-***Miner count limits were removed in the Jinan upgrade.***
+***The miner count limit was removed in the Jinan upgrade.***
 
-In order to decrease the energy usage of the network and to slow the growth in the number of time verifiers, the number of miners in the network is limited to a maximum. If a miner with a public key not present as the miner in any previous block creates and broadcasts a new block and the number of unique public keys present as miners in the blockchain equals or exceeds the maximum, the block is rejected. After a miner has created one block, it can continue to create blocks even if the maximum number of miners have been reached- they are already registered. After they are registered, they do not have a strong motivation to use more energy to mine faster past a certain point, as the sigmoid difficulty function does not significantly reward faster miners after a point. This motivates miners to use a low to medium mining rate to optimize their profits- past a certain mining rate, energy costs outweigh mining reward benefits. This decreases the energy usage of the network.
+In order to decrease the energy usage of the network and to slow the growth in the number of time verifiers, the number of miners in the network is limited to a maximum. If a miner with a public key not present as the miner in any previous block creates and broadcasts a new block and the number of unique public keys present as miners in the blockchain equals or exceeds the maximum, the block is rejected. After a miner has created one block, it can continue to create blocks even if the maximum number of miners have been reached- they are already registered. After they are registered, they do not have a strong motivation to use more energy to mine faster past a certain point, as the sigmoid difficulty function does not significantly reward faster miners after a point. This motivates miners to use a low to medium mining rate to optimize their profits- past a certain mining rate, energy costs outweigh mining reward benefits. In this way, the miner count limit decreases the energy usage of the network.
 
 &nbsp;&nbsp;&nbsp;&nbsp;To calculate the maximum number of miners at the current time, divide the number of blocks in the blockchain by 20, rounding up.
 
@@ -68,11 +68,13 @@ The memory of the Polycash virtual machine is contained within a set of virtual 
 
 &nbsp;&nbsp;&nbsp;&nbsp;The buffer at hex address 0x00000000, used for global errors is pre-initialized during the VM boot process.
 
+**5.1.2 Polycash VM Instruction Set** *[extended]*
+
+*This section is located in a seperate document, [instructions.md](https://github.com/Ashy5000/polycash/docs/whitepaper/instructions.md), located in the reference implementation repository.*
+
 **5.1.3 Errors**
 
 Errors are split into two types: local errors and global errors. Local errors write an error value (hex code 0x01) into a pre-initialized error buffer if an error occurs in an instruction. Global errors write an error value (also hex code 0x01) into the pre-initialized error buffer at 0x00000000. If the error buffer needed to throw a local error is not found, a global error is thrown.
-
-See [Polycash VM Spec](https://github.com/ashy5000/cryptocurrency/blob/master/docs/whitepaper/instructions.md) for extended subsection 5.1.3 on the VM instruction set.
 
 **5.1.4 Inter-Contract Communication**
 
@@ -92,7 +94,7 @@ Without smart contract packing, smart contracts must wait 1 or more blocks for m
 
 **5.1.6 Gas Fees**
 
-The PVM's fee calculation uses a model similar to that of Ethereum, where each instruction costs a specific amount of 'gas'. One unit of gas is equal to 0.000001 PCSH (the native token of Polycash). When a smart contract begins execution, the PVM sets a gas limit for its execution equal to the total balance, measured in units of gas, of the contract's sender. During execution, the PVM keeps track of the amount of gas that has been spent so far. If at any point the amount of gas used exceeds the gas limit, the transaction that executed the contract is rejected as invalid.
+The PVM's fee calculation uses a model similar to that of Ethereum, where each instruction costs a specific amount of 'gas'. When a smart contract begins execution, the PVM sets a gas limit for its execution equal to the total balance, measured in units of gas, of the contract's sender. During execution, the PVM keeps track of the amount of gas that has been spent so far. If at any point the amount of gas used exceeds the gas limit, the transaction that executed the contract is rejected as invalid.
 
 **6 Transaction Body**
 
@@ -115,6 +117,22 @@ It is crucial to prevent miners from forking their hashrate through multiple wal
 
 In order to create a net loss of tokens for miners forking their hashrate, a block reward adjustment system is used. For each new miner that joins the network, the block reward decreases by 1%. This change makes miners lose profit when forking their hashrate, instead of gaining tokens. Although it is impossible to seperate the true identities of miners apart from their 'mining identities', public keys that are used for mining blocks, the block reward adjustment mechanism makes it unprofitable to hold over 100 actively mining identities.
 
+**8 Fees**
+
+There are three scenarios in which taking actions on the blockchain requires the payment of a fixed or variable fee. Fees are deducted from the sender's balance in the same transaction as the action that required the fee.
+
+**8.1 Initiating Transactions**
+
+Once a transaction that has been created, signed, and sent to the network moves from the mempool to the blockchain, the sender of that transaction (the key that signed it) is incurred a constant fee of 0.0001 PCSH. This constant rate keeps fees low and predictable, as opposed to other blockchains that use an auction-based or traffic-based fee calculation methods, where increased transaction load increases fees dramatically.
+
+**8.2 Gas usage**
+
+Whenever smart contracts contained in a transaction consume gas, the sender of the transaction must pay 0.000001 for each unit of gas that was used during the contract's execution as part of the fee model for PVM resource usage (see section 5.1.6).
+
+**8.3 Transaction Body**
+
+When a transaction is appended in a new block to the end of the blockchain that contains data in its body (see section 6), the sender of the transaction is charged a fee equal to 0.000001 PCSH per byte of data  present in the transaction's body.
+
 **Conclusion**
 
-We have seen that using an alternative consensus algorithm, APoW, with the help of the time verification protocol increases decentralization and decreases energy usage when compared to traditional PoW blockchains. It also avoids the security issues present in PoS or PoH blockchains, where controlling 1/3 of stake in the blockchain can cause the network to fail. We have outlined a new blockchain, Polycash, that implements these features alongside a smart contract system in order to enable secure digital transactions and decentralized applications.
+We have seen that using an alternative consensus algorithm, APoW, with the help of the time verification protocol increases decentralization and decreases energy usage when compared to traditional PoW blockchains. It also avoids the security issues present in PoS or PoH blockchains, where controlling 1/3 of stake in the blockchain can cause the network to fail. We have analyzed how combining this new consensus mechanism with the Dilithium3 signature algorithm ensures its tolerance against quantum-based attacks. We have outlined a new blockchain, Polycash, that implements these features alongside a smart contract system that together secure and decentralize digital transactions and decentralized applications.
