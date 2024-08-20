@@ -52,7 +52,7 @@ In order to decrease the energy usage of the network and to slow the growth in t
 
 **5 Smart Contracts**
 
-To enable cryptographically verified functionality on the blockchain, smart contracts are implemented. with a blockchain-specific assembly language. When a miner begins mining a block, they evaluate all smart contracts that would be triggered in that block, and, if they initiate any transactions, those transactions are placed in the block to be mined. The block is considered invalid if the smart contract transactions are missing or do not match the correct ones.
+To enable complex and customized functionality on the blockchain, Polycash implements a smart contract system that uses a blockchain-specific assembly language. When a miner is sent a transaction, they evaluate all smart contracts that would be triggered in that transaction, and, if they initiate any new transactions, those transactions are added to the mempool if they are valid. The block is considered invalid if the contract-created transactions are missing or do not match the correct ones.
 
 &nbsp;&nbsp;&nbsp;&nbsp;A smart contract may automatically make transactions on the behalf of another party, provided that party signs the smart contract when it is created, granting their approval of the instructions contained within it. This functionality is required to allow a contract to be deterministically executed without the need for trust of a party to fulfill their part of the agreement.
 

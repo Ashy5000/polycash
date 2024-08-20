@@ -245,16 +245,34 @@ func VerifyTimeVerifiers(block Block, verifiers []PublicKey, signatures []Signat
 		}
 		verifierMap[string(verifier.Y)] = true
 	}
-	// Ensure all verifiers are miners
+	// Ensure verifiers are miners
+	fromLastBlock := 0
 	for _, verifier := range verifiers {
 		if IsNewMiner(verifier, len(Blockchain)+1) {
 			Log("Time verifier is not a miner.", true)
 			return false
 		}
+		for _, exitingVerifier := range Blockchain[len(Blockchain)-1].TimeVerifiers {
+			if bytes.Equal(verifier.Y, exitingVerifier.Y) {
+				fromLastBlock++
+				continue
+			}
+		}
+		for _, exitingVerifier := range Blockchain[len(Blockchain)-1].PreMiningTimeVerifiers {
+			if bytes.Equal(verifier.Y, exitingVerifier.Y) {
+				fromLastBlock++
+				continue
+			}
+		}
 	}
 	// Ensure there are enough verifiers
 	if len(verifiers) < GetMinVerifiers() {
 		Log("Not enough time verifiers.", true)
+		return false
+	}
+	// Ensure enough time verifiers signed the previous block
+	if fromLastBlock < int(float64(len(verifiers))*0.75) {
+		Log("Not enough existing time verifiers.", true)
 		return false
 	}
 	return true
