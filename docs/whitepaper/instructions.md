@@ -187,3 +187,42 @@ Stdout [Bfr] [ResDst]
 The PrintStr instruction, represented by the hex instruction code 0x0023, prints the ASCII string stored in the buffer at StrBfr. If StrBfr does not exist, a local error is thrown into ResDst.
 
 PrintStr [StrBfr] [ResDst]
+
+**5.1.3.6 Blockchain interface instructions**
+
+**Tx**
+
+The Tx instruction, represented by the hex instruction code 0x0017, initiates a transaction from `Sndr` to `Rcvr` with an amount of `Amount`. If any of the required information is not present, a local error is thrown into ResDst. Transactions can only originate from addresses that have signed the smart contract at its creation.
+
+Tx [Sndr] [Rcvr] [Amount] [ResDst]
+
+**GetNthBlk**
+
+The GetNthBlk instruction, represented by the hex instruction code 0x0018, gets the `N`th block from the blockchain, gets the property corresponding to `Prop`, and stores the result in `Out`.
+
+Properties corresponding to `Prop`:
+0: Hash
+1: Previous hash
+2: Transaction count
+
+If `N`, `Prop`, or `Out` are not initialized, a local error is thrown into `ResDst`.
+
+GetNthBlk [N] [Prop] [Out] [ResDst]
+
+**GetNthTx**
+
+The GetNthTx instruction, represented by the hex instruction code 0x0019, gets the `BlkN`th block, the `TxN`th transaction in that block, then gets the property corresponding to `Prop` from the transaction, and stores the result in `Out`.
+
+Properties corresponding to `Prop`:
+0: Sender
+1: Recipient
+2: Amount
+3: Body
+
+If `BlkN`, `TxN`, `Prop`, or `Out` are not initialized, a local error is thrown into `ResDst`.
+
+**ChainLen**
+
+The ChainLen instruction, represented by the hex instruction code 0x001A, gets the length of the blockchain and stores it in `Out`.
+
+ChainLen [Out]
