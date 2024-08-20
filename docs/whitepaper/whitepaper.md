@@ -117,6 +117,67 @@ It is crucial to prevent miners from forking their hashrate through multiple wal
 
 In order to create a net loss of tokens for miners forking their hashrate, a block reward adjustment system is used. For each new miner that joins the network, the block reward decreases by 1%. This change makes miners lose profit when forking their hashrate, instead of gaining tokens. Although it is impossible to seperate the true identities of miners apart from their 'mining identities', public keys that are used for mining blocks, the block reward adjustment mechanism makes it unprofitable to hold over 100 actively mining identities.
 
+&nbsp;&nbsp;&nbsp;&nbsp;About once per year, defined in the blockchain as once per 31536000 blocks, the block reward multiplies by 5 times. This keeps an active supply of PCSH present and prevents deflation. The increase doesn't nullify the 1% decrease mechanism, however, as this is a *proportional* increase of the block reward, and does *not* reset the 1% decreases in any way, offsetting them by a *constant* amount instead.
+
+&nbsp;&nbsp;&nbsp;&nbsp;Formally, each 31536000 blocks is known as an 'epoch' and governs the way tokens are distributed according to the formula:
+
+$$r=0.99^m*5^n$$
+
+Where _r_ is the block reward, _m_ is the number of miners, and _n_ is the current epoch, with the first epoch at 0.
+
+We can prove that an increase in *m* carries over between epochs. Initially, two states, one with one more miner than the other, show the expected 1% differential:
+
+$$
+r1 = 0.99^m*5^n
+$$
+$$
+r2 = 0.99^{m+1}*5^n
+$$
+$$
+r2 / r1 = 0.99
+$$
+$$
+\frac{0.99^m*5^n}{0.99^m+1*5^n} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^{m+1}} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^m*0.99} = r1/r2
+$$
+$$
+\frac{1}{0.99} = r1/r2
+$$
+$$
+r2/r1 = 0.99
+$$
+As expected, before any epoch transitions, the _r2_ is 1% less than _r1_. After an epoch transition, the ratio remains the same:
+
+$$
+r1_{new} = 0.99^m*5^{n+1}
+$$
+$$
+r2_{new} = 0.99^{m-1}*5^{n+1}
+$$
+Using the same method as before:
+$$
+\frac{0.99^m*5^{n+1}}{0.99^{m+1}*5^{n+1}} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^{m+1}} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^m*0.99} = r1/r2
+$$
+$$
+\frac{1}{0.99} = r1/r2
+$$
+$$
+r2/r1 = 0.99
+$$
+
+And so the assertion holds. The 1% decreases in block reward each time a new miner joins the network span across the per-epoch increases in block reward and do not interfere with any existing mechanisms in the blockchain.
+
 **8 Fees**
 
 There are three scenarios in which taking actions on the blockchain requires the payment of a fixed or variable fee. Fees are deducted from the sender's balance in the same transaction as the action that required the fee.
