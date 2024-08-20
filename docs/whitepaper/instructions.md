@@ -226,3 +226,29 @@ If `BlkN`, `TxN`, `Prop`, or `Out` are not initialized, a local error is thrown 
 The ChainLen instruction, represented by the hex instruction code 0x001A, gets the length of the blockchain and stores it in `Out`.
 
 ChainLen [Out]
+
+**5.1.3.7 State instructions**
+
+**UpdateState**
+
+The UpdateState instruction, represented by the hex instruction code 0x001B, updates the buffer in state storage at the location `Location` within the contract's owned state to `Value`. If `Location` or `Value` are not initialized, a local error is thrown into `ResDst`.
+
+UpdateState [Location] [Value] [ResDst]
+
+**GetFromStateExternal**
+
+The GetFromStateExternal instruction, represented by the hex instruction code 0x001C, gets the buffer at location `Location` from global state storage, which includes both internal and external state. It stores the resulting data in `Dst`. If `Location` or `Dst` does not exist or if there is no data in the state at `Location`, a local error is thrown into `ResDst`.
+
+GetFromStateExternal [Location] [Dst] [ResDst]
+
+**UpdateStateExternal**
+
+The UpdateStateExternal instruction, represented by the hex instruction code 0x0024, updates the buffer in state storage at the location `Location`, which may be part of internal or external state, to `Value`. If `Location` or `Value` are not initialized or the location is not writeable, a local error is thrown into `ResDst`.
+
+UpdateStateExternal [Location] [Value] [ResDst]
+
+**GetFromState**
+
+The GetFromState instruction, represented by the hex instruction code 0x0025, gets the buffer from the smart contract's owned state storage at `Location` and stores the result in `Out`. If `Location` or `Out` are not initialized or if there is no buffer at `Location`, a local error is thrown into `ResDst`.
+
+GetFromState [Location] [Out] [ResDst]
