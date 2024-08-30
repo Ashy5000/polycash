@@ -49,6 +49,13 @@ func VerifyTransaction(senderKey PublicKey, recipientKey PublicKey, amount strin
 				return false
 			}
 			amountSpentInCurrentBlock += transaction.Amount
+			if len(Blockchain) > 50 {
+				amountSpentInCurrentBlock += TransactionFee                                  // Base fee
+				amountSpentInCurrentBlock += BodyFeePerByte * float64(len(transaction.Body)) // Body fee
+				for _, contract := range transaction.Contracts {
+					amountSpentInCurrentBlock += GasPrice * contract.GasUsed // Gas fee
+				}
+			}
 		}
 	}
 	amountSpentInCurrentBlock -= amountFloat
