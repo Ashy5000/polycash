@@ -5,7 +5,7 @@
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 
 
-<img src="https://github.com/Ashy5000/cryptocurrency/blob/master/assets/logos/logo_classic.png?raw=true" alt="Polycash logo" width="200" />
+<img src="https://github.com/Ashy5000/cryptocurrency/blob/master/assets/logos/logo_new.png?raw=true" alt="Polycash logo" width="200" />
 
 [Radicle](https://radicle.xyz) ID: `rad:z2E1qt896CsMnTcRRhqt8sQDCgKp`
 

@@ -10,3 +10,4 @@ builds/node/node
 /perf.data.old
 /flamegraph.svg
 .dccache
+pending_state.msgpack

@@ -1,6 +1,7 @@
 use rustc_hash::FxHashMap;
 
 use crate::{buffer::Buffer, blockutil::BlockUtilInterface};
+use crate::msgpack::PendingState;
 
 pub trait State {
     fn write(&mut self, location: String, contents: Vec<u8>);
@@ -62,27 +63,36 @@ impl State for OnchainState {
 pub struct StateManager {
     cached_state: CachedState,
     onchain_state: OnchainState,
+    pending_state: PendingState
 }
 
 impl StateManager {
-    pub fn new(blockutil_interface: BlockUtilInterface, contract_hash: String) -> Self {
+    pub fn new(blockutil_interface: BlockUtilInterface, contract_hash: String, pending_state: PendingState) -> Self {
         StateManager {
             cached_state: CachedState::new(),
             onchain_state: OnchainState::new(blockutil_interface, contract_hash),
+            pending_state,
         }
     }
     pub fn write(&mut self, location: String, contents: Vec<u8>) {
         self.cached_state.write(location, contents);
     }
+    pub fn get_sync(&mut self, location: String) -> Result<Vec<u8>, String> {
+        if let Some(res) = self.pending_state.data.get(&location.clone()) {
+            Ok(res.to_vec())
+        } else {
+            self.get(location)
+        }
+    }
     pub fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
         if let Ok(res) = self.cached_state.get(location.clone()) {
-            return Ok(res);
+            Ok(res)
         } else {
             let onchain_res = self.onchain_state.get(location.clone());
             if onchain_res.is_err() {
                 Err("Could not get from onchain state".to_string())
             } else {
-                self.cached_state.write(location, onchain_res.clone().unwrap());
+                self.cached_state.write(location, onchain_res.clone()?);
                 onchain_res
             }
         }

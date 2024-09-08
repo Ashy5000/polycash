@@ -17,6 +17,7 @@ use crate::{
 use crate::stack::Stack;
 use smartstring::alias::String;
 use ring::digest;
+use crate::msgpack::PendingState;
 
 pub const VM_NIL: *const c_void = 0x0000 as *const c_void;
 
@@ -781,6 +782,40 @@ pub fn vm_execute_instruction(
                 next_pc: pc + 1,
             }
         }
+        "GetFromStateSync" => unsafe {
+            if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+            {
+                vm_throw_local_error(buffers, line.args[2].clone());
+            }
+            let location = (*vm_access_buffer(buffers, line.args[0].clone(), line.args[1].clone())).as_u64().unwrap() as usize;
+            let location = format!("{}{}", contract_hash.clone(), location);
+            let contents_vec_u8 = state_manager.get_sync(location).unwrap();
+            let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
+            dst_buffer.contents = contents_vec_u8;
+            *gas_used += 2.0;
+            VmInstructionResult {
+                exit_details: None,
+                next_pc: pc + 1,
+            }
+        }
+        "GetFromStateExternalSync" => {
+            if !vm_check_buffer_initialization(buffers, line.args[0].clone())
+                || !vm_check_buffer_initialization(buffers, line.args[1].clone())
+            {
+                vm_throw_local_error(buffers, line.args[2].clone());
+            }
+            let location_vec_u8 = &vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone());
+            let location = hex::encode(location_vec_u8);
+            let contents_vec_u8: Vec<u8> = state_manager.get_sync(location).unwrap();
+            let dst_buffer = buffers.get_mut(&line.args[1]).unwrap();
+            dst_buffer.contents = contents_vec_u8;
+            *gas_used += 2.0;
+            VmInstructionResult {
+                exit_details: None,
+                next_pc: pc + 1,
+            }
+        }
         "QueryOracle" => unsafe {
             *gas_used += 10.0;
             if !vm_check_buffer_initialization(buffers, line.args[0].clone())
@@ -882,7 +917,7 @@ pub fn vm_simulate(
     (0, *gas_used)
 }
 
-pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, sender: Vec<u8>) -> (i64, f64) {
+pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, sender: Vec<u8>, pending_state: PendingState) -> (i64, f64) {
     let mut tree = build_syntax_tree();
     tree.create(contract_contents);
     let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
@@ -894,6 +929,6 @@ pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, 
     let mut stack = Stack{frames: vec![]};
     let mut pc: usize = 0;
     let mut gas_used = 0.0;
-    let mut state_manager = StateManager::new(interface.clone(), contract_hash.to_string());
+    let mut state_manager = StateManager::new(interface.clone(), contract_hash.to_string(), pending_state);
     vm_simulate(tree, &mut buffers, &mut stack, &mut state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender)
 }

@@ -16,8 +16,13 @@ mod vm;
 mod stack;
 mod state;
 
+mod msgpack;
+
 use std::env;
+use std::fs::File;
 use std::process::ExitCode;
+use hex::decode;
+use crate::msgpack::decode_pending_state;
 use crate::vm::run_vm;
 
 #[global_allocator]
@@ -29,7 +34,8 @@ fn main() -> ExitCode {
     let contract_hash = &args[2];
     let gas_limit: f64 = args[3].parse().unwrap();
     let sender: Vec<u8> = args[4].clone().into();
-    let (exit_code, gas_used) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit, sender);
+    let pending_state = decode_pending_state();
+    let (exit_code, gas_used) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit, sender, pending_state);
     println!("Gas used: {}", gas_used);
     ExitCode::from(exit_code as u8)
 }

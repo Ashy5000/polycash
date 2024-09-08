@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/vmihailenco/msgpack/v5"
 	"os"
 	"os/exec"
 	"strconv"
@@ -67,6 +68,12 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 	}
 	contractStr := c.Contents
 	hash := sha256.Sum256([]byte(contractStr))
+	pendingState := GetPendingState()
+	pendingStateSerialized, err := msgpack.Marshal(pendingState)
+	err = os.WriteFile("pending_state.msgpack", pendingStateSerialized, 0644)
+	if err != nil {
+		return nil, StateTransition{}, 0, err
+	}
 	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%f", max_gas), hex.EncodeToString(sender.Y)).Output()
 	if err != nil {
 		fmt.Println("Errored with output:", string(out))
@@ -86,6 +93,9 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 			continue
 		}
 		if line[:2] != "TX" {
+			if len(line) < 10 {
+				continue
+			}
 			if line[:9] != "Gas used:" {
 				if line[:14] == "State change: " {
 					stateChangeString := line[14:]
@@ -97,7 +107,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 						return nil, StateTransition{}, 0, err
 					}
 					transition.UpdatedData[address] = valueBytes
-				} else if line[:24] == "External state change: " {
+				} else if len(line) >= 25 && line[:24] == "External state change: " {
 					stateChangeString := line[24:]
 					parts := strings.Split(stateChangeString, "|")
 					address := parts[0]
@@ -106,7 +116,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 					if err != nil {
 						return nil, StateTransition{}, 0, err
 					}
-					if !bytes.Equal(CalculateCurrentState().Data[address], ExternalStateWriteableValue) {
+					if !bytes.Equal(GetFromState(address), ExternalStateWriteableValue) {
 						Warn("Contract attempted to modify external state not marked as writeable.")
 						return nil, StateTransition{}, 0, errors.New("contract attempted to modify external state not marked as writeable")
 					}

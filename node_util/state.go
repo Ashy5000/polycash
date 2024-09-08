@@ -20,9 +20,9 @@ type StateTransition struct {
 
 func TransitionState(state State, transition StateTransition) State {
 	for key, value := range transition.UpdatedData {
-    if len(value) == 0 || value == nil {
-      continue
-    }
+		if len(value) == 0 || value == nil {
+			continue
+		}
 		state.Data[key] = value
 	}
 	for key, value := range transition.NewContracts {
@@ -33,8 +33,8 @@ func TransitionState(state State, transition StateTransition) State {
 
 func CalculateCurrentState() State {
 	state := State{
-		Data: make(map[string][]byte),
-    Contracts: make(map[uint64]Contract),
+		Data:      make(map[string][]byte),
+		Contracts: make(map[uint64]Contract),
 	}
 	for _, block := range Blockchain {
 		state = TransitionState(state, block.Transition)
@@ -42,10 +42,21 @@ func CalculateCurrentState() State {
 	return state
 }
 
-func GetFromState(location string, state State) []byte {
-  val, ok := state.Data[location];
-  if ok {
-    return val;
-  }
-  return []byte{};
+func GetFromState(location string) []byte {
+	state := CalculateCurrentState()
+	val, ok := state.Data[location]
+	if ok {
+		return val
+	}
+	return []byte{}
+}
+
+func GetPendingState() map[string][]byte {
+	res := make(map[string][]byte)
+	for _, subTransition := range NextTransitions {
+		for location, data := range subTransition.UpdatedData {
+			res[location] = data
+		}
+	}
+	return res
 }
