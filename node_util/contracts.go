@@ -55,15 +55,22 @@ func (c Contract) LoadContract() {
 	}
 }
 
+var executionLocked = false
+
 func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, StateTransition, float64, error) {
+	for executionLocked {
+	}
+	executionLocked = true
 	if !c.Loaded {
 		c.LoadContract()
 	}
 	if !VerifySmartContract(c) {
 		Warn("Invalid contract detected.")
+		executionLocked = false
 		return make([]Transaction, 0), StateTransition{}, 0, nil
 	}
 	if err := os.WriteFile("contract.blockasm", []byte(c.Contents), 0666); err != nil {
+		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
 	contractStr := c.Contents
@@ -72,6 +79,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 	pendingStateSerialized, err := msgpack.Marshal(pendingState)
 	err = os.WriteFile("pending_state.msgpack", pendingStateSerialized, 0644)
 	if err != nil {
+		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
 	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%f", max_gas), hex.EncodeToString(sender.Y)).Output()
@@ -79,6 +87,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 		fmt.Println("Errored with output:", string(out))
 		fmt.Println("Error: ", err)
 		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))
+		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
@@ -104,6 +113,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 					valueHex := parts[1]
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {
+						executionLocked = false
 						return nil, StateTransition{}, 0, err
 					}
 					transition.UpdatedData[address] = valueBytes
@@ -114,10 +124,12 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 					valueHex := parts[1]
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {
+						executionLocked = false
 						return nil, StateTransition{}, 0, err
 					}
 					if !bytes.Equal(GetFromState(address), ExternalStateWriteableValue) {
 						Warn("Contract attempted to modify external state not marked as writeable.")
+						executionLocked = false
 						return nil, StateTransition{}, 0, errors.New("contract attempted to modify external state not marked as writeable")
 					}
 					transition.UpdatedData[address] = valueBytes
@@ -126,6 +138,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 			}
 			gasUsed, err = strconv.ParseFloat(line[10:], 64)
 			if err != nil {
+				executionLocked = false
 				return nil, StateTransition{}, 0, err
 			}
 			continue
@@ -134,6 +147,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 		var senderY []byte
 		err = json.Unmarshal([]byte(words[1]), &senderY)
 		if err != nil {
+			executionLocked = false
 			return nil, StateTransition{}, 0, err
 		}
 		senderIsParty := false
@@ -145,6 +159,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 		}
 		if !senderIsParty {
 			Warn("Invalid sender detected.")
+			executionLocked = false
 			return nil, StateTransition{}, 0, nil
 		}
 		sender := PublicKey{
@@ -153,6 +168,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 		var receiverY []byte
 		err = json.Unmarshal([]byte(words[2]), &receiverY)
 		if err != nil {
+			executionLocked = false
 			return nil, StateTransition{}, 0, err
 		}
 		receiver := PublicKey{
@@ -160,6 +176,7 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 		}
 		subdividedAmount, err := strconv.Atoi(words[3])
 		if err != nil {
+			executionLocked = false
 			return nil, StateTransition{}, 0, err
 		}
 		amount := float64(subdividedAmount * 1000000)
@@ -176,5 +193,6 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 			c.Location: c,
 		}
 	}
+	executionLocked = false
 	return transactions, transition, gasUsed, nil
 }
