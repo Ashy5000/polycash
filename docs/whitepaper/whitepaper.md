@@ -36,6 +36,129 @@ _mdpm_ is a constant representing 1 million DPM.
 
 &nbsp;&nbsp;&nbsp;&nbsp;To determine if a cryptographic proof of work is valid, the SHA3-512 hash of the block, represented in this case as an unsigned 64-bit integer, must be less than the maximum value of an unsigned 64-bit integer (18446744073709551615) divided by the block’s difficulty. This means if block _A_ has difficulty _D<sub>a</sub>_ and block B has difficulty _D<sub>b</sub>_, and if _D<sub>b</sub>_/ _D<sub>a</sub>_ = _n_, then block B is expected to take _n_ times longer to mine than block _A_. In other words, difficulty is proportional to mining time.
 
+**2.1 Block Reward Adjustment**
+
+In order to create a net loss of tokens for miners forking their hashrate, a block reward adjustment system is used. For each new miner that joins the network, the block reward decreases by 1%. This change makes miners lose profit when forking their hashrate, instead of gaining tokens. Although it is impossible to seperate the true identities of miners apart from their 'mining identities', public keys that are used for mining blocks, the block reward adjustment mechanism makes it unprofitable to hold over 100 actively mining identities.
+
+&nbsp;&nbsp;&nbsp;&nbsp;About once per year, defined in the blockchain as once per 31536000 blocks, the block reward multiplies by 5 times. This keeps an active supply of PCSH present and prevents deflation. The increase doesn't nullify the 1% decrease mechanism, as this is a *proportional* increase of the block reward, and does *not* reset the 1% decreases in any way, offsetting them by a *constant* amount instead.
+
+&nbsp;&nbsp;&nbsp;&nbsp;Formally, each 31536000 blocks is known as an 'epoch' and governs the way tokens are distributed according to the formula:
+
+$$r=0.99^m*5^n$$
+
+Where _r_ is the block reward, _m_ is the number of miners, and _n_ is the current epoch, with the first epoch at 0.
+
+We can prove that an increase in *m* carries over between epochs. Initially, two states, one with one more miner than the other, show the expected 1% differential:
+
+$$
+r1 = 0.99^m*5^n
+$$
+$$
+r2 = 0.99^{m+1}*5^n
+$$
+$$
+r2 / r1 = 0.99
+$$
+$$
+\frac{0.99^m*5^n}{0.99^m+1*5^n} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^{m+1}} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^m*0.99} = r1/r2
+$$
+$$
+\frac{1}{0.99} = r1/r2
+$$
+$$
+r2/r1 = 0.99
+$$
+As expected, before any epoch transitions, the _r2_ is 1% less than _r1_. After an epoch transition, the ratio remains the same:
+
+$$
+r1_{new} = 0.99^m*5^{n+1}
+$$
+$$
+r2_{new} = 0.99^{m-1}*5^{n+1}
+$$
+Using the same method as before:
+$$
+\frac{0.99^m*5^{n+1}}{0.99^{m+1}*5^{n+1}} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^{m+1}} = r1/r2
+$$
+$$
+\frac{0.99^m}{0.99^m*0.99} = r1/r2
+$$
+$$
+\frac{1}{0.99} = r1/r2
+$$
+$$
+r2/r1 = 0.99
+$$
+
+And so the assertion holds. The 1% decreases in block reward each time a new miner joins the network span across the per-epoch increases in block reward and do not interfere with any existing mechanisms in the blockchain.
+
+**2.1 Cryptoeconomic modeling**
+
+Let a function, $m(b, s)$, be equal to the block reward at block number $b$ with $s$ mining identities. Let $d$ equal the fraction of the block reward that is sold at market price by miners. Let $h$ equal 1 - $d$. Let $a(b, s)$ equal:
+$$
+a(b,s)=\sum_{n=0}^{b}{m(b,s)}
+$$
+
+Thus, $a(b)$ represents the total amount of PCSH that has been minted by miners.
+
+To model the reward per mining identity (assuming each identity is mining with optimal compute), we can use a function $r(b, s, s_{a})$, where *b* is the block number, *s* is the number of mining identities, as with before, and $s_{a}$ is the number of mining identities that are *active* and are being used to produce blocks.
+
+$$
+r_{PCSH}(b,s, s_{a}) = 0.99^{s}*5^{floor(b/31536000)}/s_{a}
+$$
+
+This represents the average reward per block in PCSH. To get the average reward taking into account the current value of PCSH, the model must introduce a *base currency*, which is assumed to have a fixed value. The value of PCSH relative to the base currency is $v$.
+
+$$
+r_{BASE}(b,s, s_{a}) = v*r_{PCSH}(b,s,s_{a})
+$$
+
+From here, we can estimate the number of active mining identities. For this cryptoeconomic model, we assume that people will create new mining identities based on the square root of $r_{BASE}$, so we create a function, $s_{a}(r)$, which determines the number of active mining identities based on the result from $r_{BASE}(b, s, s_{a})$.
+
+$$
+s_{a}(r)=\sqrt{a}
+$$
+
+To calculate the most likely configuration for the model's state, we need to define a function, $L(b, s, s_{a})$, that calculates the total energy of the system. In the terminology of quantum mechanics, which often uses this method of calculating the most likely state for systems, this function would be known as the *Lagrangian*.
+
+$$
+L(b,s,s_{a})=|s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}|
+$$
+
+This function calculates the energy of the system (the Lagrangian) based on the difference between the current $s_{a}$ and the next calculated $s_{a}$. If the two are exactly equal, the system is in its *vacuum state* and in complete balance. If the two are farther apart, the system will soon experience a sharp correction back to a lower-energy state represented by a decrease in the Langrangian.
+
+We can solve for a zero Langrangian:
+
+$$
+|s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}|=0
+$$
+$$
+s_{a}(r_{BASE}(b,s,s_{a}))=s_{a}
+$$
+$$
+\sqrt{v*r_{PCSH}(b,s,s_{a})} = s_{a}
+$$
+$$
+\sqrt{v*0.99^{s}*5^{floor(b/31536000)}/s_{a}} = s_{a}
+$$
+$$
+v*0.99^{s}*5^{floor(b/31536000)}/s_{a} = s_{a}^2
+$$
+$$
+v*0.99^{s}*5^{floor(b/31536000)} = s_{a}^3
+$$
+
+The last formula is the formal definition of the PCSH Fundamental Economics Model (PFEM). Using it, it is possible to construct several proofs of economic phenomena that will occur in Polycash's economy.
+
 **3 Time Verifiers**
 
 When difficulty is adjusted based on the time it takes for a miner to create blocks, it becomes necessary to ensure miners are honest about the time they start and finish mining. If these two timestamps can be verified, it would also prevent all manipulation of past blocks in the blockchain, even if 51% of the mining power in the network is controlled. To implement this security feature, time verifiers are used in the network. Any node that has mined a block may become a time verifier. When a node starts or finishes mining a block, they must request and collect the signatures of time verifiers. Time verifiers will provide their signature if the current time is within a 10-second range of the time they need to verify. There may be no less than 75% of the time verifiers in the previous block in the current block, and each additional signature beyond the number of signatures in the previous block earns the miner a reward. Because of the reward gained from adding additional time verifiers, miners will attempt to gather signatures from as many nodes as possible. Therefore, the number of signatures will roughly match the number of verifiers in the network. As a given miner will never have control of over 50% of the verifiers in the network, they will fall short of the required number of signatures if they attempt to lie about the times they begin and end mining.
@@ -113,70 +236,6 @@ It is crucial to prevent miners from forking their hashrate through multiple wal
 
    Block Reward Adjustment decreases the block reward for each new miner that mines a block by 1% in order to impose a net loss of profits on miners that fork their hashrate. This is the most effective approach.
 
-**7.1 Block Reward Adjustment**
-
-In order to create a net loss of tokens for miners forking their hashrate, a block reward adjustment system is used. For each new miner that joins the network, the block reward decreases by 1%. This change makes miners lose profit when forking their hashrate, instead of gaining tokens. Although it is impossible to seperate the true identities of miners apart from their 'mining identities', public keys that are used for mining blocks, the block reward adjustment mechanism makes it unprofitable to hold over 100 actively mining identities.
-
-&nbsp;&nbsp;&nbsp;&nbsp;About once per year, defined in the blockchain as once per 31536000 blocks, the block reward multiplies by 5 times. This keeps an active supply of PCSH present and prevents deflation. The increase doesn't nullify the 1% decrease mechanism, as this is a *proportional* increase of the block reward, and does *not* reset the 1% decreases in any way, offsetting them by a *constant* amount instead.
-
-&nbsp;&nbsp;&nbsp;&nbsp;Formally, each 31536000 blocks is known as an 'epoch' and governs the way tokens are distributed according to the formula:
-
-$$r=0.99^m*5^n$$
-
-Where _r_ is the block reward, _m_ is the number of miners, and _n_ is the current epoch, with the first epoch at 0.
-
-We can prove that an increase in *m* carries over between epochs. Initially, two states, one with one more miner than the other, show the expected 1% differential:
-
-$$
-r1 = 0.99^m*5^n
-$$
-$$
-r2 = 0.99^{m+1}*5^n
-$$
-$$
-r2 / r1 = 0.99
-$$
-$$
-\frac{0.99^m*5^n}{0.99^m+1*5^n} = r1/r2
-$$
-$$
-\frac{0.99^m}{0.99^{m+1}} = r1/r2
-$$
-$$
-\frac{0.99^m}{0.99^m*0.99} = r1/r2
-$$
-$$
-\frac{1}{0.99} = r1/r2
-$$
-$$
-r2/r1 = 0.99
-$$
-As expected, before any epoch transitions, the _r2_ is 1% less than _r1_. After an epoch transition, the ratio remains the same:
-
-$$
-r1_{new} = 0.99^m*5^{n+1}
-$$
-$$
-r2_{new} = 0.99^{m-1}*5^{n+1}
-$$
-Using the same method as before:
-$$
-\frac{0.99^m*5^{n+1}}{0.99^{m+1}*5^{n+1}} = r1/r2
-$$
-$$
-\frac{0.99^m}{0.99^{m+1}} = r1/r2
-$$
-$$
-\frac{0.99^m}{0.99^m*0.99} = r1/r2
-$$
-$$
-\frac{1}{0.99} = r1/r2
-$$
-$$
-r2/r1 = 0.99
-$$
-
-And so the assertion holds. The 1% decreases in block reward each time a new miner joins the network span across the per-epoch increases in block reward and do not interfere with any existing mechanisms in the blockchain.
 
 **8 Fees**
 
