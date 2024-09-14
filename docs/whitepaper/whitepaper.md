@@ -211,6 +211,35 @@ In the second case, where the left side, $PFEM_{l}$, is less than the right, a d
 
 As both cases have incentives that align with the correct action in those scenarios, the proof holds; any PCSH economy will always eventually reach a v-state, as long as $L_{ERR}$ is large enough to ensure the market has a buffering period to respond to any sudden price movements.
 
+**2.1.3 Proof of Stable Rewards**
+
+In a system such as Polycash, it is necessary to ensure that miners will always receive stable rewards for their contributions.
+
+Again, keeping in mind the now-proven PFEM equation:
+
+$$
+v*0.99^{s}*5^{floor(b/31536000)} = s_{a}^3
+$$
+
+Now, defining:
+$$
+r_{t}=0.99^s*5^{floor(b/31536000)}
+$$
+
+The equation can be simplified for this calculation:
+
+$$
+vr_{t} = s_{a}^3
+$$
+
+Our goal is to calculate the change in rewards for a miner based on a change in $vr_t$. If $vr_t$ was to decrease by another variable, $vr_-$, than $PFEM_l$ and $PFEM_r$ would both decrease by $vr_-/v$. Because $s_a$ is equal to the cube root of $vr_-$:
+
+$$
+\Delta s_a=\root3\of{PFEM_r-vr_-/v}-\root3\of{PFEM_r}
+$$
+
+Because the difference between positive integers is always greater than the difference between the cube roots of those integers, $\Delta s_a$ is always smaller than $vr_-$, meaning there is a damping effect on any supply fluctuations due to new mining identities being created or the beginnings of new epochs.
+
 **3 Time Verifiers**
 
 When difficulty is adjusted based on the time it takes for a miner to create blocks, it becomes necessary to ensure miners are honest about the time they start and finish mining. If these two timestamps can be verified, it would also prevent all manipulation of past blocks in the blockchain, even if 51% of the mining power in the network is controlled. To implement this security feature, time verifiers are used in the network. Any node that has mined a block may become a time verifier. When a node starts or finishes mining a block, they must request and collect the signatures of time verifiers. Time verifiers will provide their signature if the current time is within a 10-second range of the time they need to verify. There may be no less than 75% of the time verifiers in the previous block in the current block, and each additional signature beyond the number of signatures in the previous block earns the miner a reward. Because of the reward gained from adding additional time verifiers, miners will attempt to gather signatures from as many nodes as possible. Therefore, the number of signatures will roughly match the number of verifiers in the network. As a given miner will never have control of over 50% of the verifiers in the network, they will fall short of the required number of signatures if they attempt to lie about the times they begin and end mining.
@@ -221,7 +250,7 @@ When difficulty is adjusted based on the time it takes for a miner to create blo
 
 ***The miner count limit was removed in the Jinan upgrade.***
 
-In order to decrease the energy usage of the network and to slow the growth in the number of time verifiers, the number of miners in the network is limited to a maximum. If a miner with a public key not present as the miner in any previous block creates and broadcasts a new block and the number of unique public keys present as miners in the blockchain equals or exceeds the maximum, the block is rejected. After a miner has created one block, it can continue to create blocks even if the maximum number of miners have been reached- they are already registered. After they are registered, they do not have a strong motivation to use more energy to mine faster past a certain point, as the sigmoid difficulty function does not significantly reward faster miners after a point. This motivates miners to use a low to medium mining rate to optimize their profits- past a certain mining rate, energy costs outweigh mining reward benefits. In this way, the miner count limit decreases the energy usage of the network.
+In order to decrease the energy usage of the network and to slow the growth in the number of time verifiers, the number of miners in the network is limited to a maximum. If a miner with a public key not present as the miner in any previous block creates and broadcasts a new block and the number of unique public keys present as miners in the blockchain equals or exceeds the maximum, the block is rejected. After a miner has created one block, it can continue to create blocks even if the maximum number of miners have been reached; they are already registered. After they are registered, they do not have a strong motivation to use more energy to mine faster past a certain point, as the sigmoid difficulty function does not significantly reward faster miners after a point. This motivates miners to use a low to medium mining rate to optimize their profits; past a certain mining rate, energy costs outweigh mining reward benefits. In this way, the miner count limit decreases the energy usage of the network.
 
 &nbsp;&nbsp;&nbsp;&nbsp;To calculate the maximum number of miners at the current time, divide the number of blocks in the blockchain by 20, rounding up.
 
