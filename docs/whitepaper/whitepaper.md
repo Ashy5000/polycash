@@ -131,15 +131,15 @@ $$
 To calculate the most likely configuration for the model's state, we need to define a function, $L(b, s, s_{a})$, that calculates the total energy of the system. In the terminology of quantum mechanics, which often uses this method of calculating the most likely state for systems, this function would be known as the *Lagrangian*.
 
 $$
-L(b,s,s_{a})=|s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}|
+L(b,s,s_{a})=\lvert s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}\rvert
 $$
 
-This function calculates the energy of the system (the Lagrangian) based on the difference between the current $s_{a}$ and the next calculated $s_{a}$. If the two are exactly equal, the system is in its *vacuum state* and in complete balance. If the two are farther apart, the system will soon experience a sharp correction back to a lower-energy state represented by a decrease in the Langrangian.
+This function calculates the energy of the system (the Lagrangian) based on the difference between the current $s_{a}$ and the next calculated $s_{a}$. If the two are exactly equal, the system is in its *vacuum state* and in complete balance. If the two are farther apart, the system will soon experience a sharp correction back to a lower-energy state represented by a decrease in the Lagrangian.
 
-We can solve for a zero Langrangian:
+We can solve for a zero Lagrangian:
 
 $$
-|s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}|=0
+\lvert s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}\rvert=0
 $$
 $$
 s_{a}(r_{BASE}(b,s,s_{a}))=s_{a}
@@ -158,6 +158,58 @@ v*0.99^{s}*5^{floor(b/31536000)} = s_{a}^3
 $$
 
 The last formula is the formal definition of the PCSH Fundamental Economics Model (PFEM). Using it, it is possible to construct several proofs of economic phenomena that will occur in Polycash's economy.
+
+**2.1.2 Proof of Lagrangian Descent**
+
+For the formal definition of the PFEM to be useful, the Lagrangian must be equal to zero. Otherwise, the equation is invalid. However, due to market inconsistency and latency and illogical trading strategies, $L(b,s,s_{a})$ will never be exactly zero. Instead, we can choose a value $L_{err}$ and assume the PFEM model is valid when the Lagrangian is less than or equal to that value.
+
+$$
+L(b,s,s_{a})-L_{err}\geq0
+$$
+
+PFEMs that satisfy this equation are known as vPFEMs, the *v* indicating *valid*.
+
+However, this method has a glaring issue; the PFEM is simply ignored outside of this range, and can only be used when the Lagrangian is very small. However, the economy will always fall into a state that can be described by a vPFEM (a *v-state*). We can prove this formally, but first more definitions are needed to describe how the PFEM evolves over time.
+
+The PFEM can be described as a state machine. Every simulation step, it updates its internal state to represent the current economic conditions. This is accomplished by calculating the next $s_{a}$:
+
+$$
+s_{a}(r_{BASE}(b,s,s_{a}))
+$$
+
+This formula recalculates $s_{a}$ using the $s_{a}(r)$ function, using the state machine's current state. Looking back at the Lagrangian, $L(b,s,s_{a})$, it is apparent that its main function is to calculate the difference between the next $s_{a}$ and the current $s_{a}$. If we define:
+
+$$
+\Delta s_{a}=s_{a}(r_{BASE}(b,s,s_{a})) - s_{a}
+$$
+
+Then the Lagrangian can be redefined as $\lvert\Delta s_{a}\rvert$. Now, the set of all possible states of the PFEM must be redefined as a 4-dimensional scalar field, $L_{v}$ (*L* because it represents an altered Lagrangian, and *v* because it is a **v**ector space). For the sake of standardization, we can define the x-axis to represent $s_{a}$, the y-axis to represent $s$, the z-axis to represent $p$, and finally the w-axis to represent $b$. Each point $p$ in $L_{v}$ represents a unique $\Delta s_{a}$, the $\Delta s_{a_p}$ for that point. We can introduce another nearly identical field $L_{vn}$ in which every point represents the Lagrangian, $\lvert \Delta s_{a_p}\rvert$. The only difference between the two fields is that at each point $L_{vn}$ holds the absolute value of the corresponding point in $L_v$.
+
+For the Lagrangian to decrease or stay the same on a given simulation step, an equation (the Lagrangian Descent Viability Equation, or LDVE) must be satisfied:
+
+$$
+L_{vn}(L_{v}(s_{a},s,p,b)+s_{a},max(s,L_{v}(s_{a},s,p,b)),p,b) \leq L_{vn}(s_{a},s,p,b)
+$$
+
+Looking back at the formal PFEM definition:
+
+$$
+v*0.99^{s}*5^{floor(b/31536000)} = s_{a}^3
+$$
+
+
+
+One viable proof utilizes $s_{a}$ and works as follows.
+
+In solving this proof, there are two ways of imagining its goal. The first is to make the Lagrangian decrease. The second is to make the two sides of the PFEM formula closer to equal. The two perspectives are in fact identical, as an increasing Lagrangian will cause the two sides of the PFEM formula to diverge. In order to make solving the proof easier, we will use the latter definition.
+
+There are two possible cases when attempting to correct the PFEM equation. Either the left side of the equation is greater than the right or the left side of the equation is lesser than the right.
+
+In the first case, where the left side, $PFEM_{l}$, is greater than the right, an increase in $s_{a}$ would cause $PFEM_{r}$ to increase, as $p$ is equal to its cube root. This would bring the $PFEM_{l}$ and the right side of the equation, $PFEM_{r}$, closer together, decreasing the Lagrangian. A increase in $s_{a}$ has a clear incentive for all parties that choose to create more mining identities or activate existing ones: because $PFEM_{l}$ is proportional to $r_{BASE}$, the average reward per block per mining identity, $PFEM_{l}$ being greater than $PFEM_{r}$ signifies greater rewards for anyone who chooses to do so. In addition, a decrease in $PFEM_{r}$ also creates a stronger incentive, as $r_{BASE}$ divides its reward calculation by $s_{a}$, the cube root of $PFEM_{r}$.
+
+In the second case, where the left side, $PFEM_{l}$, is less than the right, a decrease in $s_{a}$ is desired as it would decrease the Lagrangian in the same manner as the first case. Also, with a decrease in $PFEM_{l}$ and/or an increase in $PFEM_{r}$, rewards are decreased for all mining identities. This would lead many parties ceasing to mine blocks, causing a decrease in $PFEM_{r}$. Also, decreased supply would increase $v$ due to scarcity, which would increase $PFEM_l$.
+
+As both cases have incentives that align with the correct action in those scenarios, the proof holds; any PCSH economy will always eventually reach a v-state, as long as $L_{ERR}$ is large enough to ensure the market has a buffering period to respond to any sudden price movements.
 
 **3 Time Verifiers**
 
