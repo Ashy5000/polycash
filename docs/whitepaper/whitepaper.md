@@ -197,8 +197,6 @@ $$
 v*0.99^{s}*5^{floor(b/31536000)} = s_{a}^3
 $$
 
-
-
 One viable proof utilizes $s_{a}$ and works as follows.
 
 In solving this proof, there are two ways of imagining its goal. The first is to make the Lagrangian decrease. The second is to make the two sides of the PFEM formula closer to equal. The two perspectives are in fact identical, as an increasing Lagrangian will cause the two sides of the PFEM formula to diverge. In order to make solving the proof easier, we will use the latter definition.
@@ -232,13 +230,21 @@ $$
 vr_{t} = s_{a}^3
 $$
 
-Our goal is to calculate the change in rewards for a miner based on a change in $vr_t$. If $vr_t$ was to decrease by another variable, $vr_-$, than $PFEM_l$ and $PFEM_r$ would both decrease by $vr_-/v$. Because $s_a$ is equal to the cube root of $vr_-$:
+Our goal is to calculate the change in rewards for a miner based on a change in $vr_t$. If $vr_t$ was to decrease by another value, $vr_-$, than $PFEM_l$ and $PFEM_r$ would both decrease by $vr_-/v$. Note that $vr_-$ is a single variable and does not represent multiple variables multiplied together. Because $s_a$ is equal to the cube root of $vr_-$:
 
 $$
 \Delta s_a=\root3\of{PFEM_r-vr_-/v}-\root3\of{PFEM_r}
 $$
 
-Because the difference between positive integers is always greater than the difference between the cube roots of those integers, $\Delta s_a$ is always smaller than $vr_-$, meaning there is a damping effect on any supply fluctuations due to new mining identities being created or the beginnings of new epochs.
+Because the difference between positive numbers is always greater than the difference between their cube roots, $\Delta s_a$ is always smaller than $vr_-$, indicating that $s_{a}$ is affected less than $vr_-$ when market fluctuations, epoch transitions, or changes to $s$ occur. In the Polycash ecosystem, it is said that $s_{a}$ is *cube-damped* from $vr_t$.
+
+Because of this cube-damping effect, $r_{BASE}(b,s,s_a)$ (the average reward a mining identity will receive per block, in the base currency) is also effected:
+
+$$
+r_{BASE}(b,s,s_a)=\frac{vr_t}{s_a}
+$$
+
+Because, as shown by the equation above, $s_a$ linearly affects $r_{BASE}$, $r_{BASE}$ also becomes cube-damped from $vr_t$, meaning that changes in market conditions, block rewards, or block difficulty will not affect the profit of mining identities linearly; miner's flow of income is protected via cube-damping from the economy's state.
 
 **3 Time Verifiers**
 
