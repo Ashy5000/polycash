@@ -280,7 +280,7 @@ The memory of the Polycash virtual machine is contained within a set of virtual 
 
 **5.1.2 Polycash VM Instruction Set** *[extended]*
 
-*This section is located in a seperate document, [instructions.md](https://github.com/Ashy5000/polycash/docs/whitepaper/instructions.md), located in the reference implementation repository.*
+*This section is located in a seperate document, [instructions.md](https://github.com/Ashy5000/polycash/blob/master/docs/whitepaper/instructions.md), located in the reference implementation repository.*
 
 **5.1.3 Errors**
 

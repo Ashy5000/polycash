@@ -5,11 +5,13 @@
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 
 
-<img src="https://github.com/Ashy5000/cryptocurrency/blob/master/assets/logos/logo_new.png?raw=true" alt="Polycash logo" width="200" />
+<img src="https://github.com/Ashy5000/polycash/blob/master/assets/logos/logo_new.png?raw=true" alt="Polycash logo" width="200" />
 
 [Radicle](https://radicle.xyz) ID: `rad:z2E1qt896CsMnTcRRhqt8sQDCgKp`
 
 The home of a power-efficient, secure, quantum-resistant, and modern blockchain and smart contract platform designed to resolve the issues presented by existing consensus mechanisms while improving upon decentralization. Written in Golang, Rust, and C++.
+
+For the whitepaper, look [here](https://github.com/Ashy5000/polycash/blob/master/docs/whitepaper/whitepaper.pdf).
 
 Technical docs are located in the [wiki](https://github.com/Ashy5000/polycash/wiki).
 
