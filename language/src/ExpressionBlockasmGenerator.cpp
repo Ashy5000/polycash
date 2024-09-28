@@ -72,7 +72,7 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
                 blockasm << std::setfill('0') << std::setw(16) << std::hex << location << " 0x00000000" << std::endl;
                 int resultLoc = nextAllocatedLocation++;
                 blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << resultLoc << " 0x00000000" << std::endl;
-                blockasm << "GetFromState 0x" << std::setfill('0') << std::setw(8) << std::hex << locationLoc << " 0x";
+                blockasm << "GetFromState 0x00" << std::setfill('0') << std::setw(6) << std::hex << locationLoc << " 0x";
                 blockasm << std::setfill('0') << std::setw(8) << std::hex << resultLoc << " 0x00000000" << std::endl;
                 return std::make_tuple(resultLoc, type);
             } else {

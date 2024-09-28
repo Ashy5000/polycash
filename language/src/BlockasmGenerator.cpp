@@ -54,8 +54,8 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     Type type = std::get<1>(exprTuple);
                     if(varName.at(0) == '\'') {
                         blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
-                        blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x";
-                        blockasm << std::setfill('0') << std::setw(16) << std::hex << nextAllocatedStateLocation << " 0x00000000" << std::endl;
+                        blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00";
+                        blockasm << std::setfill('0') << std::setw(14) << std::hex << nextAllocatedStateLocation << " 0x00000000" << std::endl;
                         nextAllocatedLocation++;
                         blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation - 1 << " 0x";
                         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x00000000" << std::endl;
