@@ -42,6 +42,19 @@ std::string BlockasmGenerator::GenerateBlockasm() {
             const int tokensConsumed = std::get<1>(tuple);
             i += tokensConsumed;
         } else if(token.type == TokenType::identifier) {
+            if(token.value == "load") {
+                if(tokens[i + 1].type == TokenType::concat) {
+                    if(tokens[i + 2].type == TokenType::identifier) {
+                        std::string varName = tokens[i + 2].value;
+                        if(tokens[i + 2].value.at(0) != '\'') {
+                            std::cerr << "Non-state variables cannot be loaded" << std::endl;
+                            exit(EXIT_FAILURE);
+                        }
+                        Variable var = Variable(varName, nextAllocatedStateLocation++, Type::loaded);
+                        vars.push_back(var);
+                    }
+                }
+            }
             if(tokens[i + 1].type == TokenType::eq) {
                 if(tokens[i + 2].type == TokenType::eq) {
                     // e.g. newVar == 3
@@ -53,17 +66,27 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     }
                     Type type = std::get<1>(exprTuple);
                     if(varName.at(0) == '\'') {
+                        int location = nextAllocatedStateLocation;
+                        bool newVar = true;
+                        for(const Variable& var : vars) {
+                            if(var.name == varName) {
+                                location = var.location;
+                                newVar = false;
+                            }
+                        }
                         blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00000000" << std::endl;
                         blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation << " 0x00";
-                        blockasm << std::setfill('0') << std::setw(14) << std::hex << nextAllocatedStateLocation << " 0x00000000" << std::endl;
+                        blockasm << std::setfill('0') << std::setw(14) << std::hex << location << " 0x00000000" << std::endl;
                         nextAllocatedLocation++;
                         blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation - 1 << " 0x";
                         blockasm << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x00000000" << std::endl;
-                        Variable var = Variable(varName, nextAllocatedStateLocation, type);
-                        vars.emplace_back(var);
-                        nextAllocatedStateLocation++;
+                        if(newVar) {
+                            auto var = Variable(varName, location, type);
+                            vars.emplace_back(var);
+                            location++;
+                        }
                     } else {
-                        Variable var = Variable(varName, exprLoc, type);
+                        auto var = Variable(varName, exprLoc, type);
                         nextAllocatedLocation++;
                         vars.emplace_back(var);
                         i += 6;

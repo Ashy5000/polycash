@@ -3,6 +3,7 @@
 /digit_to_string
 /int_len
 /int_to_string
+load.'str
 'str == ("Hello, world!")
 length == (!string_len(('str)))
 if(length = 13) {

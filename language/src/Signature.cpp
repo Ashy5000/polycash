@@ -9,7 +9,7 @@
 
 bool Signature::CheckSignature(const std::vector<Type> &types) const {
     for(int i = 0; i < types.size(); i++) {
-        if(expectedTypes[i] != types[i]) {
+        if(expectedTypes[i] != types[i] && types[i] != Type::loaded) {
             return false;
         }
     }
