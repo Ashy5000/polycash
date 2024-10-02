@@ -3,17 +3,18 @@
 /digit_to_string
 /int_len
 /int_to_string
-load.'str
-'str == ("Hello, world!")
-length == (!string_len(('str)))
-if(length = 13) {
-    @io::print("String is 13 characters long.");
-}
-lengthStr == (!int_to_string((length)))
-@io::print(lengthStr);
-i == (5)
-i = (0)
-for(i (0) (10)) {
-    @io::print("Loop!");
-}
+; .main -> uint64
+    load.'str
+    'str == ("Hello, world!")
+    length == (!string_len(('str)))
+    if(length = 13) {
+        @io::print("String is 13 characters long.");
+    }
+    lengthStr == (!int_to_string((length)))
+    @io::print(lengthStr);
+    i == (5)
+    i = (0)
+    for(i (0) (10)) {
+        @io::print("Loop!");
+    }
 

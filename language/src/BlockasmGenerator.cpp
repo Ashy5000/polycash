@@ -41,6 +41,29 @@ std::string BlockasmGenerator::GenerateBlockasm() {
             vars.insert(vars.end(), newVars.begin(), newVars.end());
             const int tokensConsumed = std::get<1>(tuple);
             i += tokensConsumed;
+        } else if(token.type == TokenType::semi) {
+            if(tokens[i + 1].type == TokenType::concat && tokens[i + 3].type == TokenType::sub && tokens[i + 4].type == TokenType::greater) {
+                std::string functionName = tokens[i + 2].value;
+                std::string returnTypeString = tokens[i + 5].value;
+                std::vector<std::string> params;
+                for(int j = i + 1; j < tokens.size(); j++) {
+                    if(tokens[j].type == TokenType::newline) {
+                        break;
+                    }
+                    if(tokens[j].type == TokenType::div) {
+                        params.push_back(tokens[j + 1].value);
+                        j++;
+                    }
+                }
+                std::stringstream metaString;
+                metaString << "; ";
+                metaString << "FN " << functionName << " ";
+                metaString << "RET " << returnTypeString << " ";
+                for(std::string param : params) {
+                    metaString << "PARAM " << param << " ";
+                }
+                blockasm << metaString.str() << std::endl;
+            }
         } else if(token.type == TokenType::identifier) {
             if(token.value == "load") {
                 if(tokens[i + 1].type == TokenType::concat) {

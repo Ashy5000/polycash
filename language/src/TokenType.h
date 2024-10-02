@@ -29,6 +29,7 @@ enum class TokenType {
     excl,
     open_curly,
     close_curly,
+    greater,
     block,
 };
 
