@@ -11,9 +11,11 @@
 #include <tuple>
 #include <utility>
 
+#include "ControlModule.hpp"
 #include "ExpressionBlockasmGenerator.h"
 #include "Linker.h"
 #include "ParamsParser.h"
+#include "RegisteredFunctionInfo.h"
 #include "Signature.h"
 #include "SystemFunctions.h"
 #include "Variable.h"
@@ -34,6 +36,7 @@ BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, int nextAlloca
 std::string BlockasmGenerator::GenerateBlockasm() {
     int nextLabel = 0;
     auto l = Linker({"string.blockasm", "format.blockasm"});
+    auto cm = ControlModule();
     for(int i = 0; i < tokens.size(); i++) {
         if(const Token token = tokens[i]; token.type == TokenType::system_at) {
             std::tuple tuple = GenerateSystemFunctionBlockasm(i, nextAllocatedLocation, vars, l);
@@ -63,6 +66,8 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                     metaString << "PARAM " << param << " ";
                 }
                 blockasm << metaString.str() << std::endl;
+                RegisteredFunctionInfo info = cm.registerFunction();
+                blockasm << "; PRELABEL " << info.preLabelId << std::endl;
             }
         } else if(token.type == TokenType::identifier) {
             if(token.value == "load") {

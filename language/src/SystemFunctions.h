@@ -5,6 +5,7 @@
 #ifndef SYSTEMFUNCTIONS_H
 #define SYSTEMFUNCTIONS_H
 #include <iomanip>
+#include <iterator>
 #include <sstream>
 
 #include "ParamsParser.h"
@@ -27,6 +28,22 @@ const std::vector SYSTEM_FUNCTIONS = {
         },
         "contract",
         "exit"
+    ),
+    SystemFunction(
+        [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
+            if(params[0].type != TokenType::expr) {
+                std::cerr << "Can't return a non-expression" << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            std::tuple exprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(params[0], nextAllocatedLocation, vars, blockasm, l);
+            int exprLoc = std::get<0>(exprTuple);
+            if(exprLoc >= nextAllocatedLocation) {
+                nextAllocatedLocation = exprLoc + 1;
+            }
+            blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x01fff";
+        },
+        "contract",
+        "return"
     ),
     SystemFunction(
             [](const std::vector<Token>& params, int &nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {

@@ -34,4 +34,7 @@ add_executable(plc src/main.cpp
         src/LabelManager.h
         src/Compiler.cpp
         src/Compiler.h
+        src/ControlModule.cpp
+        src/ControlModule.hpp
+        src/RegisteredFunctionInfo.h
 )
