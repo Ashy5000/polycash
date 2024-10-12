@@ -17,17 +17,16 @@ When a given smart contract (Contract A) wishes to call a function of another co
 sequenceDiagram
     Contract A->>Contract B: Sets function ID
     Contract A->>Contract B: Sets parameters
-    Contract A->>Contract B: Sets return value location
     Contract A->>+Contract B: INVOKE
         Note right of Contract B: Executes function
-    Contract B-->>-Contract A: Set return value
+    Contract B-->>-Contract A: Sets return value
         Note right of Contract B: Unsets callinfo
 ```
 
 *Definitions*\
 `func_id_loc`: The state at local location `0x01000` within Contract B's owned state.\
 `param_loc_range`: The set of local locations `0x01001` through `0x01ffe` within Contract B's owned state.
-`return_loc_loc`: The state at local location `0x01fff` within Contract B's owned state.
+`return_loc`: The state at local location `0x01fff` within Contract B's owned state.
 `callinfo`: The set of buffers in state with locations specified in `func_id_loc`, `param_loc_range`, or `return_loc_loc`.
 
 *Sets function ID*\
@@ -36,8 +35,6 @@ When Contract A wishes to select which function to call on Contract B, it must s
 *Sets parameters*\
 Contract A may send arbitrary data to Contract B via a set of buffers, each representing a discrete 'parameter'. These buffers, stored in the PVM's state, must be in the set of local locations that are members of `param_loc_range`. Each buffer has an unlimited size and may be used to pass any data needed from Contract A to Contract B.
 
-*Sets return value location*\
-To receive data from Contract B, Contract A must specify a global location to store the output from the function it chooses to call. This location must be written to state at location `return_loc_loc` within Contract B's owned state.
 
 *INVOKE*\
-In this step, Contract A uses the `Invoke` instruction to call Contract B. Then, Contract B reads the function ID and jumps to the corresponding section of its code. If needed, it can read from the buffers in `param_loc_range` to access the parameters its function was called with. After execution is finished, Contract B writes its output into global state at the location specified in the buffer at `return_loc_loc`. After the operation is completed, it sets the buffers in `callinfo` to the ESWV.
+In this step, Contract A uses the `Invoke` instruction to call Contract B. Then, Contract B reads the function ID and jumps to the corresponding section of its code. If needed, it can read from the buffers in `param_loc_range` to access the parameters its function was called with. After execution is finished, Contract B writes its output into local state at `return_loc`. After the operation is completed, it sets the buffers in `callinfo` to the ESWV.
