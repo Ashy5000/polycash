@@ -16,7 +16,7 @@ class ControlModule {
 
 public:
   RegisteredFunctionInfo registerFunction();
-  std::string compile();
+  std::string compile(int &nextAllocatedLocation);
 };
 
 

@@ -20,7 +20,10 @@ void Compiler::ParseTokens() {
 
 void Compiler::GenerateBlockasm() {
     auto generator = BlockasmGenerator(tokens, 0x00001000, {}, true);
-    blockasm = generator.GenerateBlockasm();
+    auto cm = ControlModule();
+    int nextAllocatedLocation = generator.GetNextAllocatedLocation();
+    std::string controlSegment = cm.compile(nextAllocatedLocation);
+    blockasm = controlSegment + generator.GenerateBlockasm(cm);
 }
 
 void Compiler::Link() {

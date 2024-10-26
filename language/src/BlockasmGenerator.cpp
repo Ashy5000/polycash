@@ -33,10 +33,9 @@ BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, int nextAlloca
 }
 
 
-std::string BlockasmGenerator::GenerateBlockasm() {
+std::string BlockasmGenerator::GenerateBlockasm(ControlModule cm) {
     int nextLabel = 0;
     auto l = Linker({"string.blockasm", "format.blockasm"});
-    auto cm = ControlModule();
     for(int i = 0; i < tokens.size(); i++) {
         if(const Token token = tokens[i]; token.type == TokenType::system_at) {
             std::tuple tuple = GenerateSystemFunctionBlockasm(i, nextAllocatedLocation, vars, l);
@@ -164,7 +163,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
                 blockasm << "JmpCond 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " ";
                 blockasm << "<" << nextLabel << " 0x00000000" << std::endl;
                 BlockasmGenerator subGenerator = BlockasmGenerator(tokens[i + 5].children, nextAllocatedLocation, vars, false);
-                blockasm << subGenerator.GenerateBlockasm();
+                blockasm << subGenerator.GenerateBlockasm(cm);
                 int subGeneratorNextAllocatedLocation = subGenerator.GetNextAllocatedLocation();
                 if(subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
                     nextAllocatedLocation = subGeneratorNextAllocatedLocation + 1;
@@ -219,7 +218,7 @@ std::string BlockasmGenerator::GenerateBlockasm() {
               blockasm << std::setfill('0') << std::setw(8) << std::hex << varLoc << " 0x00000000" << std::endl;
               Token blockToken = tokens[i + 5];
               BlockasmGenerator subGenerator = BlockasmGenerator(blockToken.children, nextAllocatedLocation, vars, false);
-              blockasm << subGenerator.GenerateBlockasm();
+              blockasm << subGenerator.GenerateBlockasm(cm);
               int subGeneratorNextAllocatedLocation = subGenerator.nextAllocatedLocation;
               if(subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
                   nextAllocatedLocation = subGeneratorNextAllocatedLocation + 1;

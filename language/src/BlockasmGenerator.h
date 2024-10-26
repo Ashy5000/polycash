@@ -9,6 +9,7 @@
 #include <tuple>
 #include <vector>
 
+#include "ControlModule.hpp"
 #include "Linker.h"
 #include "Token.h"
 #include "Variable.h"
@@ -16,7 +17,7 @@
 
 class BlockasmGenerator {
 public:
-    std::string GenerateBlockasm();
+    std::string GenerateBlockasm(ControlModule cm);
     std::tuple<std::vector<Variable>, int> GenerateSystemFunctionBlockasm(int i, int &nextAllocatedLocation, std::vector<Variable> vars, Linker l);
     explicit BlockasmGenerator(std::vector<Token> tokens_p, int nextAllocatedLocation_p, std::vector<Variable> vars_p, bool useLinker_p);
     int GetNextAllocatedLocation() const;

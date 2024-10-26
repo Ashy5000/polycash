@@ -7,7 +7,7 @@
 #include <string>
 
 struct RegisteredFunctionInfo {
-  std::string id;
+  int id;
   int preLabelId;
 };
 

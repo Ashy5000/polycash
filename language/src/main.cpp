@@ -14,6 +14,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "plc [in.poly]" << std::endl;
     }
 
+    srand(time(nullptr));
+
     auto c = Compiler();
     std::string blockasm = c.Compile(argv[1]);
     if (std::ofstream targetAsm("out.blockasm"); targetAsm.is_open()) {
