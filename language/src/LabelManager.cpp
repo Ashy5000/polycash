@@ -14,16 +14,57 @@ LabelManager::LabelManager(std::string blockasm) {
             labelPosition++;
             continue;
         }
-        if(line.substr(2, 5) != "LABEL") {
-            labelPosition++;
-            continue;
+        if(line.substr(2, 5) == "LABEL") {
+            std::string labelIdString = line.substr(8);
+            int labelId = stoi(labelIdString);
+            labels[labelId] = labelPosition;
         }
-        std::string labelIdString = line.substr(8);
-        int labelId = stoi(labelIdString);
-        labels[labelId] = labelPosition;
+        if(line.substr(2, 8) == "PRELABEL") {
+            std::string labelIdString = line.substr(11);
+            int labelId = stoi(labelIdString);
+            preLabels[labelId] = labelPosition;
+        }
         labelPosition++;
     }
 }
+
+std::string LabelManager::ReplacePreLabels(std::string blockasm) {
+    std::istringstream iss(blockasm);
+    std::stringstream newBlockasm;
+    for(std::string line; std::getline(iss, line); ) {
+        if(line.substr(0, 3) != "Jmp") {
+            newBlockasm << line << std::endl;
+            continue;
+        }
+        std::istringstream innerIss(line);
+        std::string section;
+        std::stringstream newLine;
+        bool isFirstSection = true;
+        while(innerIss >> section) {
+            if(section.at(0) != '!') {
+                if(isFirstSection) {
+                    newLine << section;
+                    isFirstSection = false;
+                    continue;
+                }
+                newLine << " " << section;
+                continue;
+            }
+            std::string labelIdString = section.substr(1);
+            int labelId = stoi(labelIdString);
+            int labelPos = preLabels[labelId];
+            if(isFirstSection) {
+                newLine << labelPos;
+                isFirstSection = false;
+                continue;
+            }
+            newLine << " " << labelPos;
+        }
+        newBlockasm << newLine.str() << std::endl;
+    }
+    return newBlockasm.str();
+}
+
 
 std::string LabelManager::ReplaceLabels(std::string blockasm) {
     std::istringstream iss(blockasm);

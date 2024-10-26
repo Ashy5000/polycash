@@ -22,7 +22,7 @@ std::string ControlModule::compile(int &nextAllocatedLocation) {
   // Set selector location
   int selectorLocLocation = nextAllocatedLocation++;
   result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x00000000" << std::endl;
-  result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << "0x01000" << std::endl;
+  result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x01000" << std::endl;
   // Get selected function ID
   int selectorLocation = nextAllocatedLocation++;
   result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocation << " 0x00000000" << std::endl;

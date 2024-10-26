@@ -9,9 +9,11 @@
 #include <string>
 
 class LabelManager {
+    std::unordered_map<int, int> preLabels;
     std::unordered_map<int, int> labels;
 public:
     explicit LabelManager(std::string blockasm);
+    std::string ReplacePreLabels(std::string blockasm);
     std::string ReplaceLabels(std::string blockasm);
 };
 

@@ -33,7 +33,7 @@ BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, int nextAlloca
 }
 
 
-std::string BlockasmGenerator::GenerateBlockasm(ControlModule cm) {
+std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
     int nextLabel = 0;
     auto l = Linker({"string.blockasm", "format.blockasm"});
     for(int i = 0; i < tokens.size(); i++) {

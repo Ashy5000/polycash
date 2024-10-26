@@ -22,12 +22,14 @@ void Compiler::GenerateBlockasm() {
     auto generator = BlockasmGenerator(tokens, 0x00001000, {}, true);
     auto cm = ControlModule();
     int nextAllocatedLocation = generator.GetNextAllocatedLocation();
+    std::string generatedBlockasm = generator.GenerateBlockasm(cm);
     std::string controlSegment = cm.compile(nextAllocatedLocation);
-    blockasm = controlSegment + generator.GenerateBlockasm(cm);
+    blockasm = controlSegment + generatedBlockasm;
 }
 
 void Compiler::Link() {
     auto lm = LabelManager(blockasm);
+    blockasm = lm.ReplacePreLabels(blockasm);
     blockasm = lm.ReplaceLabels(blockasm);
 }
 
