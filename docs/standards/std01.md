@@ -24,9 +24,9 @@ sequenceDiagram
 ```
 
 *Definitions*\
-`func_id_loc`: The state at local location `0x01000` within Contract B's owned state.\
-`param_loc_range`: The set of local locations `0x01001` through `0x01ffe` within Contract B's owned state.
-`return_loc`: The state at local location `0x01fff` within Contract B's owned state.
+`func_id_loc`: The state at local location `0x010000` within Contract B's owned state.\
+`param_loc_range`: The set of local locations `0x010010` through `0x01ffe0` within Contract B's owned state, with the only allowed change being `001` incrementing up to a maximum of `ffe`.
+`return_loc`: The state at local location `0x01fff0` within Contract B's owned state.
 `callinfo`: The set of buffers in state with locations specified in `func_id_loc`, `param_loc_range`, or `return_loc_loc`.
 
 *Sets function ID*\
