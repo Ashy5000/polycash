@@ -40,7 +40,7 @@ const std::vector SYSTEM_FUNCTIONS = {
             if(exprLoc >= nextAllocatedLocation) {
                 nextAllocatedLocation = exprLoc + 1;
             }
-            blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x01fff";
+            blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x01fff0";
         },
         "contract",
         "return"

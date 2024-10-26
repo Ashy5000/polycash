@@ -22,7 +22,7 @@ std::string ControlModule::compile(int &nextAllocatedLocation) {
   // Set selector location
   int selectorLocLocation = nextAllocatedLocation++;
   result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x00000000" << std::endl;
-  result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x01000" << std::endl;
+  result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x010000 0x00000000" << std::endl;
   // Get selected function ID
   int selectorLocation = nextAllocatedLocation++;
   result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocation << " 0x00000000" << std::endl;
@@ -36,10 +36,10 @@ std::string ControlModule::compile(int &nextAllocatedLocation) {
   result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << idLocation << " 0x00000000" << std::endl;
   for(RegisteredFunctionInfo info : registeredFunctionInfos) {
     // Set current ID
-    result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << idLocation << "0x";
+    result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << idLocation << " 0x";
     result << std::setfill('0') << std::setw(8) << std::hex << info.id << " 0x00000000" << std::endl;
     // Compare
-    result << "Eq 0x" << std::setfill('0') << std::setw(8) << std::hex << idLocation << "0x";
+    result << "Eq 0x" << std::setfill('0') << std::setw(8) << std::hex << idLocation << " 0x";
     result << std::setfill('0') << std::setw(8) << std::hex << selectorLocation << " 0x";
     result << std::setfill('0') << std::setw(8) << std::hex << cmpResLocation << " 0x00000000" << std::endl;
     // Jump

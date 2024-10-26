@@ -300,16 +300,20 @@ pub fn vm_execute_instruction(
                 next_pc: pc + 1,
             }
         },
-        "Eq" => {
-            execute_math_operation(
-                Eq {},
-                buffers,
-                line.args[0].clone(),
-                line.args[1].clone(),
-                line.args[2].clone(),
-                line.args[3].clone(),
-            );
-            *gas_used += 0.5;
+        "Eq" => unsafe {
+            if !vm_check_buffer_initialization(buffers, line.args[0].clone()) ||
+                !vm_check_buffer_initialization(buffers, line.args[1].clone()) ||
+                !vm_check_buffer_initialization(buffers, line.args[2].clone()) {
+                vm_throw_local_error(buffers, line.args[3].clone());
+            }
+            let x = vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[3].clone());
+            let y = vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[3].clone());
+            let mut res = vm_access_buffer(buffers, line.args[2].clone(), line.args[3].clone());
+            if x == y {
+                (*res).load_u64(1);
+            } else {
+                (*res).load_u64(0);
+            }
             VmInstructionResult {
                 exit_details: None,
                 next_pc: pc + 1,

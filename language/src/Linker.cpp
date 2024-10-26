@@ -113,23 +113,9 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
 }
 
 void Linker::SkipLibs(std::stringstream &blockasm) {
-    int jmpTo = -1;
-    int i = 0;
-    std::istringstream iss(blockasm.str());
-    for(std::string line; std::getline(iss, line); ) {
-        if(line == ";^^^^BEGIN_SOURCE^^^^") {
-            jmpTo = i + 2;
-            break;
-        }
-        i++;
-    }
-    if(jmpTo == -1) {
-        std::cerr << "Could not skip libraries; no ^^^^BEGIN_SOURCE^^^^ declaration found." << std::endl;
-        exit(EXIT_FAILURE);
-    }
     const std::string &temp = blockasm.str();
     blockasm = {};
-    blockasm << "Jmp " << jmpTo << std::endl;
+    blockasm << "Jmp %" << std::endl;
     blockasm << temp;
 }
 

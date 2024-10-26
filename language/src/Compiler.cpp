@@ -31,6 +31,7 @@ void Compiler::Link() {
     auto lm = LabelManager(blockasm);
     blockasm = lm.ReplacePreLabels(blockasm);
     blockasm = lm.ReplaceLabels(blockasm);
+    blockasm = lm.SkipLibs(blockasm);
 }
 
 std::string Compiler::Compile(std::string filename_p) {

@@ -15,6 +15,10 @@ public:
     explicit LabelManager(std::string blockasm);
     std::string ReplacePreLabels(std::string blockasm);
     std::string ReplaceLabels(std::string blockasm);
+    std::string SkipLibs(std::string blockasm);
+private:
+    void DetectPreLabels(const std::string& blockasm);
+    void DetectLabels(const std::string& blockasm);
 };
 
 
