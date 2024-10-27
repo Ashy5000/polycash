@@ -61,9 +61,21 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
                             std::stringstream adjustedLine;
                             while(ss >> temp) {
                                 if(temp.substr(0, 2) != "0x" && temp.substr(0, 3) != "Jmp") {
-                                    int relativeLine = stoi(temp);
+                                    std::string tempClean;
+                                    bool cleaned = false;
+                                    if(temp.at(0) == '&') {
+                                        tempClean = temp.substr(1);
+                                        cleaned = true;
+                                    } else {
+                                        tempClean = temp;
+                                    }
+                                    int relativeLine = stoi(tempClean);
                                     int absoluteLine = relativeLine + offset - 1;
-                                    adjustedLine << absoluteLine;
+                                    if(cleaned) {
+                                        adjustedLine << "&" << absoluteLine;
+                                    } else {
+                                        adjustedLine << absoluteLine;
+                                    }
                                 } else {
                                     adjustedLine << temp;
                                 }
@@ -84,7 +96,7 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
                                 std::cerr << "Function not found!" << std::endl;
                                 exit(EXIT_FAILURE);
                             }
-                            source += "Call ";
+                            source += "Call &";
                             source += std::to_string(offset);
                             source += "\n";
                         } else {
@@ -149,7 +161,7 @@ std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std:
                 blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << fromLoc << " 0x";
                 blockasm << std::setfill('0') << std::setw(8) << std::hex << toLoc << " 0x00000000" << std::endl;
             }
-            blockasm << "Call " << std::dec << func.offset << std::endl;
+            blockasm << "Call &" << std::dec << func.offset << std::endl;
             return std::make_tuple(blockasm.str(), t);
         }
     }

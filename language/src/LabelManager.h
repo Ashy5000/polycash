@@ -16,6 +16,7 @@ public:
     std::string ReplacePreLabels(std::string blockasm);
     std::string ReplaceLabels(std::string blockasm);
     std::string SkipLibs(std::string blockasm);
+    std::string OffsetCalls(std::string blockasm, int offset);
 private:
     void DetectPreLabels(const std::string& blockasm);
     void DetectLabels(const std::string& blockasm);

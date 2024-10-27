@@ -153,10 +153,11 @@ std::string LabelManager::SkipLibs(std::string blockasm) {
                 continue;
             }
             int labelPos = -1;
-            int i;
-            for(std::string innerLine; std::getline(iss, innerLine); ) {
+            int i = 0;
+            std::istringstream innerIss(blockasm);
+            for(std::string innerLine; std::getline(innerIss, innerLine); ) {
                 if(innerLine.substr(0, 21) == ";^^^^BEGIN_SOURCE^^^^") {
-                    labelPos = i;
+                    labelPos = i + 1;
                     break;
                 }
                 i++;
@@ -170,6 +171,41 @@ std::string LabelManager::SkipLibs(std::string blockasm) {
                 continue;
             }
             newLine << " " << labelPos;
+        }
+        newBlockasm << newLine.str() << std::endl;
+    }
+    return newBlockasm.str();
+}
+
+std::string LabelManager::OffsetCalls(std::string blockasm, int offset) {
+    // Labels are not already detected.
+    // Detect them now:
+    DetectLabels(blockasm);
+    std::istringstream iss(blockasm);
+    std::stringstream newBlockasm;
+    for(std::string line; std::getline(iss, line); ) {
+        if(line.substr(0, 4) != "Call" && line.substr(0, 3) != "Jmp") {
+            newBlockasm << line << std::endl;
+            continue;
+        }
+        std::istringstream innerIss(line);
+        std::string section;
+        std::stringstream newLine;
+        bool isFirstSection = true;
+        while(innerIss >> section) {
+            if(section.at(0) != '&') {
+                if(isFirstSection) {
+                    newLine << section;
+                    isFirstSection = false;
+                    continue;
+                }
+                newLine << " " << section;
+                continue;
+            }
+            std::string existingLocationString = section.substr(1);
+            int existingLocation = stoi(existingLocationString);
+            int newLocation = existingLocation + offset;
+            newLine << " " << newLocation;
         }
         newBlockasm << newLine.str() << std::endl;
     }

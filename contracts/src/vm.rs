@@ -99,15 +99,21 @@ pub fn vm_execute_instruction(
     sender: &Vec<u8>
 ) -> VmInstructionResult {
     match line.command.as_str() {
+        "NEXT" => {
+            VmInstructionResult {
+                exit_details: None,
+                next_pc: pc + 1,
+            }
+        }
         "Exit" => {
             *gas_used += 1.0;
-            return VmInstructionResult {
+            VmInstructionResult {
                 exit_details: Some(VmExitDetails {
                     exit_code: line.args[0].parse::<i64>().unwrap(),
                     gas_used: *gas_used,
                 }),
                 next_pc: 0,
-            };
+            }
         }
         "ExitBfr" => {
             *gas_used += 1.0;

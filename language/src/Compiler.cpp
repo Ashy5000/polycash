@@ -1,4 +1,7 @@
 #include "Compiler.h"
+
+#include <algorithm>
+
 #include "Parser.h"
 #include "BlockasmGenerator.h"
 #include "LabelManager.h"
@@ -24,14 +27,17 @@ void Compiler::GenerateBlockasm() {
     int nextAllocatedLocation = generator.GetNextAllocatedLocation();
     std::string generatedBlockasm = generator.GenerateBlockasm(cm);
     std::string controlSegment = cm.compile(nextAllocatedLocation);
+    controlSegmentSize = std::count( controlSegment.begin(), controlSegment.end(), '\n' ) ;
+    controlSegmentSize += !controlSegment.empty() && controlSegment.back() != '\n';
     blockasm = controlSegment + generatedBlockasm;
 }
 
 void Compiler::Link() {
     auto lm = LabelManager(blockasm);
+    blockasm = lm.SkipLibs(blockasm);
     blockasm = lm.ReplacePreLabels(blockasm);
     blockasm = lm.ReplaceLabels(blockasm);
-    blockasm = lm.SkipLibs(blockasm);
+    blockasm = lm.OffsetCalls(blockasm, controlSegmentSize);
 }
 
 std::string Compiler::Compile(std::string filename_p) {

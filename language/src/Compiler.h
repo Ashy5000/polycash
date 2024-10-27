@@ -9,6 +9,7 @@ class Compiler {
     std::string contents;
     std::vector<Token> tokens;
     std::string blockasm;
+    int controlSegmentSize;
 public:
     void LoadContents();
     void ParseTokens();

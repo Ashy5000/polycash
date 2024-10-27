@@ -31,10 +31,16 @@ impl SyntaxTree {
         for asm_line in asm_lines_iter {
             let parts_iter = asm_line.split(" ");
             let mut parts = Vec::new();
+            let mut checked_comment = false;
             for mut part in parts_iter {
-                if part == ";" {
+                if !checked_comment && part.len() > 0 && part.chars().next().unwrap() == ';' {
+                    let mut line = build_line();
+                    line.command = "NEXT".parse().unwrap();
+                    line.args = vec![];
+                    self.lines.push(line);
                     break
                 }
+                checked_comment = true;
                 let part_chars = &part.chars();
                 let first_two_chars: String = part_chars.to_owned().take(2).collect();
                 let part_string;
