@@ -5,6 +5,7 @@
 #ifndef CONTROLMODULE_HPP
 #define CONTROLMODULE_HPP
 
+#include <random>
 #include <string>
 #include <vector>
 
@@ -16,9 +17,9 @@ class ControlModule {
   int selectorLocLocation = -1;
 
 public:
-  RegisteredFunctionInfo registerFunction();
+  RegisteredFunctionInfo registerFunction(std::default_random_engine rnd);
   std::string compile(int &nextAllocatedLocation);
-  std::string close(int &nextAllocatedLocation);
+  std::string close(int &nextAllocatedLocation) const;
 };
 
 

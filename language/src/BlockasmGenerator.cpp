@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <tuple>
 #include <utility>
@@ -14,18 +15,17 @@
 #include "ControlModule.hpp"
 #include "ExpressionBlockasmGenerator.h"
 #include "Linker.h"
-#include "ParamsParser.h"
 #include "RegisteredFunctionInfo.h"
-#include "Signature.h"
 #include "SystemFunctions.h"
 #include "Variable.h"
 
-BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, int nextAllocatedLocation_p, std::vector<Variable> vars_p, bool useLinker_p) {
+BlockasmGenerator::BlockasmGenerator(std::vector<Token> tokens_p, const int nextAllocatedLocation_p, std::vector<Variable> vars_p, const bool useLinker_p, const std::default_random_engine rnd_p) {
     tokens = std::move(tokens_p);
     nextAllocatedLocation = nextAllocatedLocation_p;
     nextAllocatedStateLocation = 0;
     blockasm = {};
     useLinker = useLinker_p;
+    rnd = rnd_p;
     if(useLinker) {
         blockasm << ";^^^^BEGIN_SOURCE^^^^" << std::endl;
     }
@@ -61,12 +61,12 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
                 metaString << "; ";
                 metaString << "FN " << functionName << " ";
                 metaString << "RET " << returnTypeString << " ";
-                for(std::string param : params) {
+                for(const std::string& param : params) {
                     metaString << "PARAM " << param << " ";
                 }
                 blockasm << metaString.str() << std::endl;
-                RegisteredFunctionInfo info = cm.registerFunction();
-                blockasm << "; PRELABEL " << info.preLabelId << std::endl;
+                auto [id, preLabelId] = cm.registerFunction(rnd);
+                blockasm << "; PRELABEL " << preLabelId << std::endl;
             }
         } else if(token.type == TokenType::identifier) {
             if(token.value == "load") {
@@ -77,7 +77,7 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
                             std::cerr << "Non-state variables cannot be loaded" << std::endl;
                             exit(EXIT_FAILURE);
                         }
-                        Variable var = Variable(varName, nextAllocatedStateLocation++, Type::loaded);
+                        auto var = Variable(varName, nextAllocatedStateLocation++, Type::loaded);
                         vars.push_back(var);
                     }
                 }
@@ -110,7 +110,7 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
                         if(newVar) {
                             auto var = Variable(varName, location, type);
                             vars.emplace_back(var);
-                            location++;
+                            nextAllocatedStateLocation++;
                         }
                     } else {
                         auto var = Variable(varName, exprLoc, type);
@@ -152,8 +152,7 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
                 if(exprLoc >= nextAllocatedLocation) {
                     nextAllocatedLocation = exprLoc + 1;
                 }
-                Type type = std::get<1>(exprTuple);
-                if(type != Type::boolean) {
+                if(Type type = std::get<1>(exprTuple); type != Type::boolean) {
                     std::cerr << "Expected bool in if statement";
                     exit(EXIT_FAILURE);
                 }
@@ -162,10 +161,9 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
                 blockasm << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x00000000" << std::endl;
                 blockasm << "JmpCond 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " ";
                 blockasm << "<" << nextLabel << " 0x00000000" << std::endl;
-                BlockasmGenerator subGenerator = BlockasmGenerator(tokens[i + 5].children, nextAllocatedLocation, vars, false);
+                auto subGenerator = BlockasmGenerator(tokens[i + 5].children, nextAllocatedLocation, vars, false, rnd);
                 blockasm << subGenerator.GenerateBlockasm(cm);
-                int subGeneratorNextAllocatedLocation = subGenerator.GetNextAllocatedLocation();
-                if(subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
+                if(int subGeneratorNextAllocatedLocation = subGenerator.GetNextAllocatedLocation(); subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
                     nextAllocatedLocation = subGeneratorNextAllocatedLocation + 1;
                 }
                 blockasm << "; LABEL " << nextLabel++ << std::endl;
@@ -174,7 +172,7 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
               // for(IDENTIFIER (EXPR) (EXPR)) {BLOCK}
               std::string varName = tokens[i + 2].children[0].value; // i: IDENTIFIER
               int varLoc = -1;
-              for(Variable var : vars) {
+              for(const Variable& var : vars) {
                  if(var.name == varName) {
                      varLoc = var.location;
                      break;
@@ -186,12 +184,10 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
               }
               Token beginExprToken = tokens[i + 2].children[2]; // 0: EXPR
               std::tuple beginExprTuple = ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(beginExprToken, nextAllocatedLocation, vars, blockasm, l);
-              int beginExprLoc = std::get<0>(beginExprTuple);
-              if(beginExprLoc >= nextAllocatedLocation) {
+              if(int beginExprLoc = std::get<0>(beginExprTuple); beginExprLoc >= nextAllocatedLocation) {
                   nextAllocatedLocation = beginExprLoc + 1;
               }
-              Type beginExprType = std::get<1>(beginExprTuple);
-              if(beginExprType != Type::uint64) {
+              if(Type beginExprType = std::get<1>(beginExprTuple); beginExprType != Type::uint64) {
                   std::cerr << "Begin expression of for loop has incorrect type" << std::endl;
                   exit(EXIT_FAILURE);
               }
@@ -201,8 +197,7 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
               if(endExprLoc >= nextAllocatedLocation) {
                   nextAllocatedLocation = endExprLoc + 1;
               }
-              Type endExprType = std::get<1>(endExprTuple);
-              if(endExprType != Type::uint64) {
+              if(Type endExprType = std::get<1>(endExprTuple); endExprType != Type::uint64) {
                 std::cerr << "End expression of for loop has incorrect type" << std::endl;
                 exit(EXIT_FAILURE);
               }
@@ -217,10 +212,9 @@ std::string BlockasmGenerator::GenerateBlockasm(ControlModule &cm) {
               blockasm << std::setfill('0') << std::setw(8) << std::hex << oneLoc << " 0x";
               blockasm << std::setfill('0') << std::setw(8) << std::hex << varLoc << " 0x00000000" << std::endl;
               Token blockToken = tokens[i + 5];
-              BlockasmGenerator subGenerator = BlockasmGenerator(blockToken.children, nextAllocatedLocation, vars, false);
+              auto subGenerator = BlockasmGenerator(blockToken.children, nextAllocatedLocation, vars, false, rnd);
               blockasm << subGenerator.GenerateBlockasm(cm);
-              int subGeneratorNextAllocatedLocation = subGenerator.nextAllocatedLocation;
-              if(subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
+              if(int subGeneratorNextAllocatedLocation = subGenerator.nextAllocatedLocation; subGeneratorNextAllocatedLocation > nextAllocatedLocation) {
                   nextAllocatedLocation = subGeneratorNextAllocatedLocation + 1;
               }
               blockasm << "Eq 0x" << std::setfill('0') << std::setw(8) << std::hex << varLoc << " 0x";

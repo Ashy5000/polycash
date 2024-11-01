@@ -70,21 +70,20 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
                 blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << locationLoc << " 0x00000000" << std::endl;
                 blockasm << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << locationLoc << " 0x00";
                 blockasm << std::setfill('0') << std::setw(14) << std::hex << location << " 0x00000000" << std::endl;
-                int resultLoc = nextAllocatedLocation++;
+                int resultLoc = nextAllocatedLocation;
                 blockasm << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << resultLoc << " 0x00000000" << std::endl;
                 blockasm << "GetFromState 0x" << std::setfill('0') << std::setw(8) << std::hex << locationLoc << " 0x";
                 blockasm << std::setfill('0') << std::setw(8) << std::hex << resultLoc << " 0x00000000" << std::endl;
                 return std::make_tuple(resultLoc, type);
-            } else {
-                auto referencedVar = Variable("", 0, Type::type_placeholder);
-                for (const Variable &var: vars) {
-                    if (var.name == expression.children[0].value) {
-                        referencedVar = var;
-                        break;
-                    }
-                }
-                return std::make_tuple(referencedVar.location, referencedVar.type);
             }
+            auto referencedVar = Variable("", 0, Type::type_placeholder);
+            for (const Variable &var: vars) {
+                if (var.name == expression.children[0].value) {
+                    referencedVar = var;
+                    break;
+                }
+            }
+            return std::make_tuple(referencedVar.location, referencedVar.type);
         }
         if(expression.children[0].type == TokenType::expr) {
             std::tuple exprTuple = GenerateBlockasmFromExpression(expression.children[0], nextAllocatedLocation, vars, blockasm, l);
@@ -128,7 +127,7 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
         Type t = std::get<1>(functionCallTuple);
         return std::make_tuple(0x00000001, t);
     }
-    OperatorType type = OperatorType::type_placeholder;
+    auto type = OperatorType::type_placeholder;
     int operatorPos = 0;
     for(;operatorPos < expression.children.size(); operatorPos++) {
         Token t = expression.children[operatorPos];
@@ -139,9 +138,9 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
     }
     std::vector preOperatorTokens(expression.children.begin(), expression.children.begin() + operatorPos);
     std::vector postOperatorTokens(expression.children.begin() + operatorPos + 1, expression.children.end());
-    Token preOperatorExpr = Token({TokenType::expr, {}});
+    auto preOperatorExpr = Token({TokenType::expr, {}});
     preOperatorExpr.children = preOperatorTokens;
-    Token postOperatorExpr = Token({TokenType::expr, {}});
+    auto postOperatorExpr = Token({TokenType::expr, {}});
     postOperatorExpr.children = postOperatorTokens;
     std::tuple exprATuple = GenerateBlockasmFromExpression(preOperatorExpr, nextAllocatedLocation, vars, blockasm, l);
     int exprALoc = std::get<0>(exprATuple);

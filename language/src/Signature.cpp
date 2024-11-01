@@ -16,7 +16,7 @@ bool Signature::CheckSignature(const std::vector<Type> &types) const {
     return true;
 }
 
-Signature::Signature(std::vector<Type> expectedTypes_p, Type returnType_p) {
+Signature::Signature(std::vector<Type> expectedTypes_p, const Type returnType_p) {
     expectedTypes = std::move(expectedTypes_p);
     returnType = returnType_p;
 }

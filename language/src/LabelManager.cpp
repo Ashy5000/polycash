@@ -3,12 +3,11 @@
 //
 
 #include <sstream>
-#include <utility>
 #include "LabelManager.h"
 
 #include <iostream>
 
-LabelManager::LabelManager(std::string blockasm) {
+LabelManager::LabelManager(const std::string &blockasm) {
     labels = {};
     preLabels = {};
     // Pre-labels can be detected immediately.
@@ -51,7 +50,7 @@ void LabelManager::DetectLabels(const std::string& blockasm) {
 }
 
 
-std::string LabelManager::ReplacePreLabels(std::string blockasm) {
+std::string LabelManager::ReplacePreLabels(const std::string& blockasm) {
     // Pre-labels are already detected
     std::istringstream iss(blockasm);
     std::stringstream newBlockasm;
@@ -90,7 +89,7 @@ std::string LabelManager::ReplacePreLabels(std::string blockasm) {
 }
 
 
-std::string LabelManager::ReplaceLabels(std::string blockasm) {
+std::string LabelManager::ReplaceLabels(const std::string& blockasm) {
     // Labels are not already detected.
     // Detect them now:
     DetectLabels(blockasm);
@@ -130,7 +129,7 @@ std::string LabelManager::ReplaceLabels(std::string blockasm) {
     return newBlockasm.str();
 }
 
-std::string LabelManager::SkipLibs(std::string blockasm) {
+std::string LabelManager::SkipLibs(const std::string& blockasm) {
     std::istringstream iss(blockasm);
     std::stringstream newBlockasm;
     for(std::string line; std::getline(iss, line); ) {
@@ -154,8 +153,8 @@ std::string LabelManager::SkipLibs(std::string blockasm) {
             }
             int labelPos = -1;
             int i = 0;
-            std::istringstream innerIss(blockasm);
-            for(std::string innerLine; std::getline(innerIss, innerLine); ) {
+            std::istringstream sourceDetectionIss(blockasm);
+            for(std::string innerLine; std::getline(sourceDetectionIss, innerLine); ) {
                 if(innerLine.substr(0, 21) == ";^^^^BEGIN_SOURCE^^^^") {
                     labelPos = i + 1;
                     break;
@@ -177,7 +176,7 @@ std::string LabelManager::SkipLibs(std::string blockasm) {
     return newBlockasm.str();
 }
 
-std::string LabelManager::OffsetCalls(std::string blockasm, int offset) {
+std::string LabelManager::OffsetCalls(const std::string& blockasm, int offset) {
     // Labels are not already detected.
     // Detect them now:
     DetectLabels(blockasm);

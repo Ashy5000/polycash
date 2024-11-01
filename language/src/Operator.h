@@ -13,7 +13,7 @@ public:
     OperatorType type;
 };
 
-std::string OperatorToString(Operator o) {
+inline std::string OperatorToString(const Operator o) {
     switch(o.type) {
         case OperatorType::type_placeholder:
             return "";
@@ -35,18 +35,14 @@ std::string OperatorToString(Operator o) {
     return "";
 }
 
-Type OperatorToType(Operator o) {
+inline Type OperatorToType(const Operator o) {
     switch(o.type) {
         case OperatorType::type_placeholder:
             return Type::type_placeholder;
         case OperatorType::add:
-            return Type::uint64;
         case OperatorType::sub:
-            return Type::uint64;
         case OperatorType::mul:
-            return Type::uint64;
         case OperatorType::div:
-            return Type::uint64;
         case OperatorType::exp:
             return Type::uint64;
         case OperatorType::concat:

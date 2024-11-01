@@ -15,7 +15,7 @@ Linker::Linker(const std::vector<std::string> &entries) {
     libs = {};
     functionsInjected = {};
     for(const auto &entry : entries) {
-        BlockasmLib lib = BlockasmLib();
+        auto lib = BlockasmLib();
         lib.sourceFile = entry;
         lib.LoadSource();
         libs.emplace_back(lib);
@@ -29,13 +29,12 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
         }
     }
     int offset = -1;
-    for(const BlockasmLib& lib : libs) {
-        for(int i = 0; i < lib.functions.size(); i++) {
-            Function func = lib.functions[i];
+    for(const auto&[sourceFile, dependencies, functions, source] : libs) {
+        for(const auto& func : functions) {
             if(func.name == name) {
                 offset = 2;
-                std::string source;
-                std::istringstream iss(lib.source);
+                std::string result;
+                std::istringstream iss(result);
                 int j = 0;
                 std::stringstream before;
                 std::stringstream after;
@@ -81,26 +80,26 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
                                 }
                                 adjustedLine << " ";
                             }
-                            source += adjustedLine.str() + "\n";
+                            result += adjustedLine.str() + "\n";
                         } else if(line.at(0) == '%') {
-                            std::string name = line.substr(1);
-                            InjectIfNotPresent(name, blockasm);
-                            int offset = -1;
-                            for(const InjectedFunction& func : functionsInjected) {
-                                if(func.name == name) {
-                                    offset = func.offset;
+                            std::string functionName = line.substr(1);
+                            InjectIfNotPresent(functionName, blockasm);
+                            int functionOffset = -1;
+                            for(const InjectedFunction& injected_function : functionsInjected) {
+                                if(injected_function.name == functionName) {
+                                    functionOffset = injected_function.offset;
                                     break;
                                 }
                             }
-                            if(offset == -1) {
+                            if(functionOffset == -1) {
                                 std::cerr << "Function not found!" << std::endl;
                                 exit(EXIT_FAILURE);
                             }
-                            source += "Call &";
-                            source += std::to_string(offset);
-                            source += "\n";
+                            result += "Call &";
+                            result += std::to_string(functionOffset);
+                            result += "\n";
                         } else {
-                            source += line + "\n";
+                            result += line + "\n";
                         }
                         if(line.substr(0, 3) == "Ret") {
                             break;
@@ -110,7 +109,7 @@ void Linker::InjectIfNotPresent(const std::string& name, std::stringstream &bloc
                 }
                 blockasm = std::stringstream();
                 blockasm << before.str();
-                blockasm << source;
+                blockasm << result;
                 std::string blockasmStr = blockasm.str();
                 blockasm << after.str();
             }
@@ -131,16 +130,16 @@ void Linker::SkipLibs(std::stringstream &blockasm) {
     blockasm << temp;
 }
 
-std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, std::vector<int> paramLocs, std::vector<Variable>& vars) {
+std::tuple<std::string, Type> Linker::CallFunction(const std::string& name, const std::vector<int> &paramLocs, std::vector<Variable>& vars) {
     Type t;
     for(const InjectedFunction& func : functionsInjected) {
         if(func.name == name) {
             std::stringstream blockasm;
             for(int i = 0; i < paramLocs.size(); i++) {
-                int fromLoc = paramLocs[i];
+                const int fromLoc = paramLocs[i];
                 int toLoc = 0;
-                for(const BlockasmLib& lib : libs) {
-                    for(Function libFunc : lib.functions) {
+                for(const auto&[sourceFile, dependencies, functions, source] : libs) {
+                    for(Function libFunc : functions) {
                         if(libFunc.name == func.name) {
                             toLoc = libFunc.sig.locations[i];
                             t = libFunc.sig.returnType;

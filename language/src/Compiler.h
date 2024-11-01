@@ -2,6 +2,8 @@
 #define COMPILER_H
 #include <string>
 #include <vector>
+#include <bits/random.h>
+
 #include "Token.h"
 
 class Compiler {
@@ -9,13 +11,13 @@ class Compiler {
     std::string contents;
     std::vector<Token> tokens;
     std::string blockasm;
-    int controlSegmentSize;
+    int controlSegmentSize = 0;
 public:
     void LoadContents();
     void ParseTokens();
-    void GenerateBlockasm();
+    void GenerateBlockasm(std::default_random_engine rnd);
     void Link();
-    std::string Compile(std::string filename);
+    std::string Compile(const std::string &filename_p, std::default_random_engine rnd);
 };
 
 #endif

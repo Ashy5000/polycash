@@ -14,7 +14,7 @@ class Linker {
 public:
     std::vector<BlockasmLib> libs;
     void InjectIfNotPresent(const std::string& name, std::stringstream &blockasm);
-    [[nodiscard]] std::tuple<std::string, Type> CallFunction(const std::string &name, std::vector<int> paramLocs, std::vector<Variable>& vars);
+    [[nodiscard]] std::tuple<std::string, Type> CallFunction(const std::string &name, const std::vector<int> &paramLocs, std::vector<Variable>& vars);
 
     static void SkipLibs(std::stringstream &blockasm);
 

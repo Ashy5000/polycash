@@ -18,7 +18,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
         const char c = input[i];
         if(c == '"' && activeToken.type == TokenType::type_placeholder || activeToken.type == TokenType::string_lit) {
             inString = !inString;
-            Token t = Token(TokenType::string_lit, str);
+            auto t = Token(TokenType::string_lit, str);
             str.clear();
             if(!inString) {
                 tokens.push_back(t);
@@ -121,8 +121,8 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
             }
         }
         if(!activeToken.value.empty()) {
-            std::string str(activeToken.value.begin(), activeToken.value.end());
-            tokens.emplace_back(activeToken.type, str);
+            std::string innerStr(activeToken.value.begin(), activeToken.value.end());
+            tokens.emplace_back(activeToken.type, innerStr);
             activeToken.value.clear();
         }
         if(c == '@') {

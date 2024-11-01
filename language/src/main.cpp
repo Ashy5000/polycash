@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <bits/random.h>
 
 #include "Compiler.h"
 
@@ -14,10 +15,11 @@ int main(int argc, char* argv[]) {
         std::cerr << "plc [in.poly]" << std::endl;
     }
 
-    srand(time(nullptr));
+    std::random_device random_device;
+    std::default_random_engine rnd(random_device());
 
     auto c = Compiler();
-    std::string blockasm = c.Compile(argv[1]);
+    std::string blockasm = c.Compile(argv[1], rnd);
     if (std::ofstream targetAsm("out.blockasm"); targetAsm.is_open()) {
         targetAsm << blockasm << std::endl;
         targetAsm.close();

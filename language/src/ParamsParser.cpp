@@ -37,7 +37,7 @@ std::tuple<std::vector<int>, Signature> ParamsParser::ParseParams(
     int &nextAllocatedLocation, std::vector<Variable> &vars, std::stringstream &blockasm, Linker &l) {
     for(const Signature& sig : signatures) {
         std::tuple parseRes = ParseParamsWithSignature(nextAllocatedLocation, vars, sig, blockasm, l);
-        if(bool sigSucceeded = std::get<1>(parseRes); !sigSucceeded) {
+        if(const bool sigSucceeded = std::get<1>(parseRes); !sigSucceeded) {
             continue;
         }
         std::vector locations = std::get<0>(parseRes);

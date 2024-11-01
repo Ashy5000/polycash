@@ -29,8 +29,7 @@ void BlockasmLib::LoadSource() {
                     name = segment.substr(1);
                 }
                 if(j == 2) {
-                    std::string returnTypeStr = segment.substr(2);
-                    if(returnTypeStr == "string") {
+                    if(std::string returnTypeStr = segment.substr(2); returnTypeStr == "string") {
                         sig.returnType = Type::string;
                     } else if(returnTypeStr == "uint64") {
                         sig.returnType = Type::uint64;
@@ -48,8 +47,7 @@ void BlockasmLib::LoadSource() {
                     int paramLoc;
                     for(std::string subSegment; std::getline(innerInnerIss, subSegment, '@'); ) {
                         if(k == 0) {
-                            std::string paramTypeStr = subSegment.substr(1);
-                            if(paramTypeStr == "string") {
+                            if(std::string paramTypeStr = subSegment.substr(1); paramTypeStr == "string") {
                                 paramType = Type::string;
                             } else if(paramTypeStr == "uint64") {
                                 paramType = Type::uint64;
@@ -59,7 +57,7 @@ void BlockasmLib::LoadSource() {
                             }
                         } else if(k == 1) {
                             std::string paramLocStr = subSegment.substr(2);
-                            paramLoc = atoi(paramLocStr.c_str());
+                            paramLoc = std::stoi(paramLocStr);
                         }
                         k++;
                     }
@@ -68,7 +66,7 @@ void BlockasmLib::LoadSource() {
                 }
                 j++;
             }
-            Function f = Function(i + 1, name, sig);
+            auto f = Function(i + 1, name, sig);
             functions.emplace_back(f);
         }
         i++;

@@ -4,6 +4,7 @@
 
 #ifndef BLOCKASMGENERATOR_H
 #define BLOCKASMGENERATOR_H
+#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -19,7 +20,7 @@ class BlockasmGenerator {
 public:
     std::string GenerateBlockasm(ControlModule &cm);
     std::tuple<std::vector<Variable>, int> GenerateSystemFunctionBlockasm(int i, int &nextAllocatedLocation, std::vector<Variable> vars, Linker l);
-    explicit BlockasmGenerator(std::vector<Token> tokens_p, int nextAllocatedLocation_p, std::vector<Variable> vars_p, bool useLinker_p);
+    explicit BlockasmGenerator(std::vector<Token> tokens_p, int nextAllocatedLocation_p, std::vector<Variable> vars_p, bool useLinker_p, std::default_random_engine rnd_p);
     int GetNextAllocatedLocation() const;
 private:
     std::stringstream blockasm;
@@ -28,6 +29,7 @@ private:
     int nextAllocatedLocation;
     int nextAllocatedStateLocation;
     bool useLinker;
+    std::default_random_engine rnd;
 };
 
 

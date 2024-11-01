@@ -21,15 +21,15 @@ void Compiler::ParseTokens() {
     tokens = Parser::parse_tokens(contents);
 }
 
-void Compiler::GenerateBlockasm() {
-    auto generator = BlockasmGenerator(tokens, 0x00001000, {}, true);
+void Compiler::GenerateBlockasm(const std::default_random_engine rnd) {
+    auto generator = BlockasmGenerator(tokens, 0x00001000, {}, true, rnd);
     auto cm = ControlModule();
-    std::string generatedBlockasm = generator.GenerateBlockasm(cm);
+    const std::string generatedBlockasm = generator.GenerateBlockasm(cm);
     int nextAllocatedLocation = generator.GetNextAllocatedLocation();
     std::string controlSegment = cm.compile(nextAllocatedLocation);
-    controlSegmentSize = std::count( controlSegment.begin(), controlSegment.end(), '\n' ) ;
+    controlSegmentSize = static_cast<int>(std::ranges::count(controlSegment, '\n' ));
     controlSegmentSize += !controlSegment.empty() && controlSegment.back() != '\n';
-    std::string controlClose = cm.close(nextAllocatedLocation);
+    const std::string controlClose = cm.close(nextAllocatedLocation);
     blockasm = controlSegment + generatedBlockasm + controlClose;
 }
 
@@ -39,17 +39,17 @@ void Compiler::Link() {
     // The LabelManager is used during the Link step to resolve uses of the Jmp, JmpCond, and Call instructions.
     // Both the Linker and the LabelManager perform linking, just at different times.
     auto lm = LabelManager(blockasm);
-    blockasm = lm.SkipLibs(blockasm);
+    blockasm = LabelManager::SkipLibs(blockasm);
     blockasm = lm.ReplacePreLabels(blockasm);
     blockasm = lm.ReplaceLabels(blockasm);
     blockasm = lm.OffsetCalls(blockasm, controlSegmentSize);
 }
 
-std::string Compiler::Compile(std::string filename_p) {
+std::string Compiler::Compile(const std::string &filename_p, const std::default_random_engine rnd) {
     filename = filename_p;
     LoadContents();
     ParseTokens();
-    GenerateBlockasm();
+    GenerateBlockasm(rnd);
     Link();
     return blockasm;
 }

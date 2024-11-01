@@ -4,7 +4,6 @@
 
 #ifndef REGISTEREDFUNCTIONINFO_H
 #define REGISTEREDFUNCTIONINFO_H
-#include <string>
 
 struct RegisteredFunctionInfo {
   int id;

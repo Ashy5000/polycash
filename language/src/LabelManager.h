@@ -12,11 +12,12 @@ class LabelManager {
     std::unordered_map<int, int> preLabels;
     std::unordered_map<int, int> labels;
 public:
-    explicit LabelManager(std::string blockasm);
-    std::string ReplacePreLabels(std::string blockasm);
-    std::string ReplaceLabels(std::string blockasm);
-    std::string SkipLibs(std::string blockasm);
-    std::string OffsetCalls(std::string blockasm, int offset);
+    explicit LabelManager(const std::string &blockasm);
+    std::string ReplacePreLabels(const std::string &blockasm);
+    std::string ReplaceLabels(const std::string &blockasm);
+
+    static std::string SkipLibs(const std::string &blockasm);
+    std::string OffsetCalls(const std::string &blockasm, int offset);
 private:
     void DetectPreLabels(const std::string& blockasm);
     void DetectLabels(const std::string& blockasm);
