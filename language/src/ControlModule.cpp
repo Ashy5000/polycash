@@ -10,9 +10,10 @@
 #include <sstream>
 
 RegisteredFunctionInfo ControlModule::registerFunction() {
-  RegisteredFunctionInfo info;
-  info.preLabelId = static_cast<int>(registeredFunctionInfos.size());
-  info.id = rand();
+  RegisteredFunctionInfo info {
+    rand(),
+    static_cast<int>(registeredFunctionInfos.size())
+  };
   registeredFunctionInfos.emplace_back(info);
   return info;
 }
@@ -20,13 +21,13 @@ RegisteredFunctionInfo ControlModule::registerFunction() {
 std::string ControlModule::compile(int &nextAllocatedLocation) {
   std::stringstream result;
   // Set selector location
-  int selectorLocLocation = nextAllocatedLocation++;
+  selectorLocLocation = nextAllocatedLocation++;
   result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x00000000" << std::endl;
   result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x010000 0x00000000" << std::endl;
   // Get selected function ID
   int selectorLocation = nextAllocatedLocation++;
   result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocation << " 0x00000000" << std::endl;
-  result << "ReadFromState 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x";
+  result << "GetFromState 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x";
   result << std::setfill('0') << std::setw(8) << std::hex << selectorLocation << " 0x00000000" << std::endl;
   // Create buffer to hold comparison result
   int cmpResLocation = nextAllocatedLocation++;
@@ -49,3 +50,16 @@ std::string ControlModule::compile(int &nextAllocatedLocation) {
   return result.str();
 }
 
+std::string ControlModule::close(int &nextAllocatedLocation) {
+  if(selectorLocLocation == -1) {
+    std::cerr << "Control module not compiled." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  std::stringstream result;
+  int eswvLocation = nextAllocatedLocation++;
+  result << "InitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << eswvLocation << " 0x00000000" << std::endl;
+  result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << eswvLocation << " 0x45787465726E616C5374617465577269746561626C6556616C7565 0x00000000" << std::endl;
+  result << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x";
+  result << std::setfill('0') << std::setw(8) << std::hex << eswvLocation << " 0x00000000" << std::endl;
+  return result.str();
+}

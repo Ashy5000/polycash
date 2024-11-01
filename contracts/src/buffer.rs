@@ -13,12 +13,8 @@ pub struct Buffer {
 
 impl Buffer {
     pub fn as_u64(&self) -> Result<u64, &'static str> {
-        if self.contents.len() != 8 {
-            println!("Invalid length. Actual length: {}", self.contents.len());
-            return Err("Invalid length");
-        }
         let mut result: u64 = 0;
-        let mut shift_amount = 64 - 8;
+        let mut shift_amount = (self.contents.len() * 8) - 8;
         for piece in &self.contents {
             result += u64::from(*piece) << shift_amount;
             shift_amount -= 8;

@@ -13,10 +13,12 @@
 
 class ControlModule {
   std::vector<RegisteredFunctionInfo> registeredFunctionInfos;
+  int selectorLocLocation = -1;
 
 public:
   RegisteredFunctionInfo registerFunction();
   std::string compile(int &nextAllocatedLocation);
+  std::string close(int &nextAllocatedLocation);
 };
 
 
