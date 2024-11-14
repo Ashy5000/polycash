@@ -29,10 +29,11 @@ fn main() -> ExitCode {
     let contract_contents = read_contract::read_contract();
     let args: Vec<std::string::String> = env::args().collect();
     let contract_hash = &args[2];
-    let gas_limit: f64 = args[3].parse().unwrap();
+    let gas_limit_f64: f64 = args[3].parse().unwrap();
+    let gas_limit = gas_limit_f64 as i64;
     let sender: Vec<u8> = args[4].clone().into();
     let pending_state = decode_pending_state();
     let (exit_code, gas_used, _out) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit, sender, pending_state);
-    println!("Gas used: {}", gas_used);
+    println!("Gas used: {}.0", gas_used);
     ExitCode::from(exit_code as u8)
 }
