@@ -7,20 +7,21 @@ fn main() {
     let run_details: VmRunDetails = env::read();
 
     // Extract details
-    let contract_contents = String::from(run_details.contract_contents.clone());
+    let contract_contents = run_details.contract_contents.clone();
     let contract_hash = String::from(run_details.contract_hash.clone());
     let gas_limit = run_details.gas_limit.clone();
     let sender = run_details.sender.clone();
     let pending_state = run_details.pending_state.clone();
 
     // Run VM
-    let (exit_code, gas_used) = run_vm(contract_contents, contract_hash, gas_limit, sender, pending_state);
+    let (exit_code, gas_used, out) = run_vm(contract_contents.parse().unwrap(), contract_hash, gas_limit, sender, pending_state);
 
     // Format output
     let output = ZkInfo {
         exit_code,
         gas_used,
-        input: run_details.clone()
+        input: run_details.clone(),
+        out: std::string::String::from(out)
     };
 
     // Write public output to the journal

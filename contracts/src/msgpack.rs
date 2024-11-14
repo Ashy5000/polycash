@@ -5,9 +5,9 @@ use rmpv::decode::read_value;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PendingState {
-    pub(crate) data: FxHashMap<String, Vec<u8>>,
+    pub data: FxHashMap<String, Vec<u8>>,
 }
 
 impl PendingState {
@@ -18,7 +18,7 @@ impl PendingState {
     }
 }
 
-pub(crate) fn decode_pending_state() -> PendingState {
+pub fn decode_pending_state() -> PendingState {
     let mut file = File::open("pending_state.msgpack").unwrap();
     let mut vec: Vec<u8> = Vec::new();
     file.read_to_end(&mut vec).unwrap();

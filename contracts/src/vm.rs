@@ -97,7 +97,8 @@ pub fn vm_execute_instruction(
     stack: &mut Stack,
     state_manager: &mut StateManager,
     gas_limit: f64,
-    sender: &Vec<u8>
+    sender: &Vec<u8>,
+    out: &mut String
 ) -> VmInstructionResult {
     match line.command.as_str() {
         "NEXT" => {
@@ -513,6 +514,7 @@ pub fn vm_execute_instruction(
                 vm_throw_local_error(buffers, line.args[1].clone())
             }
             println!("{:?}", vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone()));
+            out.push_str(&format!("{:?}\n", vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[1].clone())));
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
@@ -525,6 +527,7 @@ pub fn vm_execute_instruction(
             }
             let str = std::str::from_utf8(&(*vm_access_buffer(buffers, line.args[0].clone(), line.args[1].clone())).contents).unwrap();
             println!("{}", str);
+            out.push_str(&(str.to_owned() + "\n"));
             *gas_used += 0.5;
             VmInstructionResult {
                 exit_details: None,
@@ -630,6 +633,7 @@ pub fn vm_execute_instruction(
                 }
                 2 => {
                     println!("Transaction count: {}", result);
+                    out.push_str(&format!("Transaction count: {}\n", result));
                     let count_u64 = result.parse::<u64>().unwrap();
                     if let Some(x) = buffers.get_mut(&(line.args[2].clone())) {
                         x.load_u64(count_u64);
@@ -734,7 +738,9 @@ pub fn vm_execute_instruction(
             let contents_vec_u8 =
                 vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[2].clone());
             let full_location = format!("{}{}", contract_hash.clone(), location);
-            state_manager.write(full_location, contents_vec_u8.clone());
+            let mut out_sub = std::string::String::new();
+            state_manager.write(full_location, contents_vec_u8.clone(), &mut out_sub);
+            out.push_str(&out_sub);
             *gas_used += 3.0;
             *gas_used += 0.6 * contents_vec_u8.len() as f64;
             VmInstructionResult {
@@ -751,7 +757,9 @@ pub fn vm_execute_instruction(
             let location = buffers.get(&line.args[0]).unwrap().as_u64().unwrap() as usize;
             let contents_vec_u8 =
                 vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[2].clone());
-            state_manager.write(format!("{}", location), contents_vec_u8.clone());
+            let mut out_sub = std::string::String::new();
+            state_manager.write(format!("{}", location), contents_vec_u8.clone(), &mut out_sub);
+            out.push_str(&out_sub);
             *gas_used += 3.0;
             *gas_used += 0.6 * contents_vec_u8.len() as f64;
             VmInstructionResult {
@@ -872,7 +880,8 @@ pub fn vm_execute_instruction(
                 child_hash.into(),
                 gas_limit,
                 &mut child_pc,
-                sender
+                sender,
+                out
             );
             let frame = stack.pop();
             let return_value_tmp = vm_access_buffer(buffers, "00000001".parse().unwrap(), "00000000".parse().unwrap());
@@ -913,25 +922,30 @@ pub fn vm_simulate(
     contract_hash: String,
     gas_limit: f64,
     pc: &mut usize,
-    sender: &Vec<u8>
-) -> (i64, f64) {
+    sender: &Vec<u8>,
+    out: &mut String
+) -> (i64, f64, String) {
     while *pc < syntax_tree.lines.len() {
         if *gas_used > gas_limit {
-            return (2, gas_limit);
+            return (2, gas_limit, out.to_owned());
         }
         let line = &syntax_tree.lines[*pc];
-        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager, gas_limit, sender);
+        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager, gas_limit, sender, out);
         if let Some(exit_details) = res.exit_details {
-            state_manager.flush();
-            return (exit_details.exit_code, exit_details.gas_used);
+            let mut out_sub = std::string::String::new();
+            state_manager.flush(&mut out_sub);
+            out.push_str(&out_sub);
+            return (exit_details.exit_code, exit_details.gas_used, out.to_owned());
         }
         *pc = res.next_pc;
     }
-    state_manager.flush();
-    (0, *gas_used)
+    let mut out_sub = std::string::String::new();
+    state_manager.flush(&mut out_sub);
+    out.push_str(&out_sub);
+    (0, *gas_used, out.to_owned())
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct VmRunDetails {
     pub contract_contents: std::string::String,
     pub contract_hash: std::string::String,
@@ -944,10 +958,11 @@ pub struct VmRunDetails {
 pub struct ZkInfo {
     pub exit_code: i64,
     pub gas_used: f64,
-    pub input: VmRunDetails
+    pub input: VmRunDetails,
+    pub out: std::string::String
 }
 
-pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, sender: Vec<u8>, pending_state: PendingState) -> (i64, f64) {
+pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, sender: Vec<u8>, pending_state: PendingState) -> (i64, f64, String) {
     let mut tree = build_syntax_tree();
     tree.create(contract_contents);
     let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
@@ -960,5 +975,6 @@ pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, 
     let mut pc: usize = 0;
     let mut gas_used = 0.0;
     let mut state_manager = StateManager::new(interface.clone(), contract_hash.to_string(), pending_state);
-    vm_simulate(tree, &mut buffers, &mut stack, &mut state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender)
+    let mut out = String::new();
+    vm_simulate(tree, &mut buffers, &mut stack, &mut state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender, &mut out)
 }

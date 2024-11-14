@@ -1,10 +1,10 @@
 use rustc_hash::FxHashMap;
 
-use crate::{buffer::Buffer, blockutil::BlockUtilInterface};
+use crate::blockutil::BlockUtilInterface;
 use crate::msgpack::PendingState;
 
 pub trait State {
-    fn write(&mut self, location: String, contents: Vec<u8>);
+    fn write(&mut self, location: String, contents: Vec<u8>, out: &mut String);
     fn get(&self, location: String) -> Result<Vec<u8>, String>;
 }
 
@@ -19,7 +19,7 @@ impl CachedState {
 }
 
 impl State for CachedState {
-    fn write(&mut self, location: String, contents: Vec<u8>) {
+    fn write(&mut self, location: String, contents: Vec<u8>, _out: &mut String) {
         self.contents.insert(location, contents);
     }
     fn get(&self, location: String) -> Result<Vec<u8>, String> {
@@ -43,11 +43,15 @@ impl OnchainState {
 }
 
 impl State for OnchainState {
-    fn write(&mut self, location: String, contents: Vec<u8>) {
+    fn write(&mut self, location: String, contents: Vec<u8>, out: &mut String) {
         if location.as_bytes().starts_with(&self.prefix.as_bytes()) {
-            println!("State change: {}|{}", location, String::from_utf8(contents).unwrap());
+            let string = format!("State change: {}|{}", location, String::from_utf8(contents).unwrap());
+            println!("{}\n", string);
+            out.push_str(&string);
         } else {
-            println!("External state change: {}|{}", location, String::from_utf8(contents).unwrap());
+            let string = format!("External state change: {}|{}", location, String::from_utf8(contents).unwrap());
+            println!("{}\n", string);
+            out.push_str(&string);
         }
     }
     fn get(&self, location: String) -> Result<Vec<u8>, String> {
@@ -74,8 +78,8 @@ impl StateManager {
             pending_state,
         }
     }
-    pub fn write(&mut self, location: String, contents: Vec<u8>) {
-        self.cached_state.write(location, contents);
+    pub fn write(&mut self, location: String, contents: Vec<u8>, out: &mut String) {
+        self.cached_state.write(location, contents, out);
     }
     pub fn get_sync(&mut self, location: String) -> Result<Vec<u8>, String> {
         if let Some(res) = self.pending_state.data.get(&location.clone()) {
@@ -92,14 +96,14 @@ impl StateManager {
             if onchain_res.is_err() {
                 Err("Could not get from onchain state".to_string())
             } else {
-                self.cached_state.write(location, onchain_res.clone()?);
+                self.cached_state.write(location, onchain_res.clone()?, &mut String::new());
                 onchain_res
             }
         }
     }
-    pub fn flush(&mut self) {
+    pub fn flush(&mut self, out: &mut String) {
         for (location, contents) in self.cached_state.contents.clone().into_iter() {
-            self.onchain_state.write(location, contents);
+            self.onchain_state.write(location, contents, out);
         }
     }
 }
