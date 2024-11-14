@@ -15,4 +15,4 @@ pub mod syntax_tree;
 pub mod vm;
 pub mod stack;
 pub mod state;
-mod msgpack;
+pub mod msgpack;

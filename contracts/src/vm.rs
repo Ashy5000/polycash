@@ -8,6 +8,7 @@ You should have received a copy of the GNU General Public License along with thi
 */
 use rustc_hash::FxHashMap;
 use std::ffi::c_void;
+use sha2::{Digest, Sha256};
 use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
@@ -16,7 +17,7 @@ use crate::{
 };
 use crate::stack::Stack;
 use smartstring::alias::String;
-use ring::digest;
+use serde::{Deserialize, Serialize};
 use crate::msgpack::PendingState;
 
 pub const VM_NIL: *const c_void = 0x0000 as *const c_void;
@@ -854,7 +855,10 @@ pub fn vm_execute_instruction(
             let contents = blockutil_interface.read_contract(location).expect("Failed to read invoked contract");
             let mut tree = build_syntax_tree();
             tree.create(contents.clone());
-            let child_hash = hex::encode(digest::digest(&digest::SHA256, contents.as_ref()).as_ref());
+            let mut hasher = Sha256::new();
+            hasher.update(contents);
+            let hash = hasher.finalize();
+            let child_hash = hex::encode(hash);
             stack.push(buffers, pc + 1);
             let mut child_pc = 0;
             buffers.clear();
@@ -925,6 +929,22 @@ pub fn vm_simulate(
     }
     state_manager.flush();
     (0, *gas_used)
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct VmRunDetails {
+    pub contract_contents: std::string::String,
+    pub contract_hash: std::string::String,
+    pub gas_limit: f64,
+    pub sender: Vec<u8>,
+    pub pending_state: PendingState
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ZkInfo {
+    pub exit_code: i64,
+    pub gas_used: f64,
+    pub input: VmRunDetails
 }
 
 pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: f64, sender: Vec<u8>, pending_state: PendingState) -> (i64, f64) {

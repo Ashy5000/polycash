@@ -3,10 +3,21 @@ use std::fs::File;
 use std::io::Read;
 use rmpv::decode::read_value;
 use rustc_hash::FxHashMap;
+use serde::{Deserialize, Serialize};
 
-pub(crate) struct PendingState {
+#[derive(Serialize, Deserialize, Clone)]
+pub struct PendingState {
     pub(crate) data: FxHashMap<String, Vec<u8>>,
 }
+
+impl PendingState {
+    pub fn new() -> PendingState {
+        PendingState {
+            data: FxHashMap::default()
+        }
+    }
+}
+
 pub(crate) fn decode_pending_state() -> PendingState {
     let mut file = File::open("pending_state.msgpack").unwrap();
     let mut vec: Vec<u8> = Vec::new();

@@ -25,9 +25,6 @@ use hex::decode;
 use crate::msgpack::decode_pending_state;
 use crate::vm::run_vm;
 
-#[global_allocator]
-static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
-
 fn main() -> ExitCode {
     let contract_contents = read_contract::read_contract();
     let args: Vec<std::string::String> = env::args().collect();

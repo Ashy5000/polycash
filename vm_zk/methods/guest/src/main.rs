@@ -1,13 +1,28 @@
+use contracts::vm::{run_vm, VmRunDetails, ZkInfo};
 use risc0_zkvm::guest::env;
+use smartstring::alias::String;
 
 fn main() {
-    // TODO: Implement your guest code here
+    // Read the input
+    let run_details: VmRunDetails = env::read();
 
-    // read the input
-    let input: u32 = env::read();
+    // Extract details
+    let contract_contents = String::from(run_details.contract_contents.clone());
+    let contract_hash = String::from(run_details.contract_hash.clone());
+    let gas_limit = run_details.gas_limit.clone();
+    let sender = run_details.sender.clone();
+    let pending_state = run_details.pending_state.clone();
 
-    // TODO: do something with the input
+    // Run VM
+    let (exit_code, gas_used) = run_vm(contract_contents, contract_hash, gas_limit, sender, pending_state);
 
-    // write public output to the journal
-    env::commit(&input);
+    // Format output
+    let output = ZkInfo {
+        exit_code,
+        gas_used,
+        input: run_details.clone()
+    };
+
+    // Write public output to the journal
+    env::commit(&output);
 }

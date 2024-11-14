@@ -4,6 +4,9 @@ use methods::{
     POLYCASH_ZK_GUEST_ELF, POLYCASH_ZK_GUEST_ID
 };
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use contracts;
+use contracts::msgpack::PendingState;
+use contracts::vm::ZkInfo;
 
 fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
@@ -11,22 +14,20 @@ fn main() {
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
-    // An executor environment describes the configurations for the zkVM
-    // including program inputs.
-    // An default ExecutorEnv can be created like so:
-    // `let env = ExecutorEnv::builder().build().unwrap();`
-    // However, this `env` does not have any inputs.
-    //
-    // To add guest input to the executor environment, use
-    // ExecutorEnvBuilder::write().
-    // To access this method, you'll need to use ExecutorEnv::builder(), which
-    // creates an ExecutorEnvBuilder. When you're done adding input, call
-    // ExecutorEnvBuilder::build().
-
-    // For example:
-    let input: u32 = 15 * u32::pow(2, 27) + 1;
+    let contract_contents = String::from("InitBfr 0x00000000 0x00000000");
+    let contract_hash = String::from("79d58ca0301f1654bae45ec6c6a8ed19af3be63887e9c568a39864590318ca5b");
+    let gas_limit = 10000f64;
+    let sender: Vec<u8> = Vec::new();
+    let pending_state = PendingState::new();
+    let run_details = contracts::vm::VmRunDetails {
+        contract_contents,
+        contract_hash,
+        gas_limit,
+        sender,
+        pending_state
+    };
     let env = ExecutorEnv::builder()
-        .write(&input)
+        .write(&run_details)
         .unwrap()
         .build()
         .unwrap();
@@ -43,11 +44,9 @@ fn main() {
     // extract the receipt.
     let receipt = prove_info.receipt;
 
-    // TODO: Implement code for retrieving receipt journal here.
+    // Get output from journal
 
-    // For example:
-    let output: u32 = receipt.journal.decode().unwrap();
-    println!("Output: {output}");
+    let output: ZkInfo = receipt.journal.decode().unwrap();
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.
