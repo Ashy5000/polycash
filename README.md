@@ -29,7 +29,7 @@ Technical docs are located in the [wiki](https://github.com/Ashy5000/polycash/wi
 | Token              | BTC     | ETH             | PCSH            |
 | Pre-mined tokens   | No      | Yes             | No              |
 | Builtin Oracles    | No      | No              | Yes             |
-| Hash function      | SHA256  | SHA256          | SHA3-512        |
+| Hash function      | SHA256  | Keccak-256      | SHA3-512        |
 
 
 >[!TIP]
