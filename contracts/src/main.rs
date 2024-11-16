@@ -19,9 +19,7 @@ mod state;
 mod msgpack;
 
 use std::env;
-use std::fs::File;
 use std::process::ExitCode;
-use hex::decode;
 use crate::msgpack::decode_pending_state;
 use crate::vm::run_vm;
 

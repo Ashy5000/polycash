@@ -1,6 +1,9 @@
+mod lazy_vector;
+
 use contracts::vm::{run_vm, VmRunDetails, ZkInfo};
 use risc0_zkvm::guest::env;
 use smartstring::alias::String;
+use crate::lazy_vector::LazyVector;
 
 fn main() {
     // Read the input
@@ -12,6 +15,10 @@ fn main() {
     let gas_limit = run_details.gas_limit.clone();
     let sender = run_details.sender.clone();
     let pending_state = run_details.pending_state.clone();
+    
+    // Setup lazy vector
+    let mut lazy: LazyVector<i32> = LazyVector::new(3);
+    println!("{}, {}, {}", lazy.get(0).unwrap(), lazy.get(1).unwrap(), lazy.get(2).unwrap());
 
     // Run VM
     let (exit_code, gas_used, out) = run_vm(contract_contents.parse().unwrap(), contract_hash, gas_limit, sender, pending_state);

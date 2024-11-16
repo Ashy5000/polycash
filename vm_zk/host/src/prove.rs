@@ -1,14 +1,15 @@
 use contracts::vm::{VmRunDetails, ZkInfo};
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
-
 use methods::{
-    POLYCASH_ZK_GUEST_ELF, POLYCASH_ZK_GUEST_ID
+    POLYCASH_ZK_GUEST_ELF
 };
+use crate::lazy_vector::HostVector;
 
-pub(crate) fn prove(run_details: VmRunDetails) -> Receipt {
+pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<i32>) -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&run_details)
         .unwrap()
+        .io_callback(zk_common::lazy_vector::SYS_VECTOR_ORACLE, host_vector.handle_guest_request())
         .build()
         .unwrap();
 
@@ -36,7 +37,7 @@ pub(crate) fn prove(run_details: VmRunDetails) -> Receipt {
     assert_eq!(run_details.pending_state.data, input.pending_state.data);
 
     println!("Gas used: {}", output.gas_used);
-    
+
     // Return receipt
     receipt
 }
