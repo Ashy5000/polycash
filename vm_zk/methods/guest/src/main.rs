@@ -1,5 +1,6 @@
 mod lazy_vector;
 
+use contracts::merkle::MerkleNode;
 use contracts::vm::{run_vm, VmRunDetails, ZkInfo};
 use risc0_zkvm::guest::env;
 use smartstring::alias::String;
@@ -17,8 +18,8 @@ fn main() {
     let pending_state = run_details.pending_state.clone();
     
     // Setup lazy vector
-    let mut lazy: LazyVector<i32> = LazyVector::new(3);
-    println!("{}, {}, {}", lazy.get(0).unwrap(), lazy.get(1).unwrap(), lazy.get(2).unwrap());
+    let mut lazy: LazyVector<MerkleNode> = LazyVector::new(3);
+    println!("Hash: {}", lazy.get(0).unwrap().hash);
 
     // Run VM
     let (exit_code, gas_used, out) = run_vm(contract_contents.parse().unwrap(), contract_hash, gas_limit, sender, pending_state);

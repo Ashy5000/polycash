@@ -10,8 +10,10 @@ use contracts::msgpack::decode_pending_state;
 use std::process::ExitCode;
 use contracts::read_contract::read_contract;
 use contracts::vm::ZkInfo;
+use contracts::merkle::merklize_state;
 use crate::lazy_vector::HostVector;
 use crate::prove::prove;
+use rustc_hash::FxHashMap;
 
 fn main() -> ExitCode {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
@@ -26,8 +28,11 @@ fn main() -> ExitCode {
     let gas_limit = gas_limit_f64 as i64;
     let sender: Vec<u8> = args[4].clone().into();
     let pending_state = decode_pending_state();
-    
-    let host_vector = HostVector::new(vec![1, 2, 3]);
+   
+    let mut state: FxHashMap<String, Vec<u8>> = FxHashMap::default();
+    state.insert(String::from("123"), "abc".as_bytes().to_vec());
+    let tree = merklize_state(state);
+    let host_vector = HostVector::new(tree);
     
     let run_details = contracts::vm::VmRunDetails {
         contract_contents: std::string::String::from(contract_contents),

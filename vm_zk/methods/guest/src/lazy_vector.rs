@@ -8,7 +8,7 @@ pub struct LazyVector<T> {
     elements: Vec<Option<T>>
 }
 
-impl<T: Serialize + Clone + for<'a> Deserialize<'a>> LazyVector<T> {
+impl<T: Clone + for<'a> Deserialize<'a>> LazyVector<T> {
     pub fn new(len: usize) -> Self {
         Self {
             len,

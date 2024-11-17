@@ -1,4 +1,3 @@
-use risc0_zkvm::serde::to_vec;
 use serde::Serialize;
 
 pub struct HostVector<T> {

@@ -1,10 +1,12 @@
+use serde::{Deserialize, Serialize};
 use rustc_hash::FxHashMap;
 use sha2::{Digest, Sha256};
 
-struct MerkleNode {
-    hash: String,
-    value: Vec<u8>,
-    children: FxHashMap<char, usize>
+#[derive(Clone, Serialize, Deserialize)]
+pub struct MerkleNode {
+    pub hash: String,
+    pub value: Vec<u8>,
+    pub children: FxHashMap<char, usize>
 }
 
 fn hash_node(tree: &mut Vec<MerkleNode>, node_index: usize) {
@@ -49,7 +51,7 @@ pub fn merklize_state(state: FxHashMap<String, Vec<u8>>) -> Vec<MerkleNode> {
                 children: FxHashMap::default()
             });
             let new_index = tree.len() - 1;
-            tree[active].children.insert(c, new_index - 1);
+            tree[active].children.insert(c, new_index);
             active = new_index;
         }
         tree[active].value = val.clone();

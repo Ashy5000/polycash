@@ -1,3 +1,4 @@
+use contracts::merkle::MerkleNode;
 use contracts::vm::{VmRunDetails, ZkInfo};
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 use methods::{
@@ -5,7 +6,7 @@ use methods::{
 };
 use crate::lazy_vector::HostVector;
 
-pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<i32>) -> Receipt {
+pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<MerkleNode>) -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&run_details)
         .unwrap()
