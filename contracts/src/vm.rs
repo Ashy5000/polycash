@@ -19,6 +19,7 @@ use crate::stack::Stack;
 use smartstring::alias::String;
 use serde::{Deserialize, Serialize};
 use crate::msgpack::PendingState;
+use crate::state::State;
 
 pub const VM_NIL: *const c_void = 0x0000 as *const c_void;
 
@@ -87,7 +88,7 @@ pub struct VmInstructionResult {
     next_pc: usize,
 }
 
-pub fn vm_execute_instruction(
+pub fn vm_execute_instruction<A: State, B: State, C: State>(
     line: Line,
     buffers: &mut FxHashMap<String, Buffer>,
     blockutil_interface: BlockUtilInterface,
@@ -95,7 +96,7 @@ pub fn vm_execute_instruction(
     pc: usize,
     gas_used: &mut i64,
     stack: &mut Stack,
-    state_manager: &mut StateManager,
+    state_manager: &mut StateManager<A, B, C>,
     gas_limit: i64,
     sender: &Vec<u8>,
     out: &mut String
@@ -793,11 +794,11 @@ pub fn vm_execute_instruction(
     }
 }
 
-pub fn vm_simulate(
+pub fn vm_simulate<A: State, B: State, C: State>(
     syntax_tree: SyntaxTree,
     buffers: &mut FxHashMap<String, Buffer>,
     stack: &mut Stack,
-    state_manager: &mut StateManager,
+    state_manager: &mut StateManager<A, B, C>,
     gas_used: &mut i64,
     blockutil_interface: BlockUtilInterface,
     contract_hash: String,
@@ -832,7 +833,8 @@ pub struct VmRunDetails {
     pub contract_hash: std::string::String,
     pub gas_limit: i64,
     pub sender: Vec<u8>,
-    pub pending_state: PendingState
+    pub pending_state: PendingState,
+    pub lazy_len: usize
 }
 
 #[derive(Serialize, Deserialize)]
@@ -843,7 +845,7 @@ pub struct ZkInfo {
     pub out: std::string::String
 }
 
-pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: i64, sender: Vec<u8>, pending_state: PendingState) -> (i64, i64, String) {
+pub fn run_vm<A : State, B : State, C : State>(contract_contents: String, contract_hash: String, gas_limit: i64, sender: Vec<u8>, state_manager: &mut StateManager<A, B, C>, interface: BlockUtilInterface) -> (i64, i64, String) {
     let mut tree = build_syntax_tree();
     tree.create(contract_contents);
     let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
@@ -851,11 +853,9 @@ pub fn run_vm(contract_contents: String, contract_hash: String, gas_limit: i64, 
         "00000000".parse().unwrap(),
         Buffer { contents: vec![] }
     );
-    let interface = BlockUtilInterface::new();
     let mut stack = Stack{frames: vec![]};
     let mut pc: usize = 0;
     let mut gas_used = 0;
-    let mut state_manager = StateManager::new(interface.clone(), contract_hash.to_string(), pending_state);
     let mut out = String::new();
-    vm_simulate(tree, &mut buffers, &mut stack, &mut state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender, &mut out)
+    vm_simulate::<A, B, C>(tree, &mut buffers, &mut stack, state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender, &mut out)
 }

@@ -4,6 +4,7 @@ use std::io::Read;
 use rmpv::decode::read_value;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
+use crate::state::State;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PendingState {
@@ -16,6 +17,15 @@ impl PendingState {
             data: FxHashMap::default()
         }
     }
+}
+
+impl State for PendingState {
+    fn write(&mut self, _location: String, _contents: Vec<u8>, _out: &mut String) { panic!("Not implemented."); }
+
+    fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
+        Ok(self.data[&location].clone())
+    }
+    fn dump(&self) -> FxHashMap<String, Vec<u8>> { panic!("Not implemented."); }
 }
 
 pub fn decode_pending_state() -> PendingState {

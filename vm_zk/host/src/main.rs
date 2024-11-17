@@ -30,8 +30,9 @@ fn main() -> ExitCode {
     let pending_state = decode_pending_state();
    
     let mut state: FxHashMap<String, Vec<u8>> = FxHashMap::default();
-    state.insert(String::from("123"), "abc".as_bytes().to_vec());
+    state.insert(String::from("0000000000000000"), vec![0, 0, 0, 0, 0, 0, 0, 1]);
     let tree = merklize_state(state);
+    let lazy_len = tree.len();
     let host_vector = HostVector::new(tree);
     
     let run_details = contracts::vm::VmRunDetails {
@@ -39,7 +40,8 @@ fn main() -> ExitCode {
         contract_hash: contract_hash.to_owned(),
         gas_limit,
         sender,
-        pending_state
+        pending_state,
+        lazy_len
     };
 
     let receipt = prove(run_details, host_vector);

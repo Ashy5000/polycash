@@ -5,7 +5,8 @@ use crate::msgpack::PendingState;
 
 pub trait State {
     fn write(&mut self, location: String, contents: Vec<u8>, out: &mut String);
-    fn get(&self, location: String) -> Result<Vec<u8>, String>;
+    fn get(&mut self, location: String) -> Result<Vec<u8>, String>;
+    fn dump(&self) -> FxHashMap<String, Vec<u8>>;
 }
 
 pub struct CachedState {
@@ -13,7 +14,7 @@ pub struct CachedState {
 }
 
 impl CachedState {
-    fn new() -> Self {
+    pub fn new() -> Self {
         CachedState { contents: FxHashMap::default() }
     }
 }
@@ -22,13 +23,15 @@ impl State for CachedState {
     fn write(&mut self, location: String, contents: Vec<u8>, _out: &mut String) {
         self.contents.insert(location, contents);
     }
-    fn get(&self, location: String) -> Result<Vec<u8>, String> {
+    fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
         if !self.contents.contains_key(&location) {
             Err("Could not find key in cache".parse().unwrap())
         } else {
             Ok(self.contents[&location].clone())
         }
     }
+
+    fn dump(&self) -> FxHashMap<String, Vec<u8>> { self.contents.clone() }
 }
 
 pub struct OnchainState {
@@ -54,7 +57,7 @@ impl State for OnchainState {
             out.push_str(&string);
         }
     }
-    fn get(&self, location: String) -> Result<Vec<u8>, String> {
+    fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
         let (contents_vec_u8, success) = self.blockutil_interface.get_from_state(location.parse().unwrap());
         if success {
             Ok(contents_vec_u8)
@@ -62,16 +65,18 @@ impl State for OnchainState {
             Err("Could not get from onchain state".to_string())
         }
     }
+
+    fn dump(&self) -> FxHashMap<String, Vec<u8>> { panic!("Not implemented."); }
 }
 
-pub struct StateManager {
-    cached_state: CachedState,
-    onchain_state: OnchainState,
-    pending_state: PendingState
+pub struct StateManager<A : State, B : State, C : State> {
+    pub cached_state: A,
+    pub onchain_state: B,
+    pub pending_state: C
 }
 
-impl StateManager {
-    pub fn new(blockutil_interface: BlockUtilInterface, contract_hash: String, pending_state: PendingState) -> Self {
+impl<A : State, B : State, C : State> StateManager<A, B, C> {
+    pub fn new(blockutil_interface: BlockUtilInterface, contract_hash: String, pending_state: PendingState) -> StateManager<CachedState, OnchainState, PendingState> {
         StateManager {
             cached_state: CachedState::new(),
             onchain_state: OnchainState::new(blockutil_interface, contract_hash),
@@ -82,7 +87,7 @@ impl StateManager {
         self.cached_state.write(location, contents, out);
     }
     pub fn get_sync(&mut self, location: String) -> Result<Vec<u8>, String> {
-        if let Some(res) = self.pending_state.data.get(&location.clone()) {
+        if let Ok(res) = self.pending_state.get(location.clone()) {
             Ok(res.to_vec())
         } else {
             self.get(location)
@@ -96,13 +101,13 @@ impl StateManager {
             if onchain_res.is_err() {
                 Err("Could not get from onchain state".to_string())
             } else {
-                self.cached_state.write(location, onchain_res.clone()?, &mut String::new());
+                self.cached_state.write(location, onchain_res.clone().unwrap(), &mut String::new());
                 onchain_res
             }
         }
     }
     pub fn flush(&mut self, out: &mut String) {
-        for (location, contents) in self.cached_state.contents.clone().into_iter() {
+        for (location, contents) in self.cached_state.dump().into_iter() {
             self.onchain_state.write(location, contents, out);
         }
     }

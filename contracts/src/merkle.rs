@@ -60,10 +60,14 @@ pub fn merklize_state(state: FxHashMap<String, Vec<u8>>) -> Vec<MerkleNode> {
     tree
 }
 
-pub fn get_from_merkle(tree: Vec<MerkleNode>, loc: String) -> Vec<u8> {
+pub trait MerkleContainer {
+    fn get_wrapper(&mut self, index: usize) -> Option<MerkleNode>;
+}
+
+pub fn get_from_merkle<T : MerkleContainer>(tree: &mut T, loc: String) -> Vec<u8> {
     let mut active: usize = 0;
     for c in loc.chars() {
-        active = tree[active].children[&c];
+        active = tree.get_wrapper(active).unwrap().children[&c];
     }
-    tree[active].value.clone()
+    tree.get_wrapper(active).unwrap().value.clone()
 }
