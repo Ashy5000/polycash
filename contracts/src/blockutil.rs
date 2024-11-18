@@ -10,24 +10,34 @@ You should have received a copy of the GNU General Public License along with thi
 use crate::sanitization::sanitize_node_console_command;
 use smartstring::alias::String;
 
+pub trait BlockUtilInterface {
+    fn read_contract(&self, location: u64) -> Result<String, String>;
+    fn get_from_state(&self, property: String) -> (Vec<u8>, bool);
+    fn get_blockchain_len(&self) -> u64;
+    fn query_oracle(&self, query_type: u64, query_body: Vec<u8>) -> (Vec<u8>, bool);
+}
+
 #[derive(Clone)]
-pub struct BlockUtilInterface {
+pub struct NodeBlockUtilInterface {
     node_executable_path: String,
 }
 
-impl Default for BlockUtilInterface {
+impl Default for NodeBlockUtilInterface {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl BlockUtilInterface {
+impl NodeBlockUtilInterface {
     pub fn new() -> Self {
         Self {
             node_executable_path: "builds/node/node".into(),
         }
     }
-    pub fn read_contract(&self, location: u64) -> Result<String, String> {
+}
+
+impl BlockUtilInterface for NodeBlockUtilInterface {
+    fn read_contract(&self, location: u64) -> Result<String, String> {
         let command = format!("readSmartContract {}", location);
         if !sanitize_node_console_command(&command) {
             println!("Forbidden command");
@@ -43,7 +53,7 @@ impl BlockUtilInterface {
         let output = output.trim().to_string();
         Ok(output.parse().unwrap())
     }
-    pub fn get_from_state(&self, property: String) -> (Vec<u8>, bool) {
+    fn get_from_state(&self, property: String) -> (Vec<u8>, bool) {
         let command = format!("sync;getFromState {}", property);
         if !sanitize_node_console_command(&command) {
             println!("Forbidden command");
@@ -62,7 +72,7 @@ impl BlockUtilInterface {
         let data = hex::decode(data_hex).expect("Decoding failed");
         (data, true)
     }
-    pub fn get_blockchain_len(&self) -> u64 {
+    fn get_blockchain_len(&self) -> u64 {
         let command = "sync;getBlockchainLen";
         let output = Command::new(&*self.node_executable_path.clone())
             .arg("--command")
@@ -75,7 +85,7 @@ impl BlockUtilInterface {
         let output = output[output.len() - 1].to_string();
         output.parse::<u64>().unwrap() // Long Live the Turbofish.
     }
-    pub fn query_oracle(&self, query_type: u64, query_body: Vec<u8>) -> (Vec<u8>, bool) {
+    fn query_oracle(&self, query_type: u64, query_body: Vec<u8>) -> (Vec<u8>, bool) {
         let query_body_hex = hex::encode(query_body);
         let command = format!("queryOracle {} {}", query_type, query_body_hex);
         if !sanitize_node_console_command(&command) {

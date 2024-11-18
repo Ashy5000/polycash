@@ -1,6 +1,5 @@
 use rustc_hash::FxHashMap;
-
-use crate::blockutil::BlockUtilInterface;
+use crate::blockutil::{ BlockUtilInterface, NodeBlockUtilInterface };
 use crate::msgpack::PendingState;
 
 pub trait State {
@@ -35,12 +34,12 @@ impl State for CachedState {
 }
 
 pub struct OnchainState {
-    blockutil_interface: BlockUtilInterface,
+    blockutil_interface: NodeBlockUtilInterface,
     prefix: String,
 }
 
 impl OnchainState {
-    fn new(blockutil_interface: BlockUtilInterface, prefix: String) -> Self {
+    fn new(blockutil_interface: NodeBlockUtilInterface, prefix: String) -> Self {
         OnchainState { blockutil_interface, prefix }
     }
 }
@@ -76,7 +75,7 @@ pub struct StateManager<A : State, B : State, C : State> {
 }
 
 impl<A : State, B : State, C : State> StateManager<A, B, C> {
-    pub fn new(blockutil_interface: BlockUtilInterface, contract_hash: String, pending_state: PendingState) -> StateManager<CachedState, OnchainState, PendingState> {
+    pub fn new(blockutil_interface: NodeBlockUtilInterface, contract_hash: String, pending_state: PendingState) -> StateManager<CachedState, OnchainState, PendingState> {
         StateManager {
             cached_state: CachedState::new(),
             onchain_state: OnchainState::new(blockutil_interface, contract_hash),

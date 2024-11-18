@@ -12,8 +12,8 @@ use sha2::{Digest, Sha256};
 use crate::{
     blockutil::BlockUtilInterface,
     buffer::Buffer,
-    math::{execute_math_operation, Add, And, Divide, Eq, Less, Multiply, Not, Or, Subtract, Modulo, Exp},
-    syntax_tree::{SyntaxTree, Line, build_syntax_tree, self}, state::StateManager,
+    math::{execute_math_operation, Add, And, Divide, Less, Multiply, Not, Or, Subtract, Modulo, Exp},
+    syntax_tree::{SyntaxTree, Line, build_syntax_tree}, state::StateManager,
 };
 use crate::stack::Stack;
 use smartstring::alias::String;
@@ -88,10 +88,10 @@ pub struct VmInstructionResult {
     next_pc: usize,
 }
 
-pub fn vm_execute_instruction<A: State, B: State, C: State>(
+pub fn vm_execute_instruction<A: State, B: State, C: State, D : BlockUtilInterface + Clone>(
     line: Line,
     buffers: &mut FxHashMap<String, Buffer>,
-    blockutil_interface: BlockUtilInterface,
+    blockutil_interface: D,
     contract_hash: String,
     pc: usize,
     gas_used: &mut i64,
@@ -316,7 +316,7 @@ pub fn vm_execute_instruction<A: State, B: State, C: State>(
             }
             let x = vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[3].clone());
             let y = vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[3].clone());
-            let mut res = vm_access_buffer(buffers, line.args[2].clone(), line.args[3].clone());
+            let res = vm_access_buffer(buffers, line.args[2].clone(), line.args[3].clone());
             if x == y {
                 (*res).load_u64(1);
             } else {
@@ -794,13 +794,13 @@ pub fn vm_execute_instruction<A: State, B: State, C: State>(
     }
 }
 
-pub fn vm_simulate<A: State, B: State, C: State>(
+pub fn vm_simulate<A: State, B: State, C: State, D : BlockUtilInterface + Clone>(
     syntax_tree: SyntaxTree,
     buffers: &mut FxHashMap<String, Buffer>,
     stack: &mut Stack,
     state_manager: &mut StateManager<A, B, C>,
     gas_used: &mut i64,
-    blockutil_interface: BlockUtilInterface,
+    blockutil_interface: D,
     contract_hash: String,
     gas_limit: i64,
     pc: &mut usize,
@@ -845,7 +845,13 @@ pub struct ZkInfo {
     pub out: std::string::String
 }
 
-pub fn run_vm<A : State, B : State, C : State>(contract_contents: String, contract_hash: String, gas_limit: i64, sender: Vec<u8>, state_manager: &mut StateManager<A, B, C>, interface: BlockUtilInterface) -> (i64, i64, String) {
+pub fn run_vm<A, B, C, D>(contract_contents: String, contract_hash: String, gas_limit: i64, sender: Vec<u8>, state_manager: &mut StateManager<A, B, C>, interface: D) -> (i64, i64, String)
+where
+    A: State,
+    B: State,
+    C: State,
+    D: BlockUtilInterface + Clone
+{
     let mut tree = build_syntax_tree();
     tree.create(contract_contents);
     let mut buffers: FxHashMap<String, Buffer> = FxHashMap::default();
@@ -857,5 +863,5 @@ pub fn run_vm<A : State, B : State, C : State>(contract_contents: String, contra
     let mut pc: usize = 0;
     let mut gas_used = 0;
     let mut out = String::new();
-    vm_simulate::<A, B, C>(tree, &mut buffers, &mut stack, state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender, &mut out)
+    vm_simulate::<A, B, C, D>(tree, &mut buffers, &mut stack, state_manager, &mut gas_used, interface, contract_hash, gas_limit, &mut pc, &sender, &mut out)
 }
