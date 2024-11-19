@@ -8,6 +8,7 @@ use methods::POLYCASH_ZK_GUEST_ID;
 use contracts;
 use contracts::msgpack::decode_pending_state;
 use std::process::ExitCode;
+use contracts::blockutil::{BlockUtilInterface, NodeBlockUtilInterface};
 use contracts::read_contract::read_contract;
 use contracts::vm::ZkInfo;
 use contracts::merkle::merklize_state;
@@ -28,12 +29,20 @@ fn main() -> ExitCode {
     let gas_limit = gas_limit_f64 as i64;
     let sender: Vec<u8> = args[4].clone().into();
     let pending_state = decode_pending_state();
-   
+  
+    // Initialize state
     let mut state: FxHashMap<String, Vec<u8>> = FxHashMap::default();
+    // TODO: Load & deserialize state merkle tree from a file
     state.insert(String::from("0000000000000000"), vec![0, 0, 0, 0, 0, 0, 0, 1]);
     let tree = merklize_state(state);
     let lazy_len = tree.len();
     let host_vector = HostVector::new(tree);
+    
+    // Create node blockutil for data fetching
+    let node_blockutil = NodeBlockUtilInterface::new();
+    
+    // Fetch data from node
+    let blockchain_len = node_blockutil.get_blockchain_len();
     
     let run_details = contracts::vm::VmRunDetails {
         contract_contents: std::string::String::from(contract_contents),
@@ -41,7 +50,8 @@ fn main() -> ExitCode {
         gas_limit,
         sender,
         pending_state,
-        lazy_len
+        lazy_len,
+        blockchain_len
     };
 
     let receipt = prove(run_details, host_vector);

@@ -1,5 +1,6 @@
 mod lazy_vector;
 mod merkle_state;
+mod zk_blockutil;
 
 use contracts::blockutil::{BlockUtilInterface, NodeBlockUtilInterface};
 use contracts::merkle::MerkleNode;
@@ -9,6 +10,7 @@ use risc0_zkvm::guest::env;
 use smartstring::alias::String;
 use crate::lazy_vector::LazyVector;
 use crate::merkle_state::MerkleState;
+use crate::zk_blockutil::ZkBlockutilInterface;
 
 fn main() {
     // Read the input
@@ -19,6 +21,7 @@ fn main() {
     let contract_hash = String::from(run_details.contract_hash.clone());
     let gas_limit = run_details.gas_limit.clone();
     let sender = run_details.sender.clone();
+    let blockchain_len = run_details.blockchain_len.clone();
 
     // Setup lazy vector
     let lazy_len = run_details.lazy_len;
@@ -34,7 +37,7 @@ fn main() {
     };
 
     // Setup blockutil interface
-    let interface = NodeBlockUtilInterface::new();
+    let interface = ZkBlockutilInterface::new(blockchain_len);
 
     // Run VM
     let (exit_code, gas_used, out) = run_vm(contract_contents.parse().unwrap(), contract_hash, gas_limit, sender, &mut state_manager, interface);

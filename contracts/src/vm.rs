@@ -834,7 +834,8 @@ pub struct VmRunDetails {
     pub gas_limit: i64,
     pub sender: Vec<u8>,
     pub pending_state: PendingState,
-    pub lazy_len: usize
+    pub lazy_len: usize,
+    pub blockchain_len: u64
 }
 
 #[derive(Serialize, Deserialize)]
