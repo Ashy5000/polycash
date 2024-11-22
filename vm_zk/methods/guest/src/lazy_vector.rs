@@ -1,7 +1,7 @@
 use risc0_zkvm::guest::env;
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct LazyVector<T> {
     len: usize,
     #[serde(skip)]

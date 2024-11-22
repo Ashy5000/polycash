@@ -6,7 +6,7 @@ use methods::{
 };
 use crate::lazy_vector::HostVector;
 
-pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<MerkleNode>) -> Receipt {
+pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<MerkleNode<Vec<u8>>>) -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&run_details)
         .unwrap()

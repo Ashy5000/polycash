@@ -2,7 +2,6 @@ mod lazy_vector;
 mod merkle_state;
 mod zk_blockutil;
 
-use contracts::blockutil::{BlockUtilInterface, NodeBlockUtilInterface};
 use contracts::merkle::MerkleNode;
 use contracts::state::{CachedState, StateManager};
 use contracts::vm::{run_vm, VmRunDetails, ZkInfo};
@@ -25,11 +24,11 @@ fn main() {
 
     // Setup lazy vector
     let lazy_len = run_details.lazy_len;
-    let lazy: LazyVector<MerkleNode> = LazyVector::new(lazy_len);
+    let lazy_vec: LazyVector<MerkleNode<Vec<u8>>> = LazyVector::new(lazy_len);
 
     // Setup state
     let pending_state = run_details.pending_state.clone();
-    let merkle_state = MerkleState::new(lazy, contract_hash.parse().unwrap());
+    let merkle_state = MerkleState::new(lazy_vec, contract_hash.parse().unwrap());
     let mut state_manager = StateManager {
         cached_state: CachedState::new(),
         onchain_state: merkle_state,

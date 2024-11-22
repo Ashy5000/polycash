@@ -2,19 +2,19 @@ use contracts::merkle::{get_from_merkle, MerkleContainer, MerkleNode};
 use contracts::state::State;
 use crate::lazy_vector::LazyVector;
 
-impl MerkleContainer for LazyVector<MerkleNode> {
-    fn get_wrapper(&mut self, index: usize) -> Option<MerkleNode> {
+impl MerkleContainer<Vec<u8>> for LazyVector<MerkleNode<Vec<u8>>> {
+    fn get_wrapper(&mut self, index: usize) -> Option<MerkleNode<Vec<u8>>> {
         self.get(index)
     }
 }
 
 pub(crate) struct MerkleState {
-    pub(crate) contents: LazyVector<MerkleNode>,
+    pub(crate) contents: LazyVector<MerkleNode<Vec<u8>>>,
     pub(crate) prefix: String
 }
 
 impl MerkleState {
-    pub(crate) fn new(contents: LazyVector<MerkleNode>, prefix: String) -> Self {
+    pub(crate) fn new(contents: LazyVector<MerkleNode<Vec<u8>>>, prefix: String) -> Self {
         MerkleState {
             contents,
             prefix
@@ -37,7 +37,7 @@ impl State for MerkleState {
     }
 
     fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
-        Ok(get_from_merkle::<LazyVector<MerkleNode>>(&mut self.contents, location))
+        Ok(get_from_merkle::<LazyVector<MerkleNode<Vec<u8>>>, Vec<u8>>(&mut self.contents, location))
     }
 
     fn dump(&self) -> rustc_hash::FxHashMap<String, Vec<u8>> { panic!("Not implemented."); }

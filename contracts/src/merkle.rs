@@ -3,13 +3,13 @@ use rustc_hash::FxHashMap;
 use sha2::{Digest, Sha256};
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct MerkleNode {
+pub struct MerkleNode<T> {
     pub hash: String,
-    pub value: Vec<u8>,
+    pub value: T,
     pub children: FxHashMap<char, usize>
 }
 
-fn hash_node(tree: &mut Vec<MerkleNode>, node_index: usize) {
+fn hash_node<T: Clone + AsRef<[u8]> + >(tree: &mut Vec<MerkleNode<T>>, node_index: usize) {
     let mut hasher = Sha256::new();
     hasher.update(tree[node_index].value.clone());
     for (_, index) in tree[node_index].children.iter() {
@@ -19,7 +19,7 @@ fn hash_node(tree: &mut Vec<MerkleNode>, node_index: usize) {
     tree[node_index].hash = hex::encode(hash);
 }
 
-fn hash_tree(tree: &mut Vec<MerkleNode>, index: usize) {
+fn hash_tree<T: Clone + AsRef<[u8]>>(tree: &mut Vec<MerkleNode<T>>, index: usize) {
     if tree[index].children.len() == 0 {
         // Base case
         hash_node(tree, index);
@@ -32,10 +32,10 @@ fn hash_tree(tree: &mut Vec<MerkleNode>, index: usize) {
     }
 }
 
-pub fn merklize_state(state: FxHashMap<String, Vec<u8>>) -> Vec<MerkleNode> {
-    let mut tree: Vec<MerkleNode> = vec![MerkleNode{
+pub fn merklize<T: Default + Clone + AsRef<[u8]>>(state: FxHashMap<String, T>) -> Vec<MerkleNode<T>> {
+    let mut tree: Vec<MerkleNode<T>> = vec![MerkleNode{
         hash: String::new(),
-        value: Vec::new(),
+        value: T::default(),
         children: FxHashMap::default()
     }];
     for (loc, val) in state.iter() {
@@ -47,7 +47,7 @@ pub fn merklize_state(state: FxHashMap<String, Vec<u8>>) -> Vec<MerkleNode> {
             }
             tree.push(MerkleNode{
                 hash: String::new(),
-                value: Vec::new(),
+                value: T::default(),
                 children: FxHashMap::default()
             });
             let new_index = tree.len() - 1;
@@ -60,11 +60,11 @@ pub fn merklize_state(state: FxHashMap<String, Vec<u8>>) -> Vec<MerkleNode> {
     tree
 }
 
-pub trait MerkleContainer {
-    fn get_wrapper(&mut self, index: usize) -> Option<MerkleNode>;
+pub trait MerkleContainer<T> {
+    fn get_wrapper(&mut self, index: usize) -> Option<MerkleNode<T>>;
 }
 
-pub fn get_from_merkle<T : MerkleContainer>(tree: &mut T, loc: String) -> Vec<u8> {
+pub fn get_from_merkle<A : MerkleContainer<B> + Clone, B : Clone>(tree: &mut A, loc: String) -> B {
     let mut active: usize = 0;
     for c in loc.chars() {
         active = tree.get_wrapper(active).unwrap().children[&c];

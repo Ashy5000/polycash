@@ -11,7 +11,7 @@ use std::process::ExitCode;
 use contracts::blockutil::{BlockUtilInterface, NodeBlockUtilInterface};
 use contracts::read_contract::read_contract;
 use contracts::vm::ZkInfo;
-use contracts::merkle::merklize_state;
+use contracts::merkle::merklize;
 use crate::lazy_vector::HostVector;
 use crate::prove::prove;
 use rustc_hash::FxHashMap;
@@ -30,11 +30,12 @@ fn main() -> ExitCode {
     let sender: Vec<u8> = args[4].clone().into();
     let pending_state = decode_pending_state();
   
-    // Initialize state
-    let mut state: FxHashMap<String, Vec<u8>> = FxHashMap::default();
+    // Initialize merkle tree
+    let mut data: FxHashMap<String, Vec<u8>> = FxHashMap::default();
     // TODO: Load & deserialize state merkle tree from a file
-    state.insert(String::from("0000000000000000"), vec![0, 0, 0, 0, 0, 0, 0, 1]);
-    let tree = merklize_state(state);
+    data.insert(String::from("0000000000000000"), vec![0, 0, 0, 0, 0, 0, 0, 1]);
+    // TODO: Load & deserialize contract data from a file
+    let tree = merklize(data);
     let lazy_len = tree.len();
     let host_vector = HostVector::new(tree);
     
