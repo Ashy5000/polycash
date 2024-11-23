@@ -829,19 +829,23 @@ pub fn vm_simulate<A: State, B: State, C: State, D : BlockUtilInterface + Clone>
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct VmRunDetails {
-    pub contract_contents: std::string::String,
-    pub contract_hash: std::string::String,
+    pub contract_contents: Vec<std::string::String>,
+    pub contract_hash: Vec<std::string::String>,
     pub gas_limit: i64,
     pub sender: Vec<u8>,
-    pub pending_state: PendingState,
     pub lazy_len: usize,
     pub blockchain_len: u64
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct ZkInfo {
+pub struct ZkContractResult {
     pub exit_code: i64,
-    pub gas_used: i64,
+    pub gas_used: i64
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ZkInfo {
+    pub results: Vec<ZkContractResult>,
     pub input: VmRunDetails,
     pub out: std::string::String,
     pub merkle_root: std::string::String

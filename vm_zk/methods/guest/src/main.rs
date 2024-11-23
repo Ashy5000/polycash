@@ -1,14 +1,17 @@
 mod lazy_vector;
 mod merkle_state;
 mod zk_blockutil;
+mod ptr_wrapper_state;
 
-use contracts::merkle::{MerkleContainer, MerkleNode};
+use contracts::merkle::MerkleNode;
+use contracts::msgpack::PendingState;
 use contracts::state::{CachedState, StateManager};
-use contracts::vm::{run_vm, VmRunDetails, ZkInfo};
+use contracts::vm::{run_vm, VmRunDetails, ZkContractResult, ZkInfo};
 use risc0_zkvm::guest::env;
 use smartstring::alias::String;
 use crate::lazy_vector::LazyVector;
 use crate::merkle_state::MerkleState;
+use crate::ptr_wrapper_state::PtrWrapperState;
 use crate::zk_blockutil::ZkBlockutilInterface;
 
 fn main() {
@@ -17,7 +20,7 @@ fn main() {
 
     // Extract details
     let contract_contents = run_details.contract_contents.clone();
-    let contract_hash = String::from(run_details.contract_hash.clone());
+    let contract_hashes = run_details.contract_hash.clone();
     let gas_limit = run_details.gas_limit.clone();
     let sender = run_details.sender.clone();
     let blockchain_len = run_details.blockchain_len.clone();
@@ -27,27 +30,50 @@ fn main() {
     let mut lazy_vec: LazyVector<MerkleNode<Vec<u8>>> = LazyVector::new(lazy_len);
     let merkle_root = lazy_vec.get(0).unwrap().hash;
 
-    // Setup state
-    let pending_state = run_details.pending_state.clone();
-    let merkle_state = MerkleState::new(lazy_vec.clone(), contract_hash.parse().unwrap());
-    let mut state_manager = StateManager {
-        cached_state: CachedState::new(),
-        onchain_state: merkle_state,
-        pending_state
-    };
-
     // Setup blockutil interface
-    let mut interface = ZkBlockutilInterface::new(blockchain_len, lazy_vec);
+    let mut interface = ZkBlockutilInterface::new(blockchain_len, lazy_vec.clone());
 
-    // Run VM
-    let (exit_code, gas_used, out) = run_vm(contract_contents.parse().unwrap(), contract_hash, gas_limit, sender, &mut state_manager, &mut interface);
+    // Setup pending state
+    let mut pending_state = PendingState::new();
+    let pending_state_ptr = &mut pending_state as *mut PendingState;
+
+    // Setup merkle state
+    let mut merkle_state = MerkleState::new(lazy_vec, std::string::String::new(), pending_state_ptr);
+    let merkle_state_ptr = &mut merkle_state as *mut MerkleState;
+
+    // Initialize results
+    let results: Vec<ZkContractResult> = Vec::new();
+
+    // Initialize string output
+    let mut out_final = String::new();
+
+    for i in 0..contract_contents.len() {
+        // Setup individual state
+        merkle_state.prefix = contract_hashes[i].clone().parse().unwrap();
+        let pending_wrapper_state = PtrWrapperState::new(pending_state_ptr);
+        let merkle_wrapper_state = PtrWrapperState::<MerkleState>::new(merkle_state_ptr);
+        let mut state_manager = StateManager {
+            cached_state: CachedState::new(),
+            onchain_state: merkle_wrapper_state,
+            pending_state: pending_wrapper_state
+        };
+
+        // Run VM
+        let (exit_code, gas_used, out) = run_vm(contract_contents[i].parse().unwrap(), contract_hashes[i].clone().parse().unwrap(), gas_limit, sender.clone(), &mut state_manager, &mut interface);
+
+        // Store result
+        let result = ZkContractResult {
+            exit_code,
+            gas_used,
+        };
+        out_final.push_str(&out);
+    }
 
     // Format output
     let output = ZkInfo {
-        exit_code,
-        gas_used,
+        results,
         input: run_details.clone(),
-        out: std::string::String::from(out),
+        out: std::string::String::from(out_final),
         merkle_root
     };
 

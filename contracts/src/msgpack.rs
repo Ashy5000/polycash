@@ -1,4 +1,3 @@
-use std::fs;
 use std::fs::File;
 use std::io::Read;
 use rmpv::decode::read_value;
@@ -20,7 +19,9 @@ impl PendingState {
 }
 
 impl State for PendingState {
-    fn write(&mut self, _location: String, _contents: Vec<u8>, _out: &mut String) { panic!("Not implemented."); }
+    fn write(&mut self, location: String, contents: Vec<u8>, _out: &mut String) {
+        self.data.insert(location, contents);
+    }
 
     fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
         Ok(self.data[&location].clone())

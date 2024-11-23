@@ -7,7 +7,6 @@ use std::env;
 use methods::POLYCASH_ZK_GUEST_ID;
 use contracts;
 use contracts::msgpack::decode_pending_state;
-use std::process::ExitCode;
 use contracts::blockutil::{BlockUtilInterface, NodeBlockUtilInterface};
 use contracts::read_contract::read_contract;
 use contracts::vm::ZkInfo;
@@ -16,15 +15,24 @@ use crate::lazy_vector::HostVector;
 use crate::prove::prove;
 use rustc_hash::FxHashMap;
 
-fn main() -> ExitCode {
+fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-
-    let contract_contents = read_contract();
+    
+    let contracts_file = read_contract();
+    let contract_contents_str = contracts_file.split("%").collect::<Vec<&str>>(); // % marks separation between contracts
+    let mut contract_contents = Vec::new();
+    for contract in contract_contents_str {
+        contract_contents.push(std::string::String::from(contract));
+    }
     let args: Vec<String> = env::args().collect();
-    let contract_hash  = &args[2];
+    let contract_hashes_str  = args[2].split("%").collect::<Vec<&str>>();
+    let mut contract_hashes = Vec::new();
+    for hash in contract_hashes_str {
+        contract_hashes.push(std::string::String::from(hash));
+    }
     let gas_limit_f64: f64 = args[3].parse().unwrap();
     let gas_limit = gas_limit_f64 as i64;
     let sender: Vec<u8> = args[4].clone().into();
@@ -45,11 +53,10 @@ fn main() -> ExitCode {
     let blockchain_len = node_blockutil.get_blockchain_len();
     
     let run_details = contracts::vm::VmRunDetails {
-        contract_contents: std::string::String::from(contract_contents),
-        contract_hash: contract_hash.to_owned(),
+        contract_contents,
+        contract_hash: contract_hashes,
         gas_limit,
         sender,
-        pending_state,
         lazy_len,
         blockchain_len
     };
@@ -62,6 +69,4 @@ fn main() -> ExitCode {
     receipt
         .verify(POLYCASH_ZK_GUEST_ID)
         .unwrap();
-
-    ExitCode::from(output.exit_code as u8)
 }
