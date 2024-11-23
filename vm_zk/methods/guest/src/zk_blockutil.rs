@@ -33,7 +33,9 @@ impl BlockUtilInterface for ZkBlockutilInterface {
         self.blockchain_len
     }
 
-    fn query_oracle(&self, query_type: u64, query_body: Vec<u8>) -> (Vec<u8>, bool) {
-        todo!()
+    fn query_oracle(&self, _query_type: u64, _query_body: Vec<u8>) -> (Vec<u8>, bool) {
+        // Oracle queries are impossible using a ZK version of the PVM.
+        // They will be left unimplemented out of necessity.
+        unimplemented!()
     }
 }
