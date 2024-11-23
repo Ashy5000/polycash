@@ -32,9 +32,8 @@ fn main() -> ExitCode {
   
     // Initialize merkle tree
     let mut data: FxHashMap<String, Vec<u8>> = FxHashMap::default();
-    // TODO: Load & deserialize state merkle tree from a file
+    // TODO: Load & deserialize merkle tree from a file
     data.insert(String::from("0000000000000000"), vec![0, 0, 0, 0, 0, 0, 0, 1]);
-    // TODO: Load & deserialize contract data from a file
     let tree = merklize(data);
     let lazy_len = tree.len();
     let host_vector = HostVector::new(tree);

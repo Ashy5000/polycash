@@ -37,7 +37,7 @@ impl State for MerkleState {
     }
 
     fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
-        Ok(get_from_merkle::<LazyVector<MerkleNode<Vec<u8>>>, Vec<u8>>(&mut self.contents, location))
+        Ok(get_from_merkle::<LazyVector<MerkleNode<Vec<u8>>>>(&mut self.contents, location))
     }
 
     fn dump(&self) -> rustc_hash::FxHashMap<String, Vec<u8>> { panic!("Not implemented."); }

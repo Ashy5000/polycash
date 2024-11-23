@@ -2,7 +2,7 @@ mod lazy_vector;
 mod merkle_state;
 mod zk_blockutil;
 
-use contracts::merkle::MerkleNode;
+use contracts::merkle::{MerkleContainer, MerkleNode};
 use contracts::state::{CachedState, StateManager};
 use contracts::vm::{run_vm, VmRunDetails, ZkInfo};
 use risc0_zkvm::guest::env;
@@ -24,7 +24,8 @@ fn main() {
 
     // Setup lazy vector
     let lazy_len = run_details.lazy_len;
-    let lazy_vec: LazyVector<MerkleNode<Vec<u8>>> = LazyVector::new(lazy_len);
+    let mut lazy_vec: LazyVector<MerkleNode<Vec<u8>>> = LazyVector::new(lazy_len);
+    let merkle_root = lazy_vec.get(0).unwrap().hash;
 
     // Setup state
     let pending_state = run_details.pending_state.clone();
@@ -46,7 +47,8 @@ fn main() {
         exit_code,
         gas_used,
         input: run_details.clone(),
-        out: std::string::String::from(out)
+        out: std::string::String::from(out),
+        merkle_root
     };
 
     // Write public output to the journal

@@ -843,7 +843,8 @@ pub struct ZkInfo {
     pub exit_code: i64,
     pub gas_used: i64,
     pub input: VmRunDetails,
-    pub out: std::string::String
+    pub out: std::string::String,
+    pub merkle_root: std::string::String
 }
 
 pub fn run_vm<A, B, C, D>(contract_contents: String, contract_hash: String, gas_limit: i64, sender: Vec<u8>, state_manager: &mut StateManager<A, B, C>, interface: &mut D) -> (i64, i64, String)
