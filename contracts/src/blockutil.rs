@@ -11,7 +11,7 @@ use crate::sanitization::sanitize_node_console_command;
 use smartstring::alias::String;
 
 pub trait BlockUtilInterface {
-    fn read_contract(&self, location: u64) -> Result<String, String>;
+    fn read_contract(&mut self, location: u64) -> Result<String, String>;
     fn get_from_state(&self, property: String) -> (Vec<u8>, bool);
     fn get_blockchain_len(&self) -> u64;
     fn query_oracle(&self, query_type: u64, query_body: Vec<u8>) -> (Vec<u8>, bool);
@@ -37,7 +37,7 @@ impl NodeBlockUtilInterface {
 }
 
 impl BlockUtilInterface for NodeBlockUtilInterface {
-    fn read_contract(&self, location: u64) -> Result<String, String> {
+    fn read_contract(&mut self, location: u64) -> Result<String, String> {
         let command = format!("readSmartContract {}", location);
         if !sanitize_node_console_command(&command) {
             println!("Forbidden command");

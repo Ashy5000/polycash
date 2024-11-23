@@ -28,7 +28,7 @@ fn main() {
 
     // Setup state
     let pending_state = run_details.pending_state.clone();
-    let merkle_state = MerkleState::new(lazy_vec, contract_hash.parse().unwrap());
+    let merkle_state = MerkleState::new(lazy_vec.clone(), contract_hash.parse().unwrap());
     let mut state_manager = StateManager {
         cached_state: CachedState::new(),
         onchain_state: merkle_state,
@@ -36,10 +36,10 @@ fn main() {
     };
 
     // Setup blockutil interface
-    let interface = ZkBlockutilInterface::new(blockchain_len);
+    let mut interface = ZkBlockutilInterface::new(blockchain_len, lazy_vec);
 
     // Run VM
-    let (exit_code, gas_used, out) = run_vm(contract_contents.parse().unwrap(), contract_hash, gas_limit, sender, &mut state_manager, interface);
+    let (exit_code, gas_used, out) = run_vm(contract_contents.parse().unwrap(), contract_hash, gas_limit, sender, &mut state_manager, &mut interface);
 
     // Format output
     let output = ZkInfo {

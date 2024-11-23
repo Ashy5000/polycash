@@ -33,9 +33,9 @@ fn main() -> ExitCode {
     let gas_limit = gas_limit_f64 as i64;
     let sender: Vec<u8> = args[4].clone().into();
     let pending_state = decode_pending_state();
-    let interface = NodeBlockUtilInterface::new();
+    let mut interface = NodeBlockUtilInterface::new();
     let mut state_manager = StateManager::<CachedState, OnchainState, PendingState>::new(interface.clone(), contract_hash.clone(), pending_state);
-    let (exit_code, gas_used, _out) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit, sender, &mut state_manager, interface);
+    let (exit_code, gas_used, _out) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit, sender, &mut state_manager, &mut interface);
     println!("Gas used: {}.0", gas_used);
     ExitCode::from(exit_code as u8)
 }

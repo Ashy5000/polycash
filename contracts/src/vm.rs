@@ -91,7 +91,7 @@ pub struct VmInstructionResult {
 pub fn vm_execute_instruction<A: State, B: State, C: State, D : BlockUtilInterface + Clone>(
     line: Line,
     buffers: &mut FxHashMap<String, Buffer>,
-    blockutil_interface: D,
+    blockutil_interface: &mut D,
     contract_hash: String,
     pc: usize,
     gas_used: &mut i64,
@@ -800,7 +800,7 @@ pub fn vm_simulate<A: State, B: State, C: State, D : BlockUtilInterface + Clone>
     stack: &mut Stack,
     state_manager: &mut StateManager<A, B, C>,
     gas_used: &mut i64,
-    blockutil_interface: D,
+    blockutil_interface: &mut D,
     contract_hash: String,
     gas_limit: i64,
     pc: &mut usize,
@@ -812,7 +812,7 @@ pub fn vm_simulate<A: State, B: State, C: State, D : BlockUtilInterface + Clone>
             return (2, gas_limit, out.to_owned());
         }
         let line = &syntax_tree.lines[*pc];
-        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface.clone(), contract_hash.clone(), *pc, gas_used, stack, state_manager, gas_limit, sender, out);
+        let res = vm_execute_instruction(line.clone(), buffers, blockutil_interface, contract_hash.clone(), *pc, gas_used, stack, state_manager, gas_limit, sender, out);
         if let Some(exit_details) = res.exit_details {
             let mut out_sub = std::string::String::new();
             state_manager.flush(&mut out_sub);
@@ -846,7 +846,7 @@ pub struct ZkInfo {
     pub out: std::string::String
 }
 
-pub fn run_vm<A, B, C, D>(contract_contents: String, contract_hash: String, gas_limit: i64, sender: Vec<u8>, state_manager: &mut StateManager<A, B, C>, interface: D) -> (i64, i64, String)
+pub fn run_vm<A, B, C, D>(contract_contents: String, contract_hash: String, gas_limit: i64, sender: Vec<u8>, state_manager: &mut StateManager<A, B, C>, interface: &mut D) -> (i64, i64, String)
 where
     A: State,
     B: State,

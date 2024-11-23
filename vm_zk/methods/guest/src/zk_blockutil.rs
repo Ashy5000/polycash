@@ -1,24 +1,29 @@
 use contracts::blockutil::BlockUtilInterface;
+use contracts::merkle::{get_from_merkle, MerkleNode};
+use crate::lazy_vector::LazyVector;
+use smartstring::alias::String;
 
 #[derive(Clone)]
 pub(crate) struct ZkBlockutilInterface {
-    blockchain_len: u64
+    blockchain_len: u64,
+    lazy_vec: LazyVector<MerkleNode<Vec<u8>>>
 }
 
 impl ZkBlockutilInterface {
-    pub fn new(blockchain_len: u64) -> Self {
+    pub fn new(blockchain_len: u64, lazy_vec: LazyVector<MerkleNode<Vec<u8>>>) -> Self {
         Self {
-            blockchain_len
+            blockchain_len,
+            lazy_vec
         }
     }
 }
 
 impl BlockUtilInterface for ZkBlockutilInterface {
-    fn read_contract(&self, location: u64) -> Result<smartstring::alias::String, smartstring::alias::String> {
-        todo!()
+    fn read_contract(&mut self, location: u64) -> Result<String, String> {
+        Ok(String::from(std::string::String::from_utf8(get_from_merkle::<LazyVector<MerkleNode<Vec<u8>>>, Vec<u8>>(&mut self.lazy_vec, format!("{:x}", location))).unwrap()))
     }
 
-    fn get_from_state(&self, _property: smartstring::alias::String) -> (Vec<u8>, bool) {
+    fn get_from_state(&self, _property: String) -> (Vec<u8>, bool) {
         // Implemented through an alternative state manager, not through the blockutil interface.
         // Never used, and thus left unimplemented.
         unimplemented!()
