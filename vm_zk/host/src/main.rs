@@ -6,10 +6,8 @@ use std::env;
 // The ELF is used for proving and the ID is used for verification.
 use methods::POLYCASH_ZK_GUEST_ID;
 use contracts;
-use contracts::msgpack::decode_pending_state;
 use contracts::blockutil::{BlockUtilInterface, NodeBlockUtilInterface};
 use contracts::read_contract::read_contract;
-use contracts::vm::ZkInfo;
 use contracts::merkle::merklize;
 use crate::lazy_vector::HostVector;
 use crate::prove::prove;
@@ -36,7 +34,6 @@ fn main() {
     let gas_limit_f64: f64 = args[3].parse().unwrap();
     let gas_limit = gas_limit_f64 as i64;
     let sender: Vec<u8> = args[4].clone().into();
-    let pending_state = decode_pending_state();
   
     // Initialize merkle tree
     let mut data: FxHashMap<String, Vec<u8>> = FxHashMap::default();
@@ -62,7 +59,6 @@ fn main() {
     };
 
     let receipt = prove(run_details, host_vector);
-    let output: ZkInfo = receipt.journal.decode().unwrap();
     
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.

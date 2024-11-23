@@ -42,7 +42,7 @@ fn main() {
     let merkle_state_ptr = &mut merkle_state as *mut MerkleState;
 
     // Initialize results
-    let results: Vec<ZkContractResult> = Vec::new();
+    let mut results: Vec<ZkContractResult> = Vec::new();
 
     // Initialize string output
     let mut out_final = String::new();
@@ -66,6 +66,7 @@ fn main() {
             exit_code,
             gas_used,
         };
+        results.push(result);
         out_final.push_str(&out);
     }
 
