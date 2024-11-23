@@ -11,3 +11,4 @@ builds/node/node
 /flamegraph.svg
 .dccache
 pending_state.msgpack
+receipt.bin

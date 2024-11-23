@@ -18,7 +18,6 @@ use crate::{
 use crate::stack::Stack;
 use smartstring::alias::String;
 use serde::{Deserialize, Serialize};
-use crate::msgpack::PendingState;
 use crate::state::State;
 
 pub const VM_NIL: *const c_void = 0x0000 as *const c_void;

@@ -1,9 +1,7 @@
 use contracts::merkle::MerkleNode;
 use contracts::vm::{VmRunDetails, ZkInfo};
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
-use methods::{
-    POLYCASH_ZK_GUEST_ELF
-};
+use methods::POLYCASH_ZK_GUEST_ELF;
 use crate::lazy_vector::HostVector;
 
 pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<MerkleNode<Vec<u8>>>) -> Receipt {
