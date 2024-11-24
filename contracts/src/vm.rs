@@ -830,8 +830,8 @@ pub fn vm_simulate<A: State, B: State, C: State, D : BlockUtilInterface + Clone>
 pub struct VmRunDetails {
     pub contract_contents: Vec<std::string::String>,
     pub contract_hash: Vec<std::string::String>,
-    pub gas_limit: i64,
-    pub sender: Vec<u8>,
+    pub gas_limits: Vec<i64>,
+    pub senders: Vec<Vec<u8>>,
     pub lazy_len: usize,
     pub blockchain_len: u64
 }

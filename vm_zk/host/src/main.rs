@@ -37,9 +37,16 @@ fn main() {
     for hash in contract_hashes_str {
         contract_hashes.push(std::string::String::from(hash));
     }
-    let gas_limit_f64: f64 = args[3].parse().unwrap();
-    let gas_limit = gas_limit_f64 as i64;
-    let sender: Vec<u8> = args[4].clone().into();
+    let gas_limits_str = args[3].split("%").collect::<Vec<&str>>();
+    let mut gas_limits = Vec::new();
+    for limit in gas_limits_str {
+        gas_limits.push(limit.parse::<f64>().unwrap() as i64);
+    }
+    let senders_str: Vec<&str> = args[4].split("%").collect::<Vec<&str>>();
+    let mut senders: Vec<Vec<u8>> = Vec::new();
+    for sender in senders_str {
+        senders.push(sender.into());
+    }
   
     // Initialize merkle tree
     let mut data: FxHashMap<String, Vec<u8>> = FxHashMap::default();
@@ -64,8 +71,8 @@ fn main() {
     let run_details = contracts::vm::VmRunDetails {
         contract_contents,
         contract_hash: contract_hashes,
-        gas_limit,
-        sender,
+        gas_limits,
+        senders,
         lazy_len,
         blockchain_len
     };

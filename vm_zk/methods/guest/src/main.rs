@@ -21,8 +21,8 @@ fn main() {
     // Extract details
     let contract_contents = run_details.contract_contents.clone();
     let contract_hashes = run_details.contract_hash.clone();
-    let gas_limit = run_details.gas_limit.clone();
-    let sender = run_details.sender.clone();
+    let gas_limits = run_details.gas_limits.clone();
+    let senders = run_details.senders.clone();
     let blockchain_len = run_details.blockchain_len.clone();
 
     // Setup lazy vector
@@ -59,7 +59,7 @@ fn main() {
         };
 
         // Run VM
-        let (exit_code, gas_used, out) = run_vm(contract_contents[i].parse().unwrap(), contract_hashes[i].clone().parse().unwrap(), gas_limit, sender.clone(), &mut state_manager, &mut interface);
+        let (exit_code, gas_used, out) = run_vm(contract_contents[i].parse().unwrap(), contract_hashes[i].clone().parse().unwrap(), gas_limits[i], senders[i].clone(), &mut state_manager, &mut interface);
 
         // Store result
         let result = ZkContractResult {
