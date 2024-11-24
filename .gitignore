@@ -12,3 +12,4 @@ builds/node/node
 .dccache
 pending_state.msgpack
 receipt.bin
+state.txt
