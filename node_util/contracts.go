@@ -11,14 +11,11 @@ package node_util
 import (
 	"bufio"
 	"bytes"
-	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/vmihailenco/msgpack/v5"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -57,7 +54,7 @@ func (c Contract) LoadContract() {
 
 var executionLocked = false
 
-func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, StateTransition, float64, error) {
+func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, StateTransition, float64, error) {
 	for executionLocked {
 	}
 	executionLocked = true
@@ -73,8 +70,6 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
-	contractStr := c.Contents
-	hash := sha256.Sum256([]byte(contractStr))
 	pendingState := GetPendingState()
 	pendingStateSerialized, err := msgpack.Marshal(pendingState)
 	err = os.WriteFile("pending_state.msgpack", pendingStateSerialized, 0644)
@@ -82,15 +77,8 @@ func (c Contract) Execute(max_gas float64, sender PublicKey) ([]Transaction, Sta
 		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
-	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%f", max_gas), hex.EncodeToString(sender.Y)).Output()
-	if err != nil {
-		fmt.Println("Errored with output:", string(out))
-		fmt.Println("Error: ", err)
-		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))
-		executionLocked = false
-		return nil, StateTransition{}, 0, err
-	}
-	scanner := bufio.NewScanner(strings.NewReader(string(out)))
+	out, _ := ZkProve([]Contract{c}, []float64{maxGas}, []PublicKey{sender}, CalculateCurrentState())
+	scanner := bufio.NewScanner(strings.NewReader(out))
 	transactions := make([]Transaction, 0)
 	gasUsed := 0.0
 	transition := StateTransition{

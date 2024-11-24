@@ -31,8 +31,8 @@ pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<MerkleNod
     let input = output.input;
     assert_eq!(run_details.contract_contents, input.contract_contents);
     assert_eq!(run_details.contract_hash, input.contract_hash);
-    assert_eq!(run_details.gas_limit, input.gas_limit);
-    assert_eq!(run_details.sender, input.sender);
+    assert_eq!(run_details.gas_limits, input.gas_limits);
+    assert_eq!(run_details.senders, input.senders);
 
     // Return receipt
     receipt
