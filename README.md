@@ -62,9 +62,13 @@ The roadmap for this repository looks something like this:
 
 **Initial Development** (COMPLETE): Implementing a blockchain and networking system, along with the specific changes to the PoW and networking protocols in order to increase the effectiveness, speed, reliability, and efficiency of the blockchain. Creating a README that documents the design decisions of the blockchain and network and how to use the software. Licensing the software with the GNU General Purpose License v3.0. Performing small scale, local tests on various operating systems and architectures to ensure the software works correctly.
 
-**Testnet** (ACTIVE): Running a testing network to verfify the correct operation of the software. Expirementing with its ability to verify large amounts of transactions at once. Making adjustments if neccessary to increase the speed, reliability, and efficiency of the blockchain. Running small-scale tests on the cryptocurrency's financial model.
+**Testnet** (DEPRECATED): Running a testing network to verfify the correct operation of the software. Expirementing with its ability to verify large amounts of transactions at once. Making adjustments if neccessary to increase the speed, reliability, and efficiency of the blockchain. Running small-scale tests on the cryptocurrency's financial model.
 
-**Mainnet** (COMING UP): Launching the final network, fixing any issues if and when they arrive.
+**ZK Refactor** (ACTIVE): Refactoring the entire Polycash blockchain to use a zero-knowledge proof system with the goal of enhancing scalability, decentralization, and security.
+
+**ZK Testnet** (COMING UP): Launching a post-refactor testnet that will replace the first testnet. **The bootstrap node will switch to this network momentarily.**
+
+**Mainnet** (COMING UP): Launching the final network, fixing any issues if and when they arrive. Uses the same protocol as the ZK testnet.
 
 ## Directory structure
 
