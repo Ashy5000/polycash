@@ -1,0 +1,13 @@
+{
+    "network": "testnet",
+    "upgrades": {
+        "guadalajara": 8,
+        "jinan": 9,
+        "alexandria": 9,
+        "yangon": -1,
+        "washington": 10,
+        "dalian": 12,
+        "qingdao": 15,
+        "saint_petersburg": 17
+    }
+}
