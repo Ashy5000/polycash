@@ -53,26 +53,92 @@ type OldBlock struct {
 	Transition                      OldTransition    `json:"transition"`
 }
 
+type PreZenTransition struct {
+	UpdatedData  map[string][]byte
+	NewContracts map[uint64]Contract
+}
+
+type PreZenTransaction struct {
+	Sender            PublicKey
+	Recipient         PublicKey
+	Amount            float64
+	SenderSignature   Signature
+	Timestamp         time.Time
+	Contracts         []Contract
+	FromSmartContract bool
+	Body              []byte
+	BodySignatures    []Signature
+}
+
+type PreZenBlock struct {
+	Transactions                    []PreZenTransaction `json:"transactions"`
+	Miner                           PublicKey           `json:"miner"`
+	Nonce                           int64               `json:"nonce"`
+	MiningTime                      time.Duration       `json:"miningTime"`
+	Difficulty                      uint64              `json:"difficulty"`
+	PreviousBlockHash               [64]byte            `json:"previousBlockHash"`
+	Timestamp                       time.Time           `json:"timestamp"`
+	PreMiningTimeVerifierSignatures []Signature         `json:"preMiningTimeVerifierSignatures"`
+	PreMiningTimeVerifiers          []PublicKey         `json:"preMiningTimeVerifiers"`
+	TimeVerifierSignatures          []Signature         `json:"timeVerifierSignature"`
+	TimeVerifiers                   []PublicKey         `json:"timeVerifiers"`
+	Transition                      PreZenTransition    `json:"transition"`
+}
+
 func HashBlock(block Block, blockHeight int) [64]byte {
 	if Env.Upgrades.Washington < blockHeight {
-		var blockCpy Block
-		marshaled, err := json.Marshal(block)
-		if err != nil {
-			panic(err)
+		if Env.Upgrades.Zen < blockHeight {
+			var blockCpy Block
+			marshaled, err := json.Marshal(block)
+			if err != nil {
+				panic(err)
+			}
+			err = json.Unmarshal(marshaled, &blockCpy)
+			if err != nil {
+				panic(err)
+			}
+			blockCpy.MiningTime = time.Minute
+			blockCpy.TimeVerifiers = []PublicKey{}
+			blockCpy.TimeVerifierSignatures = []Signature{}
+			blockCpy.Timestamp = time.Time{}
+			for i := range block.Transactions {
+				blockCpy.Transactions[i].Timestamp = time.Time{}
+				blockCpy.Transactions[i].Body = []byte{}
+			}
+			blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
+			sum := sha3.Sum512(blockBytes)
+			return sum
 		}
-		err = json.Unmarshal(marshaled, &blockCpy)
-		if err != nil {
-			panic(err)
+		var preZenBlock PreZenBlock
+		preZenTransactions := make([]PreZenTransaction, 0)
+		for _, transaction := range block.Transactions {
+			preZenTransaction := PreZenTransaction{}
+			preZenTransaction.Sender = transaction.Sender
+			preZenTransaction.Recipient = transaction.Recipient
+			preZenTransaction.Amount = transaction.Amount
+			preZenTransaction.SenderSignature = transaction.SenderSignature
+			preZenTransaction.Timestamp = time.Time{}
+			preZenTransaction.FromSmartContract = transaction.FromSmartContract
+			preZenTransaction.Body = []byte{}
+			preZenTransaction.BodySignatures = transaction.BodySignatures
+			preZenTransaction.Contracts = transaction.Contracts
+			preZenTransactions = append(preZenTransactions, preZenTransaction)
 		}
-		blockCpy.MiningTime = time.Minute
-		blockCpy.TimeVerifiers = []PublicKey{}
-		blockCpy.TimeVerifierSignatures = []Signature{}
-		blockCpy.Timestamp = time.Time{}
-		for i := range block.Transactions {
-			blockCpy.Transactions[i].Timestamp = time.Time{}
-			blockCpy.Transactions[i].Body = []byte{}
-		}
-		blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
+		preZenBlock.Transactions = preZenTransactions
+		preZenBlock.Miner = block.Miner
+		preZenBlock.Nonce = block.Nonce
+		preZenBlock.MiningTime = time.Minute
+		preZenBlock.Difficulty = block.Difficulty
+		preZenBlock.PreviousBlockHash = block.PreviousBlockHash
+		preZenBlock.PreMiningTimeVerifierSignatures = block.PreMiningTimeVerifierSignatures
+		preZenBlock.PreMiningTimeVerifiers = block.PreMiningTimeVerifiers
+		preZenBlock.TimeVerifierSignatures = block.TimeVerifierSignatures
+		preZenBlock.TimeVerifiers = block.TimeVerifiers
+		preZenTransition := PreZenTransition{}
+		preZenTransition.UpdatedData = block.Transition.UpdatedData
+		preZenTransition.NewContracts = block.Transition.NewContracts
+		preZenBlock.Transition = preZenTransition
+		blockBytes := []byte(fmt.Sprintf("%v", preZenBlock))
 		sum := sha3.Sum512(blockBytes)
 		return sum
 	}

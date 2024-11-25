@@ -22,6 +22,7 @@ type NetworkUpgrades struct {
 	Washington  int `json:"washington"`
 	Dalian      int `json:"dalian"`
 	Qingdao     int `json:"qingdao"`
+	Zen         int `json:"zen"`
 }
 
 type Environment struct {
@@ -41,7 +42,12 @@ func LoadEnv() {
 	if err != nil {
 		panic(err)
 	}
-	defer envFile.Close()
+	defer func(envFile *os.File) {
+		err := envFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(envFile)
 	jsonBytes, _ := ioutil.ReadAll(envFile)
 	err = json.Unmarshal(jsonBytes, &Env)
 	if err != nil {
