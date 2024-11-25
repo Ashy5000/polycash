@@ -1,18 +1,18 @@
 mod lazy_vector;
 mod merkle_state;
-mod zk_blockutil;
 mod ptr_wrapper_state;
+mod zk_blockutil;
 
+use crate::lazy_vector::LazyVector;
+use crate::merkle_state::MerkleState;
+use crate::ptr_wrapper_state::PtrWrapperState;
+use crate::zk_blockutil::ZkBlockutilInterface;
 use contracts::merkle::MerkleNode;
 use contracts::msgpack::PendingState;
 use contracts::state::{CachedState, StateManager};
 use contracts::vm::{run_vm, VmRunDetails, ZkContractResult, ZkInfo};
 use risc0_zkvm::guest::env;
 use smartstring::alias::String;
-use crate::lazy_vector::LazyVector;
-use crate::merkle_state::MerkleState;
-use crate::ptr_wrapper_state::PtrWrapperState;
-use crate::zk_blockutil::ZkBlockutilInterface;
 
 fn main() {
     // Read the input
@@ -38,7 +38,8 @@ fn main() {
     let pending_state_ptr = &mut pending_state as *mut PendingState;
 
     // Setup merkle state
-    let mut merkle_state = MerkleState::new(lazy_vec, std::string::String::new(), pending_state_ptr);
+    let mut merkle_state =
+        MerkleState::new(lazy_vec, std::string::String::new(), pending_state_ptr);
     let merkle_state_ptr = &mut merkle_state as *mut MerkleState;
 
     // Initialize results
@@ -55,11 +56,18 @@ fn main() {
         let mut state_manager = StateManager {
             cached_state: CachedState::new(),
             onchain_state: merkle_wrapper_state,
-            pending_state: pending_wrapper_state
+            pending_state: pending_wrapper_state,
         };
 
         // Run VM
-        let (exit_code, gas_used, out) = run_vm(contract_contents[i].parse().unwrap(), contract_hashes[i].clone().parse().unwrap(), gas_limits[i], senders[i].clone(), &mut state_manager, &mut interface);
+        let (exit_code, gas_used, out) = run_vm(
+            contract_contents[i].parse().unwrap(),
+            contract_hashes[i].clone().parse().unwrap(),
+            gas_limits[i],
+            senders[i].clone(),
+            &mut state_manager,
+            &mut interface,
+        );
 
         // Store result
         let result = ZkContractResult {
@@ -75,7 +83,7 @@ fn main() {
         results,
         input: run_details.clone(),
         out: std::string::String::from(out_final),
-        merkle_root
+        merkle_root,
     };
 
     // Write public output to the journal

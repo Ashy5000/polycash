@@ -2,15 +2,12 @@ use contracts::state::State;
 use rustc_hash::FxHashMap;
 
 pub(crate) struct PtrWrapperState<T> {
-    pub(crate) ptr: *mut T
+    pub(crate) ptr: *mut T,
 }
-
 
 impl<T> PtrWrapperState<T> {
     pub(crate) fn new(ptr: *mut T) -> Self {
-        Self {
-            ptr
-        }
+        Self { ptr }
     }
 }
 

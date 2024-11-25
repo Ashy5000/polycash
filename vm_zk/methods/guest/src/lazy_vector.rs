@@ -1,18 +1,18 @@
 use risc0_zkvm::guest::env;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct LazyVector<T> {
     len: usize,
     #[serde(skip)]
-    elements: Vec<Option<T>>
+    elements: Vec<Option<T>>,
 }
 
 impl<T: Clone + for<'a> Deserialize<'a>> LazyVector<T> {
     pub fn new(len: usize) -> Self {
         Self {
             len,
-            elements: vec![None; len]
+            elements: vec![None; len],
         }
     }
 
@@ -26,10 +26,14 @@ impl<T: Clone + for<'a> Deserialize<'a>> LazyVector<T> {
         }
 
         if self.elements[index].is_none() {
-            let element: T = bincode::deserialize(env::send_recv_slice::<usize, u8>(zk_common::lazy_vector::SYS_VECTOR_ORACLE, &[index])).unwrap();
+            let element: T = bincode::deserialize(env::send_recv_slice::<usize, u8>(
+                zk_common::lazy_vector::SYS_VECTOR_ORACLE,
+                &[index],
+            ))
+            .unwrap();
             self.elements[index] = Some(element);
         }
-        
+
         self.elements[index].clone()
     }
 }

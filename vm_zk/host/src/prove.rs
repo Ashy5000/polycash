@@ -1,14 +1,20 @@
+use crate::lazy_vector::HostVector;
 use contracts::merkle::MerkleNode;
 use contracts::vm::{VmRunDetails, ZkInfo};
-use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 use methods::POLYCASH_ZK_GUEST_ELF;
-use crate::lazy_vector::HostVector;
+use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 
-pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<MerkleNode<Vec<u8>>>) -> Receipt {
+pub(crate) fn prove(
+    run_details: VmRunDetails,
+    host_vector: HostVector<MerkleNode<Vec<u8>>>,
+) -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&run_details)
         .unwrap()
-        .io_callback(zk_common::lazy_vector::SYS_VECTOR_ORACLE, host_vector.handle_guest_request())
+        .io_callback(
+            zk_common::lazy_vector::SYS_VECTOR_ORACLE,
+            host_vector.handle_guest_request(),
+        )
         .build()
         .unwrap();
 
@@ -17,9 +23,7 @@ pub(crate) fn prove(run_details: VmRunDetails, host_vector: HostVector<MerkleNod
 
     // Proof information by proving the specified ELF binary.
     // This struct contains the receipt along with statistics about execution of the guest
-    let prove_info = prover
-        .prove(env, POLYCASH_ZK_GUEST_ELF)
-        .unwrap();
+    let prove_info = prover.prove(env, POLYCASH_ZK_GUEST_ELF).unwrap();
 
     // Extract the receipt
     let receipt = prove_info.receipt;
