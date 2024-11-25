@@ -16,7 +16,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"os"
@@ -266,7 +265,7 @@ func DeploySmartContract(contractPath string, contractLocation string) error {
 	}
 	var contract Contract
 	if contractPath != "" {
-		file, err := ioutil.ReadFile(contractPath)
+		file, err := os.ReadFile(contractPath)
 		if err != nil {
 			return err
 		}

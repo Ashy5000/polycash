@@ -18,7 +18,6 @@ const BlocksUntilFinality = 3
 
 // Rewards
 var BlocksBeforeReward = 3
-var BlockReward = 1.0
 var TransactionFee = 0.0001
 var BodyFeePerByte = 0.000001
 var GasPrice = 0.000001

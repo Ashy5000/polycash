@@ -49,7 +49,7 @@ func InsertValue(tree []MerkleNode, key string, value []byte) []MerkleNode {
 		})
 		activeIndex = 0
 	}
-	for i, _ := range key {
+	for i := range key {
 		activeKey += string(key[i])
 		if _, ok := tree[activeIndex].Children[key[i]]; ok {
 			activeIndex = tree[activeIndex].Children[key[i]]
@@ -65,14 +65,14 @@ func InsertValue(tree []MerkleNode, key string, value []byte) []MerkleNode {
 		})
 		activeIndex = len(tree) - 1
 	}
-	tree[activeIndex].Data = []byte(value)
+	tree[activeIndex].Data = value
 	tree = HashTree(tree, activeIndex)
 	return tree
 }
 
 func GetValue(tree []MerkleNode, key string) ([]byte, bool) {
 	activeIndex := 0
-	for i, _ := range key {
+	for i := range key {
 		if val, ok := tree[activeIndex].Children[key[i]]; ok {
 			activeIndex = val
 		} else {

@@ -36,7 +36,7 @@ func SignAuthenticationProof(a *AuthenticationProof) error {
 	return nil
 }
 
-func RequestAuthentication(peer_ip string) (PublicKey, bool, error) {
+func RequestAuthentication(peerIp string) (PublicKey, bool, error) {
 	// Generate a random slice of bytes to sign
 	// This is to prevent replay attacks
 	data := make([]byte, 64)
@@ -47,7 +47,7 @@ func RequestAuthentication(peer_ip string) (PublicKey, bool, error) {
 	// Get the hash of the data
 	digest := sha256.Sum256(data)
 	// Request the signature from the peer
-	req, err := http.NewRequest("GET", peer_ip+"/identify", bytes.NewBuffer(data))
+	req, err := http.NewRequest("GET", peerIp+"/identify", bytes.NewBuffer(data))
 	if err != nil {
 		return PublicKey{}, false, err
 	}

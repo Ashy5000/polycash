@@ -76,7 +76,12 @@ func ConnectToPeer(ip string) {
 	if err != nil {
 		panic(err)
 	}
-	defer ipReq.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(ipReq.Body)
 
 	body, err := io.ReadAll(ipReq.Body)
 	if err != nil {

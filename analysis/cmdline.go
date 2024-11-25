@@ -24,7 +24,7 @@ func GetTPSCmd(fields []string) {
 	fmt.Println(tps)
 }
 
-func GetTokensMintedCmd(fields []string) {
+func GetTokensMintedCmd([]string) {
 	tokensMinted := GetNumTokensMinted()
 	fmt.Println(tokensMinted)
 }

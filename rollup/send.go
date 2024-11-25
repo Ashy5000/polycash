@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var pendingTransactions = []string{}
+var pendingTransactions []string
 var listening = false
 
 func SendL2Transaction(sender PublicKey, recipient PublicKey, amount uint64) {
@@ -30,7 +30,12 @@ func SendL2Transaction(sender PublicKey, recipient PublicKey, amount uint64) {
 	// Listen for signing requests if not already listening
 	if !listening {
 		http.HandleFunc("/signL2Transaction", HandleSignL2TransactionRequest)
-		go http.ListenAndServe(":8080", nil)
+		go func() {
+			err := http.ListenAndServe(":8080", nil)
+			if err != nil {
+				panic(err)
+			}
+		}()
 		listening = true
 	}
 	// Add transaction to pending transactions
@@ -68,15 +73,21 @@ func HandleSignL2TransactionRequest(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if !found {
-			w.Write([]byte("invalid"))
+			_, err := w.Write([]byte("invalid"))
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 	if myTransactionsCount != len(pendingTransactions) {
-		w.Write([]byte("invalid"))
+		_, err := w.Write([]byte("invalid"))
+		if err != nil {
+			panic(err)
+		}
 	}
 	// Sign combined transactions
 	key := GetKey("")
-	signature, err := key.X.Sign([]byte(body))
+	signature, err := key.X.Sign(body)
 	if err != nil {
 		panic(err)
 	}
@@ -85,5 +96,8 @@ func HandleSignL2TransactionRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	w.Write(marshaledSignature)
+	_, err = w.Write(marshaledSignature)
+	if err != nil {
+		panic(err)
+	}
 }

@@ -71,7 +71,7 @@ func (i Transaction) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	bodySignaturesBytes := []byte{}
+	var bodySignaturesBytes []byte
 	for n, signature := range i.BodySignatures {
 		signatureBytes, err := json.Marshal(signature)
 		if err != nil {
@@ -123,7 +123,7 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 	contractsStr := strings.Replace(parts[5], "'", `"`, -1)
 	err = json.Unmarshal([]byte(contractsStr), &contracts)
 	if err != nil {
-    fmt.Println("Error unmarshaling smart contracts")
+		fmt.Println("Error unmarshaling smart contracts")
 		return err
 	}
 	i.Contracts = contracts

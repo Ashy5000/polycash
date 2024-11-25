@@ -24,12 +24,12 @@ func TestHashBlock(t *testing.T) {
 		}
 		block := Block{
 			Transactions: []Transaction{
-				Transaction{
+				{
 					Sender:    key,
 					Recipient: key,
 					Amount:    0,
 					Contracts: []Contract{
-						Contract{
+						{
 							Contents: "",
 							Parties:  nil,
 							GasUsed:  0,
@@ -52,7 +52,7 @@ func TestHashBlock(t *testing.T) {
 			Transition: StateTransition{
 				LegacyUpdatedData: map[string][]byte{},
 				LegacyNewContracts: map[uint64]Contract{
-					0: Contract{
+					0: {
 						Contents: "",
 						Parties:  nil,
 						GasUsed:  0,

@@ -52,7 +52,7 @@ var commands = map[string]func([]string){
 	"readSmartContract":    ReadSmartContractCmd,
 }
 
-func SyncCmd(fields []string) {
+func SyncCmd([]string) {
 	Log("Syncing blockchain...", false)
 	SyncBlockchain(-1)
 	Log("Blockchain successfully synced!", false)
@@ -146,7 +146,7 @@ func RunSmartContractCmd(fields []string) {
 	}
 }
 
-func KeygenCmd(fields []string) {
+func KeygenCmd([]string) {
 	var privateKey PrivateKey
 	sigName := "Dilithium3"
 	signer := oqs.Signature{}
@@ -173,7 +173,7 @@ func KeygenCmd(fields []string) {
 	// TODO: Implement mnemonics for Dilithium2
 }
 
-func ShowPublicKeyCmd(fields []string) {
+func ShowPublicKeyCmd([]string) {
 	// Show the public key in the key.json file
 	publicKey := GetKey("").PublicKey
 	publicKeyJson, err := json.Marshal(publicKey.Y)
@@ -183,7 +183,7 @@ func ShowPublicKeyCmd(fields []string) {
 	fmt.Println(string(publicKeyJson))
 }
 
-func EncryptCmd(fields []string) {
+func EncryptCmd([]string) {
 	// Ask the user for a password
 	fmt.Print("Enter a password: ")
 	inputReader := bufio.NewReader(os.Stdin)
@@ -193,7 +193,7 @@ func EncryptCmd(fields []string) {
 	EncryptKey(password)
 }
 
-func DecryptCmd(fields []string) {
+func DecryptCmd([]string) {
 	// Ask the user for a password
 	fmt.Print("Enter a password: ")
 	inputReader := bufio.NewReader(os.Stdin)
@@ -203,7 +203,7 @@ func DecryptCmd(fields []string) {
 	DecryptKey(password)
 }
 
-func SaveStateCmd(fields []string) {
+func SaveStateCmd([]string) {
 	blockchainJson, err := json.Marshal(Blockchain)
 	// Save the blockchain to a file
 	if err != nil {
@@ -224,7 +224,7 @@ func SaveStateCmd(fields []string) {
 // - fields: a slice of strings representing the command line fields.
 //
 // Return type: none.
-func LoadStateCmd(fields []string) {
+func LoadStateCmd([]string) {
 	// Load the blockchain from a file
 	blockchainJson, err := os.ReadFile("blockchain.json")
 	if err != nil {
@@ -254,7 +254,7 @@ func AddPeerCmd(fields []string) {
 	fmt.Println("Peer added successfully!")
 }
 
-func BootstrapCmd(fields []string) {
+func BootstrapCmd([]string) {
 	Bootstrap()
 	fmt.Println("Bootstrap complete!")
 }
@@ -275,7 +275,7 @@ func GetFromStateCmd(fields []string) {
 	fmt.Println("Data:", dataHex)
 }
 
-func HelpCmd(fields []string) {
+func HelpCmd([]string) {
 	fmt.Println("Commands:")
 	fmt.Println("help - Display this help menu")
 	fmt.Println("license - Display this software's license (GNU GPL v3)")
@@ -296,7 +296,7 @@ func HelpCmd(fields []string) {
 	fmt.Println("exit - Exit the console")
 }
 
-func LicenseCmd(fields []string) {
+func LicenseCmd([]string) {
 	license, err := os.ReadFile("COPYING")
 	if err != nil {
 		panic(err)
@@ -352,27 +352,27 @@ func GetNthTransactionCmd(fields []string) {
 	}
 }
 
-func StartAnalysisConsoleCmd(fields []string) {
+func StartAnalysisConsoleCmd([]string) {
 	StartAnalysisCmdline()
 }
 
-func GetBlockchainLenCmd(fields []string) {
+func GetBlockchainLenCmd([]string) {
 	fmt.Println(len(Blockchain))
 }
 
 func QueryOracleCmd(fields []string) {
-	query_type_int, err := strconv.ParseInt(fields[0], 10, 64)
+	queryTypeInt, err := strconv.ParseInt(fields[0], 10, 64)
 	if err != nil {
 		panic(err)
 	}
-	var query_body []byte
-	_, err = hex.Decode(query_body, []byte(fields[1]))
+	var queryBody []byte
+	_, err = hex.Decode(queryBody, []byte(fields[1]))
 	if err != nil {
 		return
 	}
 	query := OracleQuery{
-		Body: query_body,
-		Type: OracleQueryType(query_type_int),
+		Body: queryBody,
+		Type: OracleQueryType(queryTypeInt),
 	}
 	res := CalculateOracleResponse(query)
 	fmt.Println(string(res.Body))

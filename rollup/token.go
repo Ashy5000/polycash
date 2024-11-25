@@ -37,7 +37,7 @@ func CombineL2Transactions(transactions []string) string {
 
 func SeperateL2Transactions(transactionsStr string) []string {
 	lines := strings.Split(transactionsStr, "\n")
-	transactions := []string{}
+	var transactions []string
 	for _, line := range lines {
 		if line == "== BEGIN L2 TRANSACTION ==" {
 			transactions = append(transactions, "")
@@ -60,9 +60,9 @@ func GetL2TokenBalances() map[string]uint64 {
 			if !BodyContainsL2Transactions(string(body)) {
 				continue
 			}
-			l2_transactions := SeperateL2Transactions(string(body))
-			for _, l2_transaction := range l2_transactions {
-				lines := strings.Split(l2_transaction, "\n")
+			l2Transactions := SeperateL2Transactions(string(body))
+			for _, l2Transaction := range l2Transactions {
+				lines := strings.Split(l2Transaction, "\n")
 				sender := PublicKey{}
 				recipient := PublicKey{}
 				amount := uint64(0)
@@ -81,7 +81,10 @@ func GetL2TokenBalances() map[string]uint64 {
 				// Verify the body signature
 				verifier := oqs.Signature{}
 				sigName := "Dilithium3"
-				verifier.Init(sigName, nil)
+				err = verifier.Init(sigName, nil)
+				if err != nil {
+					panic(err)
+				}
 				foundValidSignature := false
 				for _, signature := range transaction.BodySignatures {
 					// Check if the signature is valid using the sender's public key
