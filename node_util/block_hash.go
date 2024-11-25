@@ -106,6 +106,13 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 				blockCpy.Transactions[i].Timestamp = time.Time{}
 				blockCpy.Transactions[i].Body = []byte{}
 			}
+			// Just include merkle roots when hashing
+			blockCpy.Transition.ZenUpdatedData = []MerkleNode{
+				blockCpy.Transition.ZenUpdatedData[0],
+			}
+			blockCpy.Transition.ZenNewContracts = []MerkleNode{
+				blockCpy.Transition.ZenNewContracts[0],
+			}
 			blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
 			sum := sha3.Sum512(blockBytes)
 			return sum
