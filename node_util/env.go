@@ -10,7 +10,7 @@ package node_util
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -48,7 +48,7 @@ func LoadEnv() {
 			panic(err)
 		}
 	}(envFile)
-	jsonBytes, _ := ioutil.ReadAll(envFile)
+	jsonBytes, _ := io.ReadAll(envFile)
 	err = json.Unmarshal(jsonBytes, &Env)
 	if err != nil {
 		panic(err)
