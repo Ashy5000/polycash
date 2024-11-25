@@ -9,32 +9,42 @@ You should have received a copy of the GNU General Public License along with thi
 package node_util
 
 type State struct {
-	Data      map[string][]byte
-	Contracts map[uint64]Contract
+	// Legacy properties are stored as maps for backwards compatibility
+	LegacyData      map[string][]byte
+	LegacyContracts map[uint64]Contract
+	// Post-zen properties are stored as merkle trees
+	ZenData      []MerkleNode
+	ZenContracts []MerkleNode
 }
 
 type StateTransition struct {
-	UpdatedData  map[string][]byte
-	NewContracts map[uint64]Contract
+	LegacyUpdatedData  map[string][]byte
+	LegacyNewContracts map[uint64]Contract
+	ZenUpdatedData     []MerkleNode
+	ZenNewContracts    []MerkleNode
 }
 
 func TransitionState(state State, transition StateTransition) State {
-	for key, value := range transition.UpdatedData {
+	for key, value := range transition.LegacyUpdatedData {
 		if len(value) == 0 || value == nil {
 			continue
 		}
-		state.Data[key] = value
+		state.LegacyData[key] = value
 	}
-	for key, value := range transition.NewContracts {
-		state.Contracts[key] = value
+	for key, value := range transition.LegacyNewContracts {
+		state.LegacyContracts[key] = value
 	}
+	state.ZenData = Merge(state.ZenData, transition.ZenUpdatedData)
+	state.ZenContracts = Merge(state.ZenContracts, transition.ZenNewContracts)
 	return state
 }
 
 func CalculateCurrentState() State {
 	state := State{
-		Data:      make(map[string][]byte),
-		Contracts: make(map[uint64]Contract),
+		LegacyData:      make(map[string][]byte),
+		LegacyContracts: make(map[uint64]Contract),
+		ZenData:         make([]MerkleNode, 0),
+		ZenContracts:    make([]MerkleNode, 0),
 	}
 	for _, block := range Blockchain {
 		state = TransitionState(state, block.Transition)
@@ -44,17 +54,24 @@ func CalculateCurrentState() State {
 
 func GetFromState(location string) []byte {
 	state := CalculateCurrentState()
-	val, ok := state.Data[location]
+	// Try to get from merkle
+	val, ok := GetValue(state.ZenData, location)
+	if ok {
+		return val
+	}
+	// Fallback to legacy
+	val, ok = state.LegacyData[location]
 	if ok {
 		return val
 	}
 	return []byte{}
 }
 
+// GetPendingState is for legacy versions only. Post-zen VMs process the entire batch in one ZK proof
 func GetPendingState() map[string][]byte {
 	res := make(map[string][]byte)
 	for _, subTransition := range NextTransitions {
-		for location, data := range subTransition.UpdatedData {
+		for location, data := range subTransition.LegacyUpdatedData {
 			res[location] = data
 		}
 	}

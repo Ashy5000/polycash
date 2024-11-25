@@ -55,16 +55,18 @@ func CreateBlock() (Block, error) {
 	Log(fmt.Sprintf("Mining block with difficulty %d", block.Difficulty), false)
 	for hash > MaximumUint64/block.Difficulty {
 		block.Transition = StateTransition{
-			UpdatedData: make(map[string][]byte),
-      NewContracts: make(map[uint64]Contract),
+			LegacyUpdatedData:  make(map[string][]byte),
+			LegacyNewContracts: make(map[uint64]Contract),
 		}
 		for _, PartialStateTransition := range NextTransitions {
-			for address, data := range PartialStateTransition.UpdatedData {
-				block.Transition.UpdatedData[address] = data
+			for address, data := range PartialStateTransition.LegacyUpdatedData {
+				block.Transition.LegacyUpdatedData[address] = data
 			}
-      for address, contract := range PartialStateTransition.NewContracts {
-        block.Transition.NewContracts[address] = contract
-      }
+			for address, contract := range PartialStateTransition.LegacyNewContracts {
+				block.Transition.LegacyNewContracts[address] = contract
+			}
+			block.Transition.ZenUpdatedData = Merge(block.Transition.ZenUpdatedData, PartialStateTransition.ZenUpdatedData)
+			block.Transition.ZenNewContracts = Merge(block.Transition.ZenNewContracts, PartialStateTransition.ZenNewContracts)
 		}
 		i := 0
 		for _, transaction := range MiningTransactions {

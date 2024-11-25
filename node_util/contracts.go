@@ -14,6 +14,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/vmihailenco/msgpack/v5"
 	"os"
 	"strconv"
@@ -41,11 +42,23 @@ func (c Contract) IsNewContract() bool {
 
 func (c Contract) LoadContract() {
 	state := CalculateCurrentState()
-	for _, contract := range state.Contracts {
+	// Try with merkle
+	contract, ok := GetValue(state.ZenContracts, strconv.FormatUint(c.Location, 10))
+	if ok {
+		c.Contents = string(contract)
+		c.Parties = nil // Zen drops parties from specification (can be replaced by new VM features)
+		// By only storing contracts in the merkle tree, the root hash will match between the consensus client and the VM
+		// This way, the merkle tree doesn't have to be rebuilt for each transaction
+		c.GasUsed = 0
+		c.Loaded = true
+		return
+	}
+	// Fallback to legacy
+	for _, contract := range state.LegacyContracts {
 		if contract.Location == c.Location {
 			c.Contents = contract.Contents
 			c.Parties = contract.Parties
-			c.GasUsed = contract.GasUsed
+			c.GasUsed = 0
 			c.Loaded = true
 			break
 		}
@@ -82,7 +95,8 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 	transactions := make([]Transaction, 0)
 	gasUsed := 0.0
 	transition := StateTransition{
-		UpdatedData: make(map[string][]byte),
+		LegacyUpdatedData: make(map[string][]byte),
+		ZenUpdatedData:    make([]MerkleNode, 0),
 	}
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -104,7 +118,14 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 						executionLocked = false
 						return nil, StateTransition{}, 0, err
 					}
-					transition.UpdatedData[address] = valueBytes
+					fmt.Println("Applying state change:", address, valueBytes)
+					if Env.Upgrades.Zen <= len(Blockchain) {
+						// Zen insert
+						transition.ZenUpdatedData = InsertValue(transition.ZenUpdatedData, address, valueBytes)
+					} else {
+						// Legacy insert
+						transition.LegacyUpdatedData[address] = valueBytes
+					}
 				} else if len(line) >= 25 && line[:24] == "External state change: " {
 					stateChangeString := line[24:]
 					parts := strings.Split(stateChangeString, "|")
@@ -120,7 +141,13 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 						executionLocked = false
 						return nil, StateTransition{}, 0, errors.New("contract attempted to modify external state not marked as writeable")
 					}
-					transition.UpdatedData[address] = valueBytes
+					if Env.Upgrades.Zen <= len(Blockchain) {
+						// Zen insert
+						transition.ZenUpdatedData = InsertValue(transition.ZenUpdatedData, address, valueBytes)
+					} else {
+						// Legacy insert
+						transition.LegacyUpdatedData[address] = valueBytes
+					}
 				}
 				continue
 			}
@@ -177,8 +204,14 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 		transactions = append(transactions, transaction)
 	}
 	if c.IsNewContract() {
-		transition.NewContracts = map[uint64]Contract{
-			c.Location: c,
+		if Env.Upgrades.Zen <= len(Blockchain) {
+			// Zen update
+			InsertValue(transition.ZenUpdatedData, strconv.FormatUint(c.Location, 10), []byte(c.Contents))
+		} else {
+			// Legacy update
+			transition.LegacyNewContracts = map[uint64]Contract{
+				c.Location: c,
+			}
 		}
 	}
 	executionLocked = false

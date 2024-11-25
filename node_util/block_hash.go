@@ -86,6 +86,7 @@ type PreZenBlock struct {
 }
 
 func HashBlock(block Block, blockHeight int) [64]byte {
+	// Automatically downgrades to older block formats if necessary
 	if Env.Upgrades.Washington < blockHeight {
 		if Env.Upgrades.Zen < blockHeight {
 			var blockCpy Block
@@ -135,8 +136,8 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 		preZenBlock.TimeVerifierSignatures = block.TimeVerifierSignatures
 		preZenBlock.TimeVerifiers = block.TimeVerifiers
 		preZenTransition := PreZenTransition{}
-		preZenTransition.UpdatedData = block.Transition.UpdatedData
-		preZenTransition.NewContracts = block.Transition.NewContracts
+		preZenTransition.UpdatedData = block.Transition.LegacyUpdatedData
+		preZenTransition.NewContracts = block.Transition.LegacyNewContracts
 		preZenBlock.Transition = preZenTransition
 		blockBytes := []byte(fmt.Sprintf("%v", preZenBlock))
 		sum := sha3.Sum512(blockBytes)
@@ -177,7 +178,7 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 	oldBlock.TimeVerifiers = []PublicKey{}
 	oldBlock.Timestamp = time.Time{}
 	oldTransition := OldTransition{}
-	oldTransition.UpdatedData = block.Transition.UpdatedData
+	oldTransition.UpdatedData = block.Transition.LegacyUpdatedData
 	oldBlock.Transition = oldTransition
 	blockBytes := []byte(fmt.Sprintf("%v", oldBlock))
 	sum := sha3.Sum512(blockBytes)

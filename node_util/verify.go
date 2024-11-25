@@ -120,7 +120,8 @@ func VerifySmartContractTransactions(block Block) bool {
 	// Iterate through smart contracts
 	var smartContractCreatedTransactions []Transaction
 	var fullTransition = StateTransition{
-		UpdatedData: make(map[string][]byte),
+		LegacyUpdatedData: make(map[string][]byte),
+		ZenUpdatedData:    make([]MerkleNode, 0),
 	}
 	for _, transaction := range block.Transactions {
 		for _, contract := range transaction.Contracts {
@@ -141,14 +142,18 @@ func VerifySmartContractTransactions(block Block) bool {
 				return false
 			}
 			// Add transition to fullTransition
-			for location, value := range transition.UpdatedData {
-				fullTransition.UpdatedData[location] = value
+			for location, value := range transition.LegacyUpdatedData {
+				fullTransition.LegacyUpdatedData[location] = value
 			}
+			fullTransition.ZenUpdatedData = Merge(fullTransition.ZenUpdatedData, transition.ZenUpdatedData)
 		}
 	}
-	if !reflect.DeepEqual(fullTransition.UpdatedData, block.Transition.UpdatedData) {
+	if !reflect.DeepEqual(fullTransition.LegacyUpdatedData, block.Transition.LegacyUpdatedData) {
 		Log("Block has invalid state transition. Ignoring block request.", true)
 		return false
+	}
+	if len(fullTransition.ZenUpdatedData) != 0 && fullTransition.ZenUpdatedData[0].Hash != block.Transition.ZenUpdatedData[0].Hash {
+		Log("Block has invalid merkle root. Ignoring block request.", true)
 	}
 	// Get the smart contract created transactions in the block
 	var smartContractCreatedTransactionsInBlock []Transaction

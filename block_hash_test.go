@@ -50,8 +50,8 @@ func TestHashBlock(t *testing.T) {
 			TimeVerifierSignatures:          []Signature{},
 			TimeVerifiers:                   []PublicKey{},
 			Transition: StateTransition{
-				UpdatedData: map[string][]byte{},
-				NewContracts: map[uint64]Contract{
+				LegacyUpdatedData: map[string][]byte{},
+				LegacyNewContracts: map[uint64]Contract{
 					0: Contract{
 						Contents: "",
 						Parties:  nil,

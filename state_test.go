@@ -10,10 +10,10 @@ func TestTransitionState(t *testing.T) {
 	t.Run("It correctly transitions the state", func(t *testing.T) {
 		// Arrange
 		state := node_util.State{
-			Data: map[string][]byte{
+			LegacyData: map[string][]byte{
 				"123": []byte("321"),
 			},
-			Contracts: map[uint64]node_util.Contract{
+			LegacyContracts: map[uint64]node_util.Contract{
 				0: {
 					Contents: "",
 					Parties:  nil,
@@ -24,10 +24,10 @@ func TestTransitionState(t *testing.T) {
 			},
 		}
 		transition := node_util.StateTransition{
-			UpdatedData: map[string][]byte{
+			LegacyUpdatedData: map[string][]byte{
 				"321": []byte("123"),
 			},
-			NewContracts: map[uint64]node_util.Contract{
+			LegacyNewContracts: map[uint64]node_util.Contract{
 				1: {
 					Contents: "",
 					Parties:  nil,
@@ -40,11 +40,11 @@ func TestTransitionState(t *testing.T) {
 		// Act
 		newState := node_util.TransitionState(state, transition)
 		// Assert
-		for key, value := range transition.UpdatedData {
-			state.Data[key] = value
+		for key, value := range transition.LegacyUpdatedData {
+			state.LegacyData[key] = value
 		}
-		for key, value := range transition.NewContracts {
-			state.Contracts[key] = value
+		for key, value := range transition.LegacyNewContracts {
+			state.LegacyContracts[key] = value
 		}
 		assert.Equal(t, state, newState)
 	})

@@ -262,7 +262,15 @@ func BootstrapCmd(fields []string) {
 func GetFromStateCmd(fields []string) {
 	address := fields[1]
 	state := CalculateCurrentState()
-	dataBytes := state.Data[address]
+	// Zen
+	dataBytes, ok := GetValue(state.ZenData, address)
+	if ok {
+		dataHex := hex.EncodeToString(dataBytes)
+		fmt.Println("Data:", dataHex)
+		return
+	}
+	// Legacy (fallback)
+	dataBytes = state.LegacyData[address]
 	dataHex := hex.EncodeToString(dataBytes)
 	fmt.Println("Data:", dataHex)
 }
@@ -376,7 +384,14 @@ func ReadSmartContractCmd(fields []string) {
 		panic(err)
 	}
 	state := CalculateCurrentState()
-	for l, c := range state.Contracts {
+	// Zen
+	contract, ok := GetValue(state.ZenContracts, strconv.FormatUint(loc, 10))
+	if ok {
+		fmt.Println(string(contract))
+		return
+	}
+	// Legacy (fallback)
+	for l, c := range state.LegacyContracts {
 		if l == loc {
 			fmt.Println(c.Contents)
 			break

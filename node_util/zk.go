@@ -21,7 +21,7 @@ import (
 
 func WriteZkState(state State) {
 	var segments []string
-	for location, val := range state.Data {
+	for location, val := range state.LegacyData {
 		var segment string
 		segment += location
 		segment += ">"
@@ -29,11 +29,24 @@ func WriteZkState(state State) {
 		segment += valHex
 		segments = append(segments, segment)
 	}
+	for _, i := range state.ZenData {
+		if i.Data != nil {
+			var segment string
+			segment += i.Key
+			segment += ">"
+			valHex := hex.EncodeToString(i.Data)
+			segment += valHex
+			segments = append(segments, segment)
+		}
+	}
 	result := ""
 	for segment := range segments {
 		result += segments[segment] + "*"
 	}
-	result = result[:len(result)-1]
+	if result != "" {
+		// Remove last *
+		result = result[:len(result)-1]
+	}
 	err := os.WriteFile("merkle.txt", []byte(result), 0644)
 	if err != nil {
 		panic(err)

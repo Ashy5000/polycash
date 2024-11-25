@@ -51,12 +51,14 @@ fn main() {
     // Initialize merkle tree
     let mut data: FxHashMap<String, Vec<u8>> = FxHashMap::default();
     let merkle_file = fs::read_to_string(args[5].clone()).unwrap();
-    let merkle_pairs: Vec<&str> = merkle_file.split("*").collect();
-    for pair in merkle_pairs {
-        let segments: Vec<&str> = pair.split(">").collect();
-        let key = String::from(segments[0]);
-        let value = hex::decode(segments[1].trim()).unwrap();
-        data.insert(key, value);
+    if merkle_file.len() != 0 {
+        let merkle_pairs: Vec<&str> = merkle_file.split("*").collect();
+        for pair in merkle_pairs {
+            let segments: Vec<&str> = pair.split(">").collect();
+            let key = String::from(segments[0]);
+            let value = hex::decode(segments[1].trim()).unwrap();
+            data.insert(key, value);
+        }
     }
     let tree = merklize(data);
     let lazy_len = tree.len();
