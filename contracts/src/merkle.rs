@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use rustc_hash::FxHashMap;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -7,10 +7,10 @@ pub struct MerkleNode<T> {
     pub hash: String,
     pub value: T,
     pub children: FxHashMap<char, usize>,
-    pub parent: usize
+    pub parent: usize,
 }
 
-fn hash_node<A : MerkleContainer<Vec<u8>> + Clone>(tree: &mut A, node_index: usize) -> String {
+fn hash_node<A: MerkleContainer<Vec<u8>> + Clone>(tree: &mut A, node_index: usize) -> String {
     let mut hasher = Sha256::new();
     hasher.update(tree.get_wrapper(node_index).unwrap().value.clone());
     for (_, index) in tree.get_wrapper(node_index).unwrap().children.iter() {
@@ -37,19 +37,24 @@ fn hash_vec_tree(tree: &mut Vec<MerkleNode<Vec<u8>>>, index: usize) {
     }
 }
 
-fn verify_node<A : MerkleContainer<Vec<u8>> + Clone>(tree: &mut A, node_index: usize) {
-    assert_eq!(hash_node(tree, node_index), tree.get_wrapper(node_index).unwrap().hash, "Assertion failed on node with index {}", node_index);
+fn verify_node<A: MerkleContainer<Vec<u8>> + Clone>(tree: &mut A, node_index: usize) {
+    assert_eq!(
+        hash_node(tree, node_index),
+        tree.get_wrapper(node_index).unwrap().hash,
+        "Assertion failed on node with index {}",
+        node_index
+    );
     if node_index != 0 {
         verify_node(tree, tree.clone().get_wrapper(node_index).unwrap().parent);
     }
 }
 
 pub fn merklize(state: FxHashMap<String, Vec<u8>>) -> Vec<MerkleNode<Vec<u8>>> {
-    let mut tree: Vec<MerkleNode<Vec<u8>>> = vec![MerkleNode{
+    let mut tree: Vec<MerkleNode<Vec<u8>>> = vec![MerkleNode {
         hash: String::new(),
         value: Vec::new(),
         children: FxHashMap::default(),
-        parent: 0
+        parent: 0,
     }];
     for (loc, val) in state.iter() {
         let mut active: usize = 0;
@@ -58,11 +63,11 @@ pub fn merklize(state: FxHashMap<String, Vec<u8>>) -> Vec<MerkleNode<Vec<u8>>> {
                 active = tree[active].children[&c];
                 continue;
             }
-            tree.push(MerkleNode{
+            tree.push(MerkleNode {
                 hash: String::new(),
                 value: Vec::new(),
                 children: FxHashMap::default(),
-                parent: active
+                parent: active,
             });
             let new_index = tree.len() - 1;
             tree[active].children.insert(c, new_index);
@@ -84,7 +89,7 @@ impl MerkleContainer<Vec<u8>> for Vec<MerkleNode<Vec<u8>>> {
     }
 }
 
-pub fn get_from_merkle<A : MerkleContainer<Vec<u8>> + Clone>(tree: &mut A, loc: String) -> Vec<u8> {
+pub fn get_from_merkle<A: MerkleContainer<Vec<u8>> + Clone>(tree: &mut A, loc: String) -> Vec<u8> {
     let mut active: usize = 0;
     for c in loc.chars() {
         active = tree.get_wrapper(active).unwrap().children[&c];

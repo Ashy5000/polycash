@@ -1,9 +1,9 @@
-use std::fs::File;
-use std::io::Read;
+use crate::state::State;
 use rmpv::decode::read_value;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-use crate::state::State;
+use std::fs::File;
+use std::io::Read;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PendingState {
@@ -13,7 +13,7 @@ pub struct PendingState {
 impl PendingState {
     pub fn new() -> PendingState {
         PendingState {
-            data: FxHashMap::default()
+            data: FxHashMap::default(),
         }
     }
 }
@@ -26,7 +26,9 @@ impl State for PendingState {
     fn get(&mut self, location: String) -> Result<Vec<u8>, String> {
         Ok(self.data[&location].clone())
     }
-    fn dump(&self) -> FxHashMap<String, Vec<u8>> { panic!("Not implemented."); }
+    fn dump(&self) -> FxHashMap<String, Vec<u8>> {
+        panic!("Not implemented.");
+    }
 }
 
 pub fn decode_pending_state() -> PendingState {
@@ -37,7 +39,9 @@ pub fn decode_pending_state() -> PendingState {
     let value = read_value(&mut reader).expect("Failed to decode pending state");
     assert!(value.is_map());
     let value_map = value.as_map().expect("Failed to decode pending state");
-    let mut res = PendingState{data: FxHashMap::default()};
+    let mut res = PendingState {
+        data: FxHashMap::default(),
+    };
     for pair in value_map {
         let key = &pair.0;
         assert!(key.is_str());

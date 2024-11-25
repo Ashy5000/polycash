@@ -22,7 +22,7 @@ pub(crate) fn build_line() -> Line {
 
 #[derive(Debug)]
 pub struct SyntaxTree {
-    pub lines: Vec<Line>
+    pub lines: Vec<Line>,
 }
 
 impl SyntaxTree {
@@ -38,20 +38,25 @@ impl SyntaxTree {
                     line.command = "NEXT".parse().unwrap();
                     line.args = vec![];
                     self.lines.push(line);
-                    break
+                    break;
                 }
                 checked_comment = true;
                 let part_chars = &part.chars();
                 let first_two_chars: String = part_chars.to_owned().take(2).collect();
                 let part_string;
                 if first_two_chars == "0x" {
-                    part_string = part_chars.to_owned().skip(2).take(part.len() - 2).collect::<String>().to_owned();
+                    part_string = part_chars
+                        .to_owned()
+                        .skip(2)
+                        .take(part.len() - 2)
+                        .collect::<String>()
+                        .to_owned();
                     part = part_string.as_str();
                 }
                 parts.push(part.to_owned())
             }
             if parts.is_empty() {
-                continue
+                continue;
             }
             let mut line = build_line();
             line.command = parts[0].parse().unwrap();
@@ -67,8 +72,5 @@ impl SyntaxTree {
 }
 
 pub fn build_syntax_tree() -> SyntaxTree {
-    SyntaxTree {
-        lines: Vec::new(),
-    }
+    SyntaxTree { lines: Vec::new() }
 }
-

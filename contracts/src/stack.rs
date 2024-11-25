@@ -1,5 +1,5 @@
-use rustc_hash::FxHashMap;
 use crate::buffer::Buffer;
+use rustc_hash::FxHashMap;
 use smartstring::alias::String;
 
 // Copyright 2024, Asher Wrobel
@@ -16,7 +16,7 @@ pub struct StackFrame {
 }
 
 pub struct Stack {
-    pub frames: Vec<StackFrame>
+    pub frames: Vec<StackFrame>,
 }
 
 impl Stack {

@@ -48,7 +48,8 @@ impl BlockUtilInterface for NodeBlockUtilInterface {
             .arg(command)
             .output();
         let output = output.expect("Failed to execute node script");
-        let output = std::string::String::from_utf8(output.stdout).expect("Failed to convert output to string");
+        let output = std::string::String::from_utf8(output.stdout)
+            .expect("Failed to convert output to string");
         // Remove the newline character
         let output = output.trim().to_string();
         Ok(output.parse().unwrap())
@@ -63,8 +64,8 @@ impl BlockUtilInterface for NodeBlockUtilInterface {
             .arg("--command")
             .arg(command)
             .output();
-        let output =
-            std::string::String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+        let output = std::string::String::from_utf8(output.unwrap().stdout)
+            .expect("Failed to convert output to string");
         let output = output.trim().to_string();
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();
@@ -78,8 +79,8 @@ impl BlockUtilInterface for NodeBlockUtilInterface {
             .arg("--command")
             .arg(command)
             .output();
-        let output =
-            std::string::String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+        let output = std::string::String::from_utf8(output.unwrap().stdout)
+            .expect("Failed to convert output to string");
         let output = output.trim().to_string();
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();
@@ -96,8 +97,8 @@ impl BlockUtilInterface for NodeBlockUtilInterface {
             .arg("--command")
             .arg(command)
             .output();
-        let output =
-            std::string::String::from_utf8(output.unwrap().stdout).expect("Failed to convert output to string");
+        let output = std::string::String::from_utf8(output.unwrap().stdout)
+            .expect("Failed to convert output to string");
         let output = output.trim().to_string();
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();

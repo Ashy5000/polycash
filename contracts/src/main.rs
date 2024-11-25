@@ -11,19 +11,19 @@ mod buffer;
 mod math;
 mod read_contract;
 mod sanitization;
-mod syntax_tree;
-mod vm;
 mod stack;
 mod state;
+mod syntax_tree;
+mod vm;
 
 mod msgpack;
 
+use crate::blockutil::NodeBlockUtilInterface;
+use crate::msgpack::{decode_pending_state, PendingState};
+use crate::state::{CachedState, OnchainState, StateManager};
+use crate::vm::run_vm;
 use std::env;
 use std::process::ExitCode;
-use crate::blockutil::NodeBlockUtilInterface;
-use crate::state::{CachedState, OnchainState, StateManager};
-use crate::msgpack::{decode_pending_state, PendingState};
-use crate::vm::run_vm;
 
 fn main() -> ExitCode {
     let contract_contents = read_contract::read_contract();
@@ -34,8 +34,19 @@ fn main() -> ExitCode {
     let sender: Vec<u8> = args[4].clone().into();
     let pending_state = decode_pending_state();
     let mut interface = NodeBlockUtilInterface::new();
-    let mut state_manager = StateManager::<CachedState, OnchainState, PendingState>::new(interface.clone(), contract_hash.clone(), pending_state);
-    let (exit_code, gas_used, _out) = run_vm(contract_contents, contract_hash.parse().unwrap(), gas_limit, sender, &mut state_manager, &mut interface);
+    let mut state_manager = StateManager::<CachedState, OnchainState, PendingState>::new(
+        interface.clone(),
+        contract_hash.clone(),
+        pending_state,
+    );
+    let (exit_code, gas_used, _out) = run_vm(
+        contract_contents,
+        contract_hash.parse().unwrap(),
+        gas_limit,
+        sender,
+        &mut state_manager,
+        &mut interface,
+    );
     println!("Gas used: {}.0", gas_used);
     ExitCode::from(exit_code as u8)
 }

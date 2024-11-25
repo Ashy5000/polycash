@@ -9,11 +9,11 @@ You should have received a copy of the GNU General Public License along with thi
 pub mod blockutil;
 pub mod buffer;
 pub mod math;
+pub mod merkle;
+pub mod msgpack;
 pub mod read_contract;
 pub mod sanitization;
-pub mod syntax_tree;
-pub mod vm;
 pub mod stack;
 pub mod state;
-pub mod msgpack;
-pub mod merkle;
+pub mod syntax_tree;
+pub mod vm;

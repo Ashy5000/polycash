@@ -5,9 +5,10 @@ mod syntax_tree_test {
     #[test]
     fn test_syntax_tree() {
         let tree = contracts::syntax_tree::SyntaxTree {
-            lines: vec![
-                contracts::syntax_tree::Line { command: "InitBfr".parse().unwrap(), args: vec!["00000001".parse().unwrap(), "00000000".parse().unwrap() ] }
-            ],
+            lines: vec![contracts::syntax_tree::Line {
+                command: "InitBfr".parse().unwrap(),
+                args: vec!["00000001".parse().unwrap(), "00000000".parse().unwrap()],
+            }],
         };
         assert_eq!(tree.lines[0].command, "InitBfr".to_owned());
         assert_eq!(tree.lines[0].args[0], "00000001".to_owned());
