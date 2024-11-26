@@ -3,10 +3,12 @@ use contracts::merkle::MerkleNode;
 use contracts::vm::{VmRunDetails, ZkInfo};
 use methods::POLYCASH_ZK_GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
+use crate::socket::Socket;
 
 pub(crate) fn prove(
     run_details: VmRunDetails,
     host_vector: HostVector<MerkleNode<Vec<u8>>>,
+    socket: &mut Socket
 ) -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&run_details)
@@ -30,13 +32,9 @@ pub(crate) fn prove(
 
     // Get output from journal
     let output: ZkInfo = receipt.journal.decode().unwrap();
-
-    // Verify input
-    let input = output.input;
-    assert_eq!(run_details.contract_contents, input.contract_contents);
-    assert_eq!(run_details.contract_hash, input.contract_hash);
-    assert_eq!(run_details.gas_limits, input.gas_limits);
-    assert_eq!(run_details.senders, input.senders);
+    
+    // Send output to consensus client
+    socket.write_message(output.out.as_ref()).unwrap();
 
     // Return receipt
     receipt

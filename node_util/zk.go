@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 // Overview
@@ -53,7 +54,7 @@ func WriteZkState(state State) {
 	}
 }
 
-func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders []PublicKey) []string {
+func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders []PublicKey) string {
 	if generate {
 		// Generate args for a ZK proof
 		contractsArg := "contract.blockasm" // Contracts to be included
@@ -74,12 +75,14 @@ func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders
 		sendersArg = sendersArg[:len(sendersArg)-1]
 		merkleArg := "merkle.txt"   // State
 		recieptArg := "receipt.bin" // Receipt
-		return []string{contractsArg, hashesArg, gasLimitsArg, sendersArg, merkleArg, recieptArg}
+		args := []string{contractsArg, hashesArg, gasLimitsArg, sendersArg, merkleArg, recieptArg}
+		return strings.Join(args, " ")
 	} else {
 		// Generate args for a ZK verification
 		verificationArg := "V"      // Verification
 		receiptArg := "receipt.bin" // Receipt
-		return []string{verificationArg, receiptArg}
+		args := []string{verificationArg, receiptArg}
+		return strings.Join(args, " ")
 	}
 }
 
@@ -114,14 +117,20 @@ func WriteReceipt(receipt []byte) {
 	}
 }
 
-func RunZkBinary(args []string) (string, bool) {
-	out, err := exec.Command("./vm_zk/target/release/host", args...).Output()
+func RunZkBinary() (string, bool) {
+	out, err := exec.Command("./vm_zk/target/release/host").Output()
 	if err != nil {
-		fmt.Println(err.Error())
-		fmt.Println(args)
-		return "", false
+		panic(err)
 	}
 	return string(out), true
+}
+
+func SendZkRequest(args string) (string, error) {
+	err := SendString(Conn, args)
+	if err != nil {
+		return "", err
+	}
+	return ReceiveString()
 }
 
 func ZkProve(contracts []Contract, gasLimits []float64, senders []PublicKey, state State) (string, []byte) {
@@ -137,10 +146,10 @@ func ZkProve(contracts []Contract, gasLimits []float64, senders []PublicKey, sta
 		hashes = append(hashes, hex.EncodeToString(hash[:]))
 	}
 	args := GenerateZkArgs(true, hashes, gasLimits, senders)
-	// 4. Run zk binary
-	res, ok := RunZkBinary(args)
-	if !ok {
-		panic("ZK proof failed")
+	// 4. Send request
+	res, err := SendZkRequest(args)
+	if err != nil {
+		panic(err)
 	}
 	// 5. Read receipt
 	receipt := LoadReceipt()
@@ -152,7 +161,7 @@ func ZKVerify(receipt []byte) bool {
 	WriteReceipt(receipt)
 	// 2. Generate arguments
 	args := GenerateZkArgs(false, nil, nil, nil)
-	// 3. Run zk binary
-	_, ok := RunZkBinary(args)
-	return ok
+	// 3. Send request
+	_, err := SendZkRequest(args)
+	return err != nil
 }

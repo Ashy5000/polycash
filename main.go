@@ -39,6 +39,8 @@ func main() {
 		*serve = true
 	}
 	if *serve {
+		listener := EstablishConnection()
+		defer CloseConnection(listener)
 		if *mine {
 			go Mine()
 		}
