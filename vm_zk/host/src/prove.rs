@@ -33,9 +33,6 @@ pub(crate) fn prove(
     // Get output from journal
     let output: ZkInfo = receipt.journal.decode().unwrap();
     
-    // Send output to consensus client
-    socket.write_message(output.out.as_ref()).unwrap();
-
     // Return receipt
     receipt
 }

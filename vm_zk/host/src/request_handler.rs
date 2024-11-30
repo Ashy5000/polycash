@@ -2,6 +2,7 @@ use std::fs;
 use contracts::blockutil::{BlockUtilInterface, NodeBlockUtilInterface};
 use contracts::merkle::merklize;
 use contracts::read_contract::read_contract;
+use contracts::vm::ZkInfo;
 use risc0_zkvm::Receipt;
 use rustc_hash::FxHashMap;
 use crate::lazy_vector::HostVector;
@@ -81,4 +82,7 @@ pub(crate) fn handle_request(data: Vec<u8>, socket: &mut Socket) {
 
     let out_file = args[5];
     fs::write(out_file, receipt_serialized).unwrap();
+    
+    let zk_info: ZkInfo = receipt.journal.decode().unwrap();
+    socket.write_message(zk_info.out.as_ref()).unwrap()
 }

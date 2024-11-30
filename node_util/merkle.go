@@ -66,7 +66,7 @@ func InsertValue(tree []MerkleNode, key string, value []byte) []MerkleNode {
 		activeIndex = len(tree) - 1
 	}
 	tree[activeIndex].Data = value
-	tree = HashTree(tree, activeIndex)
+	tree = HashTree(tree, 0)
 	return tree
 }
 

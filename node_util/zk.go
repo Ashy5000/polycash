@@ -173,5 +173,5 @@ func ZKVerify(receipt []byte, merkleRoot string) bool {
 	args := GenerateZkArgs(false, nil, nil, nil, merkleRoot)
 	// 3. Send request
 	_, err := SendZkRequest(args)
-	return err != nil
+	return err == nil
 }

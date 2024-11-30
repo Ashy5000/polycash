@@ -33,16 +33,9 @@ func TestHashNode(t *testing.T) {
 }
 
 func TestHashTree(t *testing.T) {
-	tree := []MerkleNode{
-		{
-			Data:     []byte("test"),
-			Children: make(map[byte]int),
-			Parent:   0,
-			Hash:     "",
-			Key:      "",
-		},
-	}
-	HashTree(tree, 0)
+	tree := []MerkleNode{}
+	tree = InsertValue(tree, "test", []byte("test"))
+	tree = HashTree(tree, 0)
 	assert.NotNil(t, tree[0].Hash)
 }
 
