@@ -115,7 +115,13 @@ func DetectDuplicateBlock(hashBytes [64]byte) bool {
 }
 
 func VerifySmartContractTransactions(block Block) bool {
-	if !ZKVerify(block.ZenProof) {
+	var merkleRoot string
+	if len(block.Transition.ZenUpdatedData) > 0 {
+		merkleRoot = block.Transition.ZenUpdatedData[0].Hash
+	} else {
+		merkleRoot = ""
+	}
+	if !ZKVerify(block.ZenProof, merkleRoot) {
 		Log("Block has invalid ZK proof. Ignoring block request.", true)
 		return false
 	}

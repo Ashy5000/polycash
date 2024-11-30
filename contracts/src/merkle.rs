@@ -25,6 +25,9 @@ fn fill_vec_node_hash(tree: &mut Vec<MerkleNode<Vec<u8>>>, node_index: usize) {
 }
 
 fn hash_vec_tree(tree: &mut Vec<MerkleNode<Vec<u8>>>, index: usize) {
+    if tree.len() == 1 {
+        tree[0].hash = "".to_owned();
+    }
     if tree[index].children.len() == 0 {
         // Base case
         fill_vec_node_hash(tree, index);
