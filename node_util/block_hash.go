@@ -121,6 +121,8 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 			} else {
 				blockCpy.Transition.ZenNewContracts = []MerkleNode{}
 			}
+			// Remove ZK proof (already proven via ZK logic)
+			blockCpy.ZenProof = nil
 			blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
 			sum := sha3.Sum512(blockBytes)
 			return sum

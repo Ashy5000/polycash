@@ -59,20 +59,26 @@ func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders
 		// Generate args for a ZK proof
 		contractsArg := "contract.blockasm" // Contracts to be included
 		hashesArg := ""                     // Contract hashes
-		for hash := range hashes {
-			hashesArg += hashes[hash] + "%"
+		if len(hashes) != 0 {
+			for hash := range hashes {
+				hashesArg += hashes[hash] + "%"
+			}
+			hashesArg = hashesArg[:len(hashesArg)-1]
 		}
-		hashesArg = hashesArg[:len(hashesArg)-1]
 		gasLimitsArg := "" // Gas limits
-		for gasLimit := range gasLimits {
-			gasLimitsArg += fmt.Sprintf("%f", gasLimits[gasLimit]) + "%"
+		if len(gasLimits) != 0 {
+			for gasLimit := range gasLimits {
+				gasLimitsArg += fmt.Sprintf("%f", gasLimits[gasLimit]) + "%"
+			}
+			gasLimitsArg = gasLimitsArg[:len(gasLimitsArg)-1]
 		}
-		gasLimitsArg = gasLimitsArg[:len(gasLimitsArg)-1]
 		sendersArg := "" // Senders
-		for sender := range senders {
-			sendersArg += hex.EncodeToString(senders[sender].Y) + "%"
+		if len(senders) != 0 {
+			for sender := range senders {
+				sendersArg += hex.EncodeToString(senders[sender].Y) + "%"
+			}
+			sendersArg = sendersArg[:len(sendersArg)-1]
 		}
-		sendersArg = sendersArg[:len(sendersArg)-1]
 		merkleArg := "merkle.txt"   // State
 		recieptArg := "receipt.bin" // Receipt
 		args := []string{contractsArg, hashesArg, gasLimitsArg, sendersArg, merkleArg, recieptArg}
@@ -87,6 +93,9 @@ func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders
 }
 
 func WriteContractsAggregate(contracts []Contract) {
+	if len(contracts) == 0 {
+		return
+	}
 	var segments []string
 	for _, contract := range contracts {
 		segments = append(segments, contract.Contents)

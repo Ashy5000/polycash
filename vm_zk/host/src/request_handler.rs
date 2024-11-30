@@ -18,10 +18,9 @@ pub(crate) fn handle_request(data: Vec<u8>, socket: &mut Socket) {
         let receipt: Receipt = rmp_serde::from_slice(&*receipt_file).unwrap();
         assert!(verify(receipt));
         println!("Verification success!");
+        socket.write_message("Verification success!".as_ref()).unwrap();
         return;
     }
-    
-    println!("{:?}", args);
 
     let contracts_file = fs::read_to_string(args[0]).unwrap();
     let contract_contents_str = contracts_file.split("%").collect::<Vec<&str>>(); // % marks separation between contracts

@@ -105,6 +105,17 @@ func CreateBlock() (Block, error) {
 			return Block{}, errors.New("pool dry")
 		}
 	}
+	// Generate ZK proof
+	var contracts []Contract
+	var gasLimits []float64
+	var senders []PublicKey
+	for _, transaction := range block.Transactions {
+		contracts = append(contracts, transaction.Contracts...)
+		gasLimits = append(gasLimits, GetBalance(transaction.Sender.Y))
+		senders = append(senders, transaction.Sender)
+	}
+	_, receipt := ZkProve(contracts, gasLimits, senders, CalculateCurrentState())
+	block.ZenProof = receipt
 	timeVerificationTimestamp := time.Now()
 	if Env.Upgrades.Yangon <= len(Blockchain) && Env.Upgrades.Yangon != -1 {
 		block.MiningTime = timeVerificationTimestamp.Sub(previousBlock.Timestamp.Add(previousBlock.MiningTime))

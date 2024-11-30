@@ -159,4 +159,5 @@ type Block struct {
 	TimeVerifierSignatures          []Signature     `json:"timeVerifierSignature"`
 	TimeVerifiers                   []PublicKey     `json:"timeVerifiers"`
 	Transition                      StateTransition `json:"transition"`
+	ZenProof                        []byte          `json:"zenProof"`
 }
