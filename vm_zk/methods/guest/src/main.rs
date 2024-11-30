@@ -12,6 +12,7 @@ use contracts::msgpack::PendingState;
 use contracts::state::{CachedState, StateManager};
 use contracts::vm::{run_vm, VmRunDetails, ZkContractResult, ZkInfo};
 use risc0_zkvm::guest::env;
+use risc0_zkvm::sha::rust_crypto::{Digest, Sha256};
 use smartstring::alias::String;
 
 fn main() {
@@ -78,12 +79,29 @@ fn main() {
         out_final.push_str(&out);
     }
 
+    let mut hasher = Sha256::new();
+    for contract in contract_contents {
+        hasher.update(contract);
+    }
+    for hash in contract_hashes {
+        hasher.update(hash);
+    }
+    for limit in gas_limits {
+        hasher.update(limit.to_string());
+    }
+    for sender in senders {
+        hasher.update(sender);
+    }
+    hasher.update(blockchain_len.to_string());
+    let input_hash_output = hasher.finalize();
+    let input_hash = hex::encode(input_hash_output);
+
     // Format output
     let output = ZkInfo {
         results,
-        input: run_details.clone(),
         out: std::string::String::from(out_final),
         merkle_root,
+        input_hash
     };
 
     // Write public output to the journal

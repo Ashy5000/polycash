@@ -18,7 +18,8 @@ pub(crate) fn handle_request(data: Vec<u8>, socket: &mut Socket) {
         let receipt_file = fs::read(args[1]).unwrap();
         let receipt: Receipt = rmp_serde::from_slice(&*receipt_file).unwrap();
         let expected_merkle_root = args[2].to_owned();
-        assert!(verify(receipt, expected_merkle_root));
+        let expected_input_hash = args[3].to_owned();
+        assert!(verify(receipt, expected_merkle_root, expected_input_hash));
         println!("Verification success!");
         socket.write_message("Verification success!".as_ref()).unwrap();
         return;

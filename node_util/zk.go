@@ -54,7 +54,7 @@ func WriteZkState(state State) {
 	}
 }
 
-func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders []PublicKey, merkleRoot string) string {
+func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders []PublicKey, merkleRoot string, inputHash string) string {
 	if generate {
 		// Generate args for a ZK proof
 		contractsArg := "contract.blockasm" // Contracts to be included
@@ -88,13 +88,18 @@ func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders
 		verificationArg := "V"      // Verification
 		receiptArg := "receipt.bin" // Receipt
 		merkleRootArg := merkleRoot // Merkle root
-		args := []string{verificationArg, receiptArg, merkleRootArg}
+		inputHashArg := inputHash   // Input hash
+		args := []string{verificationArg, receiptArg, merkleRootArg, inputHashArg}
 		return strings.Join(args, " ")
 	}
 }
 
 func WriteContractsAggregate(contracts []Contract) {
 	if len(contracts) == 0 {
+		err := os.WriteFile("contract.blockasm", []byte(""), 0644)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 	var segments []string
@@ -155,7 +160,7 @@ func ZkProve(contracts []Contract, gasLimits []float64, senders []PublicKey, sta
 		hash := sha256.Sum256([]byte(contractStr))
 		hashes = append(hashes, hex.EncodeToString(hash[:]))
 	}
-	args := GenerateZkArgs(true, hashes, gasLimits, senders, "")
+	args := GenerateZkArgs(true, hashes, gasLimits, senders, "", "")
 	// 4. Send request
 	res, err := SendZkRequest(args)
 	if err != nil {
@@ -166,11 +171,11 @@ func ZkProve(contracts []Contract, gasLimits []float64, senders []PublicKey, sta
 	return res, receipt
 }
 
-func ZKVerify(receipt []byte, merkleRoot string) bool {
+func ZKVerify(receipt []byte, merkleRoot string, inputHash string) bool {
 	// 1. Write receipt to file
 	WriteReceipt(receipt)
 	// 2. Generate arguments
-	args := GenerateZkArgs(false, nil, nil, nil, merkleRoot)
+	args := GenerateZkArgs(false, nil, nil, nil, merkleRoot, inputHash)
 	// 3. Send request
 	_, err := SendZkRequest(args)
 	return err == nil

@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"time"
@@ -122,7 +123,27 @@ func VerifySmartContractTransactions(block Block) bool {
 	} else {
 		root = ""
 	}
-	if !ZKVerify(block.ZenProof, root) {
+	hasher := sha256.New()
+	for _, transaction := range block.Transactions {
+		for _, contract := range transaction.Contracts {
+			hasher.Write([]byte(contract.Contents))
+		}
+	}
+	for _, transaction := range block.Transactions {
+		for _, contract := range transaction.Contracts {
+			contractHash := sha256.Sum256([]byte(contract.Contents))
+			hasher.Write([]byte(hex.EncodeToString(contractHash[:])))
+		}
+	}
+	for _, transaction := range block.Transactions {
+		hasher.Write([]byte(strconv.Itoa(int(GetBalance(transaction.Sender.Y)))))
+	}
+	for _, transaction := range block.Transactions {
+		hasher.Write([]byte(hex.EncodeToString(transaction.Sender.Y)))
+	}
+	hasher.Write([]byte(strconv.Itoa(len(Blockchain))))
+	hash := hasher.Sum(nil)
+	if !ZKVerify(block.ZenProof, root, hex.EncodeToString(hash)) {
 		Warn("Block has invalid ZK proof. Ignoring block request.")
 		return false
 	}

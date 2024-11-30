@@ -918,9 +918,9 @@ pub struct ZkContractResult {
 #[derive(Serialize, Deserialize)]
 pub struct ZkInfo {
     pub results: Vec<ZkContractResult>,
-    pub input: VmRunDetails,
     pub out: std::string::String,
     pub merkle_root: std::string::String,
+    pub input_hash: std::string::String,
 }
 
 pub fn run_vm<A, B, C, D>(
