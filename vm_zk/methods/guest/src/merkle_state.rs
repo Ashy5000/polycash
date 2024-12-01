@@ -41,13 +41,18 @@ impl State for MerkleState {
             println!("{}\n", string);
             out.push_str(&string);
         } else {
-            let string = format!(
-                "External state change: {}|{}",
-                location,
-                hex::encode(contents.clone())
-            );
-            println!("{}\n", string);
-            out.push_str(&string);
+            // Ensure value is set to the ESWV
+            let existing_value_vec_u8 = self.get(location.clone()).unwrap();
+            let existing_value = String::from_utf8_lossy(&*existing_value_vec_u8);
+            if existing_value == "ExternalStateWriteableValue" {
+                let string = format!(
+                    "State change: {}|{}",
+                    location,
+                    hex::encode(contents.clone())
+                );
+                println!("{}\n", string);
+                out.push_str(&string);
+            }
         }
         unsafe {
             (*self.pending_state).write(location, contents, out);

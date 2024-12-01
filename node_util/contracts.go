@@ -13,7 +13,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/vmihailenco/msgpack/v5"
 	"os"
@@ -119,28 +118,6 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 						return nil, StateTransition{}, 0, err
 					}
 					fmt.Println("Applying state change:", address, valueBytes)
-					if Env.Upgrades.Zen <= len(Blockchain) {
-						// Zen insert
-						transition.ZenUpdatedData = InsertValue(transition.ZenUpdatedData, address, valueBytes)
-					} else {
-						// Legacy insert
-						transition.LegacyUpdatedData[address] = valueBytes
-					}
-				} else if len(line) >= 25 && line[:24] == "External state change: " {
-					stateChangeString := line[24:]
-					parts := strings.Split(stateChangeString, "|")
-					address := parts[0]
-					valueHex := parts[1]
-					valueBytes, err := hex.DecodeString(valueHex)
-					if err != nil {
-						executionLocked = false
-						return nil, StateTransition{}, 0, err
-					}
-					if !bytes.Equal(GetFromState(address), ExternalStateWriteableValue) {
-						Warn("Contract attempted to modify external state not marked as writeable.")
-						executionLocked = false
-						return nil, StateTransition{}, 0, errors.New("contract attempted to modify external state not marked as writeable")
-					}
 					if Env.Upgrades.Zen <= len(Blockchain) {
 						// Zen insert
 						transition.ZenUpdatedData = InsertValue(transition.ZenUpdatedData, address, valueBytes)
