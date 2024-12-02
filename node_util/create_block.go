@@ -111,7 +111,7 @@ func CreateBlock() (Block, error) {
 	var senders []PublicKey
 	for _, transaction := range block.Transactions {
 		contracts = append(contracts, transaction.Contracts...)
-		gasLimits = append(gasLimits, GetBalance(transaction.Sender.Y))
+		gasLimits = append(gasLimits, GetBalance(transaction.Sender.Y)/GasPrice)
 		senders = append(senders, transaction.Sender)
 	}
 	_, receipt := ZkProve(contracts, gasLimits, senders, CalculateCurrentState())

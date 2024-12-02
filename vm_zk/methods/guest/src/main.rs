@@ -98,8 +98,10 @@ fn main() {
     
     // Calculate state transition hash
     let state_transition_dump = merkle_state.dump(); // Pending state will record all state changes by the end of execution
+    println!("{:?}", state_transition_dump);
     let state_transition_merkle = merklize(state_transition_dump);
     let state_transition_root = state_transition_merkle[0].hash.clone();
+    println!("{}", state_transition_root);
 
     // Format output
     let output = ZkInfo {

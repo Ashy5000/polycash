@@ -136,7 +136,7 @@ func VerifySmartContractTransactions(block Block) bool {
 		}
 	}
 	for _, transaction := range block.Transactions {
-		hasher.Write([]byte(strconv.Itoa(int(GetBalance(transaction.Sender.Y)))))
+		hasher.Write([]byte(strconv.Itoa(int(GetBalance(transaction.Sender.Y) / GasPrice))))
 	}
 	for _, transaction := range block.Transactions {
 		hasher.Write([]byte(hex.EncodeToString(transaction.Sender.Y)))
