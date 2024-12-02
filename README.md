@@ -11,6 +11,8 @@
 
 The home of a power-efficient, secure, quantum-resistant, and modern blockchain and smart contract platform designed to resolve the issues presented by existing consensus mechanisms while improving upon decentralization. Written in Golang, Rust, and C++.
 
+**Polycash is now ZK!** All state changes are now verified and sealed using SNARKs. This greatly improves the scalability potential for Polycash.
+
 For the whitepaper, look [here](https://github.com/Ashy5000/polycash/blob/master/docs/whitepaper/whitepaper.pdf).
 
 Technical docs are located in the [wiki](https://github.com/Ashy5000/polycash/wiki).
@@ -20,16 +22,17 @@ Technical docs are located in the [wiki](https://github.com/Ashy5000/polycash/wi
 
 **Comparison**
 
-|                    | Bitcoin | Ethereum        | Polycash        |
-| ------------------ | ------- | --------------- | --------------- |
-| Consensus          | PoW     | PoS             | APoW            |
-| Scriptability      | Limited | Turing-complete | Turing-complete |
-| VM                 | N/A     | EVM             | PVM             |
-| Signatures         | ECC     | ECC             | Lattice-based   |
-| Token              | BTC     | ETH             | PCSH            |
-| Pre-mined tokens   | No      | Yes             | No              |
-| Builtin Oracles    | No      | No              | Yes             |
-| Hash function      | SHA256  | Keccak-256      | SHA3-512        |
+|                    | Bitcoin | Ethereum        | Polycash          |
+| ------------------ | ------- | --------------- | ----------------- |
+| Consensus          | PoW     | PoS             | APoW              |
+| Scriptability      | Limited | Turing-complete | Turing-complete   |
+| VM                 | N/A     | EVM             | PVM               |
+| Signatures         | ECC     | ECC             | Lattice-based     |
+| Token              | BTC     | ETH             | PCSH              |
+| Pre-mined tokens   | No      | Yes             | No                |
+| Builtin Oracles    | No      | No              | Yes               |
+| Hash function      | SHA256  | Keccak-256      | SHA3-512 & SHA256 |
+| ZK                 | N/A     | N/A             | SNARK             |
 
 
 >[!TIP]
@@ -55,6 +58,10 @@ Using a new verification method, time verification, both the security and the pe
 ## Quantum-Resistant Signatures
 
 This blockchain utilizes the Dilithium3 signature algorithm, a quantum-resistant algorithm chosen as a winner for the NIST Post Quantum Cryptography standardization process. This is designed to future-proof the blockchain from the developing field of quantum computing.
+
+## ZK
+
+Every smart contract invocation in a given block can be verified with a SNARK proof, with only one necessary per block. This greatly improves verification times for large batches of transactions.
 
 ## Roadmap
 
