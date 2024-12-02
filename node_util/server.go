@@ -99,7 +99,6 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		Body:            transactionBody,
 		BodySignatures:  transactionBodySignatures,
 	}
-	MiningTransactions = append(MiningTransactions, transaction)
 	var smartContractTransactions []Transaction
 	if len(transaction.Contracts) > 0 {
 		for i, contract := range transaction.Contracts {
@@ -119,6 +118,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 			transaction.Contracts[i].GasUsed = gasUsed
 		}
 	}
+	MiningTransactions = append(MiningTransactions, transaction)
 	for _, smartContractTransaction := range smartContractTransactions {
 		MiningTransactions = append(MiningTransactions, smartContractTransaction)
 		transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(smartContractTransaction.Sender), EncodePublicKey(smartContractTransaction.Recipient), smartContractTransaction.Amount, smartContractTransaction.Timestamp.UnixNano())

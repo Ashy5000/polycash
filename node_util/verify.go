@@ -143,7 +143,13 @@ func VerifySmartContractTransactions(block Block) bool {
 	}
 	hasher.Write([]byte(strconv.Itoa(len(Blockchain))))
 	hash := hasher.Sum(nil)
-	if !ZKVerify(block.ZenProof, root, hex.EncodeToString(hash)) {
+	var transitionRoot string
+	if len(block.Transition.ZenUpdatedData) > 0 {
+		transitionRoot = block.Transition.ZenUpdatedData[0].Hash
+	} else {
+		transitionRoot = ""
+	}
+	if !ZKVerify(block.ZenProof, root, hex.EncodeToString(hash), transitionRoot) {
 		Warn("Block has invalid ZK proof. Ignoring block request.")
 		return false
 	}

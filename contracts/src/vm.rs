@@ -920,6 +920,7 @@ pub struct ZkInfo {
     pub results: Vec<ZkContractResult>,
     pub out: std::string::String,
     pub merkle_root: std::string::String,
+    pub state_transition_root: std::string::String,
     pub input_hash: std::string::String,
 }
 

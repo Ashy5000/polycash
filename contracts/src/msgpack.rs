@@ -27,7 +27,7 @@ impl State for PendingState {
         Ok(self.data[&location].clone())
     }
     fn dump(&self) -> FxHashMap<String, Vec<u8>> {
-        panic!("Not implemented.");
+        self.data.clone()
     }
 }
 

@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -54,7 +53,7 @@ func WriteZkState(state State) {
 	}
 }
 
-func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders []PublicKey, merkleRoot string, inputHash string) string {
+func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders []PublicKey, merkleRoot string, inputHash string, transitionHash string) string {
 	if generate {
 		// Generate args for a ZK proof
 		contractsArg := "contract.blockasm" // Contracts to be included
@@ -85,11 +84,12 @@ func GenerateZkArgs(generate bool, hashes []string, gasLimits []float64, senders
 		return strings.Join(args, " ")
 	} else {
 		// Generate args for a ZK verification
-		verificationArg := "V"      // Verification
-		receiptArg := "receipt.bin" // Receipt
-		merkleRootArg := merkleRoot // Merkle root
-		inputHashArg := inputHash   // Input hash
-		args := []string{verificationArg, receiptArg, merkleRootArg, inputHashArg}
+		verificationArg := "V"              // Verification
+		receiptArg := "receipt.bin"         // Receipt
+		merkleRootArg := merkleRoot         // Merkle root
+		inputHashArg := inputHash           // Input hash
+		transitionHashArg := transitionHash // Transition hash
+		args := []string{verificationArg, receiptArg, merkleRootArg, inputHashArg, transitionHashArg}
 		return strings.Join(args, " ")
 	}
 }
@@ -132,14 +132,6 @@ func WriteReceipt(receipt []byte) {
 	}
 }
 
-func RunZkBinary() (string, bool) {
-	out, err := exec.Command("./vm_zk/target/release/host").Output()
-	if err != nil {
-		panic(err)
-	}
-	return string(out), true
-}
-
 func SendZkRequest(args string) (string, error) {
 	err := SendString(Conn, args)
 	if err != nil {
@@ -160,7 +152,7 @@ func ZkProve(contracts []Contract, gasLimits []float64, senders []PublicKey, sta
 		hash := sha256.Sum256([]byte(contractStr))
 		hashes = append(hashes, hex.EncodeToString(hash[:]))
 	}
-	args := GenerateZkArgs(true, hashes, gasLimits, senders, "", "")
+	args := GenerateZkArgs(true, hashes, gasLimits, senders, "", "", "")
 	// 4. Send request
 	res, err := SendZkRequest(args)
 	if err != nil {
@@ -171,11 +163,11 @@ func ZkProve(contracts []Contract, gasLimits []float64, senders []PublicKey, sta
 	return res, receipt
 }
 
-func ZKVerify(receipt []byte, merkleRoot string, inputHash string) bool {
+func ZKVerify(receipt []byte, merkleRoot string, inputHash string, transitionHash string) bool {
 	// 1. Write receipt to file
 	WriteReceipt(receipt)
 	// 2. Generate arguments
-	args := GenerateZkArgs(false, nil, nil, nil, merkleRoot, inputHash)
+	args := GenerateZkArgs(false, nil, nil, nil, merkleRoot, inputHash, transitionHash)
 	// 3. Send request
 	_, err := SendZkRequest(args)
 	return err == nil

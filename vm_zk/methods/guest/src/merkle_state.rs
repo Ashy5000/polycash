@@ -2,6 +2,7 @@ use crate::lazy_vector::LazyVector;
 use contracts::merkle::{get_from_merkle, MerkleContainer, MerkleNode};
 use contracts::msgpack::PendingState;
 use contracts::state::State;
+use rustc_hash::FxHashMap;
 
 impl MerkleContainer<Vec<u8>> for LazyVector<MerkleNode<Vec<u8>>> {
     fn get_wrapper(&mut self, index: usize) -> Option<MerkleNode<Vec<u8>>> {
@@ -13,6 +14,7 @@ pub(crate) struct MerkleState {
     pub(crate) contents: LazyVector<MerkleNode<Vec<u8>>>,
     pub(crate) prefix: String,
     pub(crate) pending_state: *mut PendingState,
+    pub(crate) transition: FxHashMap<String, Vec<u8>>
 }
 
 impl MerkleState {
@@ -25,6 +27,7 @@ impl MerkleState {
             contents,
             prefix,
             pending_state,
+            transition: FxHashMap::default()
         }
     }
 }
@@ -39,6 +42,7 @@ impl State for MerkleState {
                 hex::encode(contents.clone())
             );
             println!("{}\n", string);
+            self.transition.insert(location.clone(), contents.clone());
             out.push_str(&string);
         } else {
             // Ensure value is set to the ESWV
@@ -51,6 +55,7 @@ impl State for MerkleState {
                     hex::encode(contents.clone())
                 );
                 println!("{}\n", string);
+                self.transition.insert(location.clone(), contents.clone());
                 out.push_str(&string);
             }
         }
@@ -66,7 +71,7 @@ impl State for MerkleState {
         ))
     }
 
-    fn dump(&self) -> rustc_hash::FxHashMap<String, Vec<u8>> {
-        panic!("Not implemented.");
+    fn dump(&self) -> FxHashMap<String, Vec<u8>> {
+        self.transition.clone()
     }
 }
