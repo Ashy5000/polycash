@@ -590,40 +590,43 @@ pub fn vm_execute_instruction<A: State, B: State, C: State, D: BlockUtilInterfac
                 next_pc: pc + 1,
             }
         },
+        // Tx was removed due to ZK incompatibility.
+        // It may be added again in the future.
         "Tx" => {
-            let sender_bytes =
-                vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[3].clone());
-            let sender = match std::string::String::from_utf8(sender_bytes) {
-                Ok(v) => v,
-                Err(_) => {
-                    vm_throw_local_error(buffers, line.args[3].clone());
-                    "".to_owned()
-                }
-            };
-            let receiver_bytes =
-                vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[3].clone());
-            let receiver = match std::string::String::from_utf8(receiver_bytes) {
-                Ok(v) => v,
-                Err(_) => {
-                    vm_throw_local_error(buffers, line.args[3].clone());
-                    "".to_owned()
-                }
-            };
-            let amount_bytes =
-                vm_access_buffer_contents(buffers, line.args[2].clone(), line.args[3].clone());
-            let amount = match std::string::String::from_utf8(amount_bytes) {
-                Ok(v) => v,
-                Err(_) => {
-                    vm_throw_local_error(buffers, line.args[3].clone());
-                    "".to_owned()
-                }
-            };
-            println!("TX {} {} {}", sender, receiver, amount);
-            *gas_used += 4;
-            VmInstructionResult {
-                exit_details: None,
-                next_pc: pc + 1,
-            }
+            panic!("ZK incompatible.");
+            // let sender_bytes =
+            //     vm_access_buffer_contents(buffers, line.args[0].clone(), line.args[3].clone());
+            // let sender = match std::string::String::from_utf8(sender_bytes) {
+            //     Ok(v) => v,
+            //     Err(_) => {
+            //         vm_throw_local_error(buffers, line.args[3].clone());
+            //         "".to_owned()
+            //     }
+            // };
+            // let receiver_bytes =
+            //     vm_access_buffer_contents(buffers, line.args[1].clone(), line.args[3].clone());
+            // let receiver = match std::string::String::from_utf8(receiver_bytes) {
+            //     Ok(v) => v,
+            //     Err(_) => {
+            //         vm_throw_local_error(buffers, line.args[3].clone());
+            //         "".to_owned()
+            //     }
+            // };
+            // let amount_bytes =
+            //     vm_access_buffer_contents(buffers, line.args[2].clone(), line.args[3].clone());
+            // let amount = match std::string::String::from_utf8(amount_bytes) {
+            //     Ok(v) => v,
+            //     Err(_) => {
+            //         vm_throw_local_error(buffers, line.args[3].clone());
+            //         "".to_owned()
+            //     }
+            // };
+            // println!("TX {} {} {}", sender, receiver, amount);
+            // *gas_used += 4;
+            // VmInstructionResult {
+            //     exit_details: None,
+            //     next_pc: pc + 1,
+            // }
         }
 
         // GetNthBlock and GetNthTx were removed due to ZK incompatibility and slow performance.

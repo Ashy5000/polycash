@@ -14,6 +14,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -115,7 +116,71 @@ func DetectDuplicateBlock(hashBytes [64]byte) bool {
 	return isDuplicate
 }
 
+func VerifySmartContractTransactionsPreZen(block Block) bool {
+	// Ensure the transactions created by smart contracts are valid
+	// Iterate through smart contracts
+	var smartContractCreatedTransactions []Transaction
+	var fullTransition = StateTransition{
+		LegacyUpdatedData: make(map[string][]byte),
+		ZenUpdatedData:    make([]MerkleNode, 0),
+	}
+	for _, transaction := range block.Transactions {
+		for _, contract := range transaction.Contracts {
+			// Validate the contract
+			if !VerifySmartContract(contract) {
+				Log("Block has invalid smart contract. Ignoring block request.", true)
+				return false
+			}
+			// Execute the contract
+			transactions, transition, gasUsed, err := contract.Execute(GetBalance(transaction.Sender.Y)/GasPrice, transaction.Sender)
+			if err != nil {
+				continue
+			}
+			smartContractCreatedTransactions = append(smartContractCreatedTransactions, transactions...)
+			// Check gas usage
+			if gasUsed != contract.GasUsed {
+				Log("Block has invalid smart contract gas usage. Ignoring block request.", true)
+				return false
+			}
+			// Add transition to fullTransition
+			for location, value := range transition.LegacyUpdatedData {
+				fullTransition.LegacyUpdatedData[location] = value
+			}
+			fullTransition.ZenUpdatedData = Merge(fullTransition.ZenUpdatedData, transition.ZenUpdatedData)
+		}
+	}
+	if !reflect.DeepEqual(fullTransition.LegacyUpdatedData, block.Transition.LegacyUpdatedData) {
+		Log("Block has invalid state transition. Ignoring block request.", true)
+		return false
+	}
+	if len(fullTransition.ZenUpdatedData) != 0 && fullTransition.ZenUpdatedData[0].Hash != block.Transition.ZenUpdatedData[0].Hash {
+		Log("Block has invalid merkle root. Ignoring block request.", true)
+	}
+	// Get the smart contract created transactions in the block
+	var smartContractCreatedTransactionsInBlock []Transaction
+	for _, transaction := range block.Transactions {
+		if transaction.FromSmartContract {
+			smartContractCreatedTransactionsInBlock = append(smartContractCreatedTransactionsInBlock, transaction)
+		}
+	}
+	// Check if the two lists are the same
+	if !reflect.DeepEqual(smartContractCreatedTransactions, smartContractCreatedTransactionsInBlock) {
+		Log("Block has invalid smart contract transactions. Ignoring block request.", true)
+		return false
+	}
+	return true
+}
+
 func VerifySmartContractTransactions(block Block) bool {
+	if len(Blockchain) < Env.Upgrades.Zen {
+		return VerifySmartContractTransactionsPreZen(block)
+	}
+	for _, tx := range block.Transactions {
+		if tx.FromSmartContract {
+			// Zen doesn't support smart contract transactions
+			return false
+		}
+	}
 	state := CalculateCurrentState()
 	var root string
 	if len(state.ZenData) > 0 {
