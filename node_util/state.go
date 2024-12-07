@@ -67,13 +67,13 @@ func GetFromState(location string) []byte {
 	return []byte{}
 }
 
-// GetPendingState is for legacy versions only. Post-zen VMs process the entire batch in one ZK proof
-func GetPendingState() map[string][]byte {
-	res := make(map[string][]byte)
+func GetPendingState() State {
+	res := State{}
 	for _, subTransition := range NextTransitions {
 		for location, data := range subTransition.LegacyUpdatedData {
-			res[location] = data
+			res.LegacyData[location] = data
 		}
+		res.ZenData = Merge(res.ZenData, subTransition.ZenUpdatedData)
 	}
 	return res
 }

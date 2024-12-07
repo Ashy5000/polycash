@@ -11,11 +11,13 @@ package node_util
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/vmihailenco/msgpack/v5"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -82,15 +84,33 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
+	contractStr := c.Contents
+	hash := sha256.Sum256([]byte(contractStr))
 	pendingState := GetPendingState()
-	pendingStateSerialized, err := msgpack.Marshal(pendingState)
+	pendingStateData := pendingState.LegacyData
+	for _, node := range pendingState.ZenData {
+		if node.Data != nil {
+			pendingStateData[node.Key] = node.Data
+		}
+	}
+	if pendingStateData == nil {
+		pendingStateData = make(map[string][]byte)
+	}
+	pendingStateSerialized, err := msgpack.Marshal(pendingStateData)
 	err = os.WriteFile("pending_state.msgpack", pendingStateSerialized, 0644)
 	if err != nil {
 		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
-	out, _ := ZkProve([]Contract{c}, []float64{maxGas}, []PublicKey{sender}, CalculateCurrentState())
-	scanner := bufio.NewScanner(strings.NewReader(out))
+	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%f", maxGas), hex.EncodeToString(sender.Y)).Output()
+	if err != nil {
+		fmt.Println("Errored with output:", string(out))
+		fmt.Println("Error: ", err)
+		fmt.Println("Contract hash:", hex.EncodeToString(hash[:]))
+		executionLocked = false
+		return nil, StateTransition{}, 0, err
+	}
+	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	transactions := make([]Transaction, 0)
 	gasUsed := 0.0
 	transition := StateTransition{
@@ -112,10 +132,12 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 					parts := strings.Split(stateChangeString, "|")
 					address := parts[0]
 					valueHex := parts[1]
+					if valueHex == "" {
+						continue
+					}
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {
-						executionLocked = false
-						return nil, StateTransition{}, 0, err
+						Warn("Error decoding state change: " + err.Error())
 					}
 					fmt.Println("Applying state change:", address, valueBytes)
 					if Env.Upgrades.Zen <= len(Blockchain) {

@@ -57,7 +57,7 @@ impl State for OnchainState {
             let string = format!(
                 "State change: {}|{}",
                 location,
-                String::from_utf8(contents).unwrap()
+                hex::encode(contents)
             );
             println!("{}\n", string);
             out.push_str(&string);
@@ -65,7 +65,7 @@ impl State for OnchainState {
             let string = format!(
                 "External state change: {}|{}",
                 location,
-                String::from_utf8(contents).unwrap()
+                hex::encode(contents)
             );
             println!("{}\n", string);
             out.push_str(&string);
