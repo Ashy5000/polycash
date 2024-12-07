@@ -88,7 +88,7 @@ type PreZenBlock struct {
 func HashBlock(block Block, blockHeight int) [64]byte {
 	// Automatically downgrades to older block formats if necessary
 	if Env.Upgrades.Washington < blockHeight {
-		if Env.Upgrades.Zen < blockHeight {
+		if Env.Upgrades.Zen < blockHeight && Env.Upgrades.Zen != -1 {
 			var blockCpy Block
 			marshaled, err := json.Marshal(block)
 			if err != nil {

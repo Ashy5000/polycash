@@ -137,7 +137,7 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 					}
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {
-						Warn("Error decoding state change: " + err.Error())
+						Warn("Error decoding state change:")
 					}
 					fmt.Println("Applying state change:", address, valueBytes)
 					if Env.Upgrades.Zen <= len(Blockchain) {
@@ -203,7 +203,7 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 		transactions = append(transactions, transaction)
 	}
 	if c.IsNewContract() {
-		if Env.Upgrades.Zen <= len(Blockchain) {
+		if Env.Upgrades.Zen <= len(Blockchain) && Env.Upgrades.Zen != -1 {
 			// Zen update
 			InsertValue(transition.ZenUpdatedData, strconv.FormatUint(c.Location, 10), []byte(c.Contents))
 		} else {

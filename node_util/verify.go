@@ -172,7 +172,7 @@ func VerifySmartContractTransactionsPreZen(block Block) bool {
 }
 
 func VerifySmartContractTransactions(block Block) bool {
-	if len(Blockchain) < Env.Upgrades.Zen {
+	if len(Blockchain) < Env.Upgrades.Zen && Env.Upgrades.Zen != -1 {
 		return VerifySmartContractTransactionsPreZen(block)
 	}
 	for _, tx := range block.Transactions {
