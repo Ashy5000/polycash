@@ -11,6 +11,7 @@ package node_util
 import (
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -31,7 +32,6 @@ func CreateBlock() (Block, error) {
 		previousBlock.MiningTime = time.Minute
 	}
 	block := Block{
-		Transactions:                    MiningTransactions,
 		Miner:                           GetKey("").PublicKey,
 		Nonce:                           0,
 		MiningTime:                      0,
@@ -43,6 +43,19 @@ func CreateBlock() (Block, error) {
 		TimeVerifiers:                   []PublicKey{},
 		Transition:                      StateTransition{},
 	}
+	if Env.Upgrades.Zen < len(Blockchain) && Env.Upgrades.Zen != -1 {
+		block.ZenTransactions = []MerkleNode{}
+		for _, tx := range MiningTransactions {
+			serialized, err := json.Marshal(tx)
+			if err != nil {
+				panic(err)
+			}
+			block.ZenTransactions = InsertValue(block.ZenTransactions, "", serialized)
+		}
+	} else {
+		block.LegacyTransactions = MiningTransactions
+	}
+
 	if len(Blockchain) > 0 {
 		block.PreviousBlockHash = HashBlock(Blockchain[len(Blockchain)-1], len(Blockchain)-1)
 	} else {
@@ -96,7 +109,18 @@ func CreateBlock() (Block, error) {
 				block.PreviousBlockHash = [64]byte{}
 			}
 			block.Difficulty = GetDifficulty(previousBlock.MiningTime, previousBlock.Difficulty, len(MiningTransactions), len(Blockchain))
-			block.Transactions = MiningTransactions
+			if Env.Upgrades.Zen < len(Blockchain) && Env.Upgrades.Zen != -1 {
+				block.ZenTransactions = []MerkleNode{}
+				for _, tx := range MiningTransactions {
+					serialized, err := json.Marshal(tx)
+					if err != nil {
+						panic(err)
+					}
+					block.ZenTransactions = InsertValue(block.ZenTransactions, "", serialized)
+				}
+			} else {
+				block.LegacyTransactions = MiningTransactions
+			}
 			block.Nonce++
 			hashBytes = HashBlock(block, len(Blockchain))
 			hash = binary.BigEndian.Uint64(hashBytes[:])
@@ -109,7 +133,7 @@ func CreateBlock() (Block, error) {
 	var contracts []Contract
 	var gasLimits []float64
 	var senders []PublicKey
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		contracts = append(contracts, transaction.Contracts...)
 		gasLimits = append(gasLimits, GetBalance(transaction.Sender.Y)/GasPrice)
 		senders = append(senders, transaction.Sender)

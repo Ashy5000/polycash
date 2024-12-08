@@ -124,7 +124,7 @@ func VerifySmartContractTransactionsPreZen(block Block) bool {
 		LegacyUpdatedData: make(map[string][]byte),
 		ZenUpdatedData:    make([]MerkleNode, 0),
 	}
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		for _, contract := range transaction.Contracts {
 			// Validate the contract
 			if !VerifySmartContract(contract) {
@@ -158,7 +158,7 @@ func VerifySmartContractTransactionsPreZen(block Block) bool {
 	}
 	// Get the smart contract created transactions in the block
 	var smartContractCreatedTransactionsInBlock []Transaction
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		if transaction.FromSmartContract {
 			smartContractCreatedTransactionsInBlock = append(smartContractCreatedTransactionsInBlock, transaction)
 		}
@@ -175,7 +175,7 @@ func VerifySmartContractTransactions(block Block) bool {
 	if len(Blockchain) < Env.Upgrades.Zen && Env.Upgrades.Zen != -1 {
 		return VerifySmartContractTransactionsPreZen(block)
 	}
-	for _, tx := range block.Transactions {
+	for _, tx := range ExtractTransactions(block) {
 		if tx.FromSmartContract {
 			// Zen doesn't support smart contract transactions
 			return false
@@ -189,21 +189,21 @@ func VerifySmartContractTransactions(block Block) bool {
 		root = ""
 	}
 	hasher := sha256.New()
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		for _, contract := range transaction.Contracts {
 			hasher.Write([]byte(contract.Contents))
 		}
 	}
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		for _, contract := range transaction.Contracts {
 			contractHash := sha256.Sum256([]byte(contract.Contents))
 			hasher.Write([]byte(hex.EncodeToString(contractHash[:])))
 		}
 	}
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		hasher.Write([]byte(strconv.Itoa(int(GetBalance(transaction.Sender.Y) / GasPrice))))
 	}
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		hasher.Write([]byte(hex.EncodeToString(transaction.Sender.Y)))
 	}
 	hasher.Write([]byte(strconv.Itoa(len(Blockchain))))
@@ -222,7 +222,7 @@ func VerifySmartContractTransactions(block Block) bool {
 }
 
 func VerifyBlock(block Block, blockHeight int) bool {
-	isValid := VerifyTransactions(block.Transactions)
+	isValid := VerifyTransactions(ExtractTransactions(block))
 	hashBytes := HashBlock(block, blockHeight)
 	hash := binary.BigEndian.Uint64(hashBytes[:]) // Take the last 64 bits-- we won't ever need more than 64 zeroes.
 	isValid = hash <= MaximumUint64/block.Difficulty && isValid
@@ -242,7 +242,7 @@ func VerifyBlock(block Block, blockHeight int) bool {
 		lastMinedBlock.Difficulty = InitialBlockDifficulty
 		lastMinedBlock.MiningTime = time.Minute
 	}
-	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty, len(block.Transactions), blockHeight)
+	correctDifficulty := GetDifficulty(lastMinedBlock.MiningTime, lastMinedBlock.Difficulty, len(ExtractTransactions(block)), blockHeight)
 	if block.Difficulty != correctDifficulty || block.Difficulty < MinimumBlockDifficulty {
 		Log("Invalid difficulty detected.", true)
 		Log("The node software is designed to prevent difficulty manipulation, so this invalid difficulty will not cause issues for the network.", false)

@@ -322,7 +322,7 @@ func GetNthBlockCmd(fields []string) {
 	case "prev_hash":
 		fmt.Println(hex.EncodeToString(block.PreviousBlockHash[:]))
 	case "transaction_count":
-		fmt.Println(len(block.Transactions))
+		fmt.Println(len(ExtractTransactions(block)))
 	default:
 		fmt.Println("Invalid property", property)
 	}
@@ -338,7 +338,7 @@ func GetNthTransactionCmd(fields []string) {
 		panic(err)
 	}
 	block := Blockchain[blockPos]
-	tx := block.Transactions[txPos]
+	tx := ExtractTransactions(block)[txPos]
 	property := fields[3]
 	switch property {
 	case "sender":

@@ -14,13 +14,13 @@ func StartTest() {
 	start := time.Now()
 	initialtxs := 0
 	for _, block := range Blockchain {
-		initialtxs += len(block.Transactions)
+		initialtxs += len(ExtractTransactions(block))
 	}
 	for {
 		SyncBlockchain(-1)
 		txs := 0
 		for _, block := range Blockchain {
-			txs += len(block.Transactions)
+			txs += len(ExtractTransactions(block))
 		}
 		if txs-initialtxs >= tpsIn*secs {
 			duration := time.Since(start)

@@ -65,7 +65,7 @@ func HandleMineRequest(_ http.ResponseWriter, req *http.Request) {
 		return
 	}
 	for _, block := range Blockchain {
-		for _, transaction := range block.Transactions {
+		for _, transaction := range ExtractTransactions(block) {
 			onchainHash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%f:%d", transaction.Sender.Y, transaction.Recipient.Y, transaction.Amount, transaction.Timestamp)))
 			if onchainHash == hash {
 				Log("No new job. Ignoring mine request.", true)
@@ -155,7 +155,7 @@ func HandleBlockRequest(_ http.ResponseWriter, req *http.Request) {
 		Log("Block is invalid. Ignoring block request.", true)
 		return
 	}
-	for _, transaction := range block.Transactions {
+	for _, transaction := range ExtractTransactions(block) {
 		// Get transaction as string
 		transactionString := fmt.Sprintf("%s:%s:%f:%d", EncodePublicKey(transaction.Sender), EncodePublicKey(transaction.Recipient), transaction.Amount, transaction.Timestamp.UnixNano())
 		transactionBytes := []byte(transactionString)

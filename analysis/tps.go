@@ -13,7 +13,7 @@ func GetTPS(duration time.Duration) float64 {
 		if now.Sub(block.Timestamp) > duration {
 			break
 		}
-		txCount += len(block.Transactions)
+		txCount += len(ExtractTransactions(block))
 	}
 	return float64(txCount) / duration.Seconds()
 }

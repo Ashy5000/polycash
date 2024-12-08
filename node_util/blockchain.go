@@ -28,7 +28,7 @@ var Blockchain []Block
 // - TimeVerifiers: a slice of PublicKey structs (empty)
 func GenesisBlock() Block {
 	return Block{
-		Transactions:           nil,
+		LegacyTransactions:     nil,
 		Miner:                  PublicKey{},
 		Nonce:                  0,
 		MiningTime:             0,

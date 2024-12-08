@@ -127,7 +127,7 @@ func SyncBlockchain(finalityBlockHeight int) {
 				lastTime = lastMinedBlock.MiningTime
 				lastDifficulty = lastMinedBlock.Difficulty
 			}
-			correctDifficulty := GetDifficulty(lastTime, lastDifficulty, len(block.Transactions), i)
+			correctDifficulty := GetDifficulty(lastTime, lastDifficulty, len(ExtractTransactions(block)), i)
 			if block.Difficulty != correctDifficulty {
 				fmt.Println(correctDifficulty)
 				fmt.Println(lastTime)
@@ -172,7 +172,7 @@ func GetBalance(key []byte) float64 {
 			isGenesis = false
 			continue
 		}
-		for _, transaction := range block.Transactions {
+		for _, transaction := range ExtractTransactions(block) {
 			if bytes.Equal(transaction.Sender.Y, key) {
 				total -= transaction.Amount
 				if i > 50 { // Fees start after 50 blocks
@@ -191,7 +191,7 @@ func GetBalance(key []byte) float64 {
 			miningTotal += float64(len(block.TimeVerifiers)-len(lastBlock.TimeVerifiers)) * 0.1
 			if i > 50 { // Fees start after 50 blocks
 				fees := 0.0
-				for _, transaction := range block.Transactions {
+				for _, transaction := range ExtractTransactions(block) {
 					fees += TransactionFee
 					fees += BodyFeePerByte * float64(len(transaction.Body))
 					for _, contract := range transaction.Contracts {

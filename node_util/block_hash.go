@@ -102,9 +102,24 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 			blockCpy.TimeVerifiers = []PublicKey{}
 			blockCpy.TimeVerifierSignatures = []Signature{}
 			blockCpy.Timestamp = time.Time{}
-			for i := range block.Transactions {
-				blockCpy.Transactions[i].Timestamp = time.Time{}
-				blockCpy.Transactions[i].Body = []byte{}
+			blockCpy.ZenTransactions = []MerkleNode{}
+			for i := range block.LegacyTransactions {
+				blockCpy.LegacyTransactions[i].Timestamp = time.Time{}
+				blockCpy.LegacyTransactions[i].Body = []byte{}
+			}
+			for _, node := range block.ZenTransactions {
+				var tx Transaction
+				err = json.Unmarshal(node.Data, &tx)
+				if err != nil {
+					panic(err)
+				}
+				tx.Timestamp = time.Time{}
+				tx.Body = []byte{}
+				serialized, err := json.Marshal(tx)
+				if err != nil {
+					panic(err)
+				}
+				blockCpy.ZenTransactions = InsertValue(blockCpy.ZenTransactions, node.Key, serialized)
 			}
 			// Just include merkle roots when hashing
 			if len(blockCpy.Transition.ZenUpdatedData) != 0 {
@@ -121,6 +136,11 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 			} else {
 				blockCpy.Transition.ZenNewContracts = []MerkleNode{}
 			}
+			if len(blockCpy.ZenTransactions) != 0 {
+				blockCpy.ZenTransactions = []MerkleNode{
+					blockCpy.ZenTransactions[0],
+				}
+			}
 			// Remove ZK proof (already proven via ZK logic)
 			blockCpy.ZenProof = nil
 			blockBytes := []byte(fmt.Sprintf("%v", blockCpy))
@@ -129,7 +149,7 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 		}
 		var preZenBlock PreZenBlock
 		preZenTransactions := make([]PreZenTransaction, 0)
-		for _, transaction := range block.Transactions {
+		for _, transaction := range block.LegacyTransactions {
 			preZenTransaction := PreZenTransaction{}
 			preZenTransaction.Sender = transaction.Sender
 			preZenTransaction.Recipient = transaction.Recipient
@@ -162,7 +182,7 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 	}
 	oldBlock := OldBlock{}
 	oldTransactions := make([]OldTransaction, 0)
-	for _, transaction := range block.Transactions {
+	for _, transaction := range block.LegacyTransactions {
 		oldTransaction := OldTransaction{}
 		oldTransaction.Sender = transaction.Sender
 		oldTransaction.Recipient = transaction.Recipient

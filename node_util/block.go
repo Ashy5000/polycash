@@ -147,7 +147,8 @@ func (i *Transaction) UnmarshalJSON(data []byte) error {
 }
 
 type Block struct {
-	Transactions                    []Transaction   `json:"transactions"`
+	LegacyTransactions              []Transaction   `json:"transactions"`
+	ZenTransactions                 []MerkleNode    `json:"zenTransactions"`
 	Miner                           PublicKey       `json:"miner"`
 	Nonce                           int64           `json:"nonce"`
 	MiningTime                      time.Duration   `json:"miningTime"`
@@ -160,4 +161,20 @@ type Block struct {
 	TimeVerifiers                   []PublicKey     `json:"timeVerifiers"`
 	Transition                      StateTransition `json:"transition"`
 	ZenProof                        []byte          `json:"zenProof"`
+}
+
+func ExtractTransactions(block Block) []Transaction {
+	txs := block.LegacyTransactions
+	for _, node := range block.ZenTransactions {
+		var tx Transaction
+		if node.Data == nil {
+			continue
+		}
+		err := json.Unmarshal(node.Data, &tx)
+		if err != nil {
+			panic(err)
+		}
+		txs = append(txs, tx)
+	}
+	return txs
 }

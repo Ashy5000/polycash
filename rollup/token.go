@@ -55,7 +55,7 @@ func BodyContainsL2Transactions(body string) bool {
 func GetL2TokenBalances() map[string]uint64 {
 	balances := make(map[string]uint64)
 	for _, block := range Blockchain {
-		for _, transaction := range block.Transactions {
+		for _, transaction := range ExtractTransactions(block) {
 			body := transaction.Body
 			if !BodyContainsL2Transactions(string(body)) {
 				continue
