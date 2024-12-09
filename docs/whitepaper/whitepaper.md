@@ -125,7 +125,7 @@ $$
 From here, we can estimate the number of active mining identities. For this cryptoeconomic model, we assume that people will create new mining identities based on the square root of $r_{BASE}$, so we create a function, $s_{a}(r)$, which determines the number of active mining identities based on the result from $r_{BASE}(b, s, s_{a})$.
 
 $$
-s_{a}(r)=\sqrt{a}
+s_{a}(r)=\sqrt{r}
 $$
 
 To calculate the most likely configuration for the model's state, we need to define a function, $L(b, s, s_{a})$, that calculates the total energy of the system. In the terminology of quantum mechanics, which often uses this method of calculating the most likely state for systems, this function would be known as the *Lagrangian*.
@@ -199,7 +199,9 @@ $$
 
 One viable proof utilizes $s_{a}$ and works as follows.
 
-In solving this proof, there are two ways of imagining its goal. The first is to make the Lagrangian decrease. The second is to make the two sides of the PFEM formula closer to equal. The two perspectives are in fact identical, as an increasing Lagrangian will cause the two sides of the PFEM formula to diverge. In order to make solving the proof easier, we will use the latter definition.
+To both decrease the Lagrangian and ensure the PFEM is correct, we can prove that the difference between the two sides of the PFEM equation will decrease over time. Because the PFEM is a solution to a market where the Lagrangian is zero, its minimum value, a PFEM with increasing accuracy (as will soon be proven) will create a Lagrangian that approaches its optimal, zero.
+
+By optimizing the PFEM instead of the Lagrangian, we can completely circumvent the possibly complex configuration space of Lagrangian values with various market conditions. A perfectly optimized PFEM is, by definition, a *global minimum* of the Lagrangian. Optimizing the Lagrangian, on the other hand, could possibly lead to optimization towards local minima, not global ones. In a sense, **PFEM optimization is the most efficient algorithm for Lagrangian optimization**.
 
 There are two possible cases when attempting to correct the PFEM equation. Either the left side of the equation is greater than the right or the left side of the equation is lesser than the right.
 
