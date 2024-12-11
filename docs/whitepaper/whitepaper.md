@@ -340,7 +340,19 @@ Whenever smart contracts contained in a transaction consume gas, the sender of t
 
 **8.3 Transaction Body**
 
-When a transaction is appended in a new block to the end of the blockchain that contains data in its body (see section 6), the sender of the transaction is charged a fee equal to 0.000001 PCSH per byte of data  present in the transaction's body.
+When a transaction is appended in a new block to the end of the blockchain that contains data in its body (see section 6), the sender of the transaction is charged a fee equal to 0.000001 PCSH per byte of data present in the transaction's body. The fee is kept relatively low to allow for the possibility of Layer 2 blockchains being built upon Polycash, storing block data (or solely merkle roots) in TX body data.
+
+**9 Scalability**
+
+The Polycash blockchain employs several tactics to enhance the performance and decrease fees on its consensus layer.
+
+**9.1 Merklification/Simplified Payment Verification**
+
+In the tradition of Bitcoin, all transactions on the Polycash blockchain are stored in a Merkle tree. This enables a class of node known as a "light node" to verify merkle roots and thus the proof of work without verifying each individual transaction. In addition to the encoding of transactions in merkle trees, VM state and deployed smart contracts are also stored in a merkle tree for the same reasons.
+
+**9.2 ZK proofs**
+
+Every single smart contract execution in each block is bundled into a single succinct ZK SNARK that proves the correctness of all VM processing and execution in the block. This way, there is no need for recalculation and execution of smart contracts by every full node; VM verification is comprised solely of ZK verification. This produces two benefits. The first is scalability: recalculation of VM state is slow and costly. The second is decentralization. Because ZK verification makes it easier to verify transactions with slower hardware, it becomes more feasible to run full nodes on small, low-power, or outdated machines.
 
 **Conclusion**
 
