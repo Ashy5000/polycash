@@ -103,9 +103,10 @@ And so the assertion holds. The 1% decreases in block reward each time a new min
 
 **2.1 Cryptoeconomic modeling**
 
-Let a function, $m(b, s)$, be equal to the block reward at block number $b$ with $s$ mining identities. Let $d$ equal the fraction of the block reward that is sold at market price by miners. Let $h$ equal 1 - $d$. Let $a(b, s)$ equal:
+Let a function, $m(b, s)$, be equal to the block reward at block number $b$ with $s$ mining identities. Let $d$ equal the fraction of the block reward that is sold at market price by miners. Let $s(b)$ equal the number of mining identities at block $b$. Let $h$ equal 1 - $d$. From these definitions, we can derive a formula for cumulative PCSH supply:
+
 $$
-a(b,s)=\sum_{n=0}^{b}{m(b,s)}
+a(b)=\sum_{n=0}^{b}{m(b,s(b))}
 $$
 
 Thus, $a(b)$ represents the total amount of PCSH that has been minted by miners.
@@ -128,10 +129,10 @@ $$
 s_{a}(r)=\sqrt{r}
 $$
 
-To calculate the most likely configuration for the model's state, we need to define a function, $L(b, s, s_{a})$, that calculates the total energy of the system. In the terminology of quantum mechanics, which often uses this method of calculating the most likely state for systems, this function would be known as the *Lagrangian*.
+To calculate the most likely configuration for the model's state, we need to define a function, $L(b, s, s_{a})$, that calculates the total 'loss' of the system. In the terminology of quantum mechanics, which often uses this method of calculating the most likely state for systems, this function would be known as the *Lagrangian*, and the loss would be *energy*.
 
 $$
-L(b,s,s_{a})=\lvert s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}\rvert
+\mathfrak{L}(b,s,s_{a})=\lvert s_{a}(r_{BASE}(b,s,s_{a}))-s_{a}\rvert
 $$
 
 This function calculates the energy of the system (the Lagrangian) based on the difference between the current $s_{a}$ and the next calculated $s_{a}$. If the two are exactly equal, the system is in its *vacuum state* and in complete balance. If the two are farther apart, the system will soon experience a sharp correction back to a lower-energy state represented by a decrease in the Lagrangian.
@@ -164,7 +165,7 @@ The last formula is the formal definition of the PCSH Fundamental Economics Mode
 For the formal definition of the PFEM to be useful, the Lagrangian must be equal to zero. Otherwise, the equation is invalid. However, due to market inconsistency and latency and illogical trading strategies, $L(b,s,s_{a})$ will never be exactly zero. Instead, we can choose a value $L_{err}$ and assume the PFEM model is valid when the Lagrangian is less than or equal to that value.
 
 $$
-L(b,s,s_{a})-L_{err}\geq0
+\mathfrak{L}(b,s,s_{a})-L_{err}\geq0
 $$
 
 PFEMs that satisfy this equation are known as vPFEMs, the *v* indicating *valid*.
@@ -188,7 +189,7 @@ Then the Lagrangian can be redefined as $\lvert\Delta s_{a}\rvert$. Now, the set
 For the Lagrangian to decrease or stay the same on a given simulation step, an equation (the Lagrangian Descent Viability Equation, or LDVE) must be satisfied:
 
 $$
-L_{vn}(L_{v}(s_{a},s,p,b)+s_{a},max(s,L_{v}(s_{a},s,p,b)),p,b) \leq L_{vn}(s_{a},s,p,b)
+\mathfrak{L}_{vn}(\mathfrak{L}_{v}(s_{a},s,p,b)+s_{a},max(s,\mathfrak{L}_{v}(s_{a},s,p,b)),p,b) \leq \mathfrak{L}_{vn}(s_{a},s,p,b)
 $$
 
 Looking back at the formal PFEM definition:
@@ -235,10 +236,10 @@ $$
 Our goal is to calculate the change in rewards for a miner based on a change in $vr_t$. If $vr_t$ was to decrease by another value, $vr_-$, than $PFEM_l$ and $PFEM_r$ would both decrease by $vr_-/v$. Note that $vr_-$ is a single variable and does not represent multiple variables multiplied together. Because $s_a$ is equal to the cube root of $vr_-$:
 
 $$
-\Delta s_a=\root3\of{PFEM_r-vr_-/v}-\root3\of{PFEM_r}
+\Delta s_a=\sqrt[3]{PFEM_r-vr_-/v}-\sqrt[3]{PFEM_r}
 $$
 
-Because the difference between positive numbers is always greater than the difference between their cube roots, $\Delta s_a$ is always smaller than $vr_-$, indicating that $s_{a}$ is affected less than $vr_-$ when market fluctuations, epoch transitions, or changes to $s$ occur. In the Polycash ecosystem, it is said that $s_{a}$ is *cube-damped* from $vr_t$.
+Because the difference between positive numbers is always greater than the difference between their cube roots (above a certain threshold), $\Delta s_a$ is always smaller than $vr_-$, indicating that $s_{a}$ is affected less than $vr_-$ when market fluctuations, epoch transitions, or changes to $s$ occur. In the Polycash ecosystem, it is said that $s_{a}$ is *cube-damped* from $vr_t$.
 
 Because of this cube-damping effect, $r_{BASE}(b,s,s_a)$ (the average reward a mining identity will receive per block, in the base currency) is also effected:
 
@@ -246,7 +247,53 @@ $$
 r_{BASE}(b,s,s_a)=\frac{vr_t}{s_a}
 $$
 
-Because, as shown by the equation above, $s_a$ linearly affects $r_{BASE}$, $r_{BASE}$ also becomes cube-damped from $vr_t$, meaning that changes in market conditions, block rewards, or block difficulty will not affect the profit of mining identities linearly; miner's flow of income is protected via cube-damping from the economy's state.
+If $vr_t$ decreases, $s_a$ will as well, though to a lesser degree due to cube damping. The same goes for an increase in $vr_t$. This means changes in the economic state of Polycash will be counteracted by cube damping.
+
+
+**2.1.3.1 A Note on Cube-Damping**
+
+Two conditions need to be met in order for cube-damping to reduce economic effects on miners:
+$$
+\sqrt[3]{PFEM_r-vr_-/v} > \alpha
+$$
+and
+$$
+\sqrt[3]{PFEM_r} > \alpha
+$$
+As mentioned earlier, the difference between two positive real numbers is greater than the difference between their cube roots, with one exception: if one of the numbers is below a threshold, $\alpha$, the cube root operation will actually increase the difference. We can calculate what the value of $\alpha$ is as follows.
+
+There are two possible cases. In the first, both numbers ($a$ and $b$) are less than $\alpha$. Assume $b$ is always greater than $a$. In this situation, the difference between their cube roots will be greater than the difference between them (by definition). We can interpret this fact as $\Delta x < \Delta y$, where $\Delta x$  and $\Delta y$ are equal to $b-a$ and $\sqrt[3]{b}-\sqrt[3]{a}$, respectively. This can be rewritten as $\frac{\Delta y}{\Delta x} < 1$. Because $a$ and $b$ can be arbitrarily close, this can become the measure of a derivative.
+$$
+\frac{dy}{dx}\lbrace \sqrt[3]{x} \rbrace < 1
+$$
+And thus calculating $\alpha$ becomes a measure of calculating where the derivative is equal to 1.
+
+First, we can rewrite $\sqrt{x}$ as $x^{\frac 1 3}$. Using the power rule, we can calculate the derivative as $\frac 1 3 x^{\frac {-2} 3}$. Solving for $\alpha$:
+
+$$
+\frac 1 3 \alpha^{\frac {-2} 3} = 1
+$$
+$$
+\alpha^{\frac {-2} 3} = 3
+$$
+$$
+\frac 1 {\alpha^{\frac 2 3}} = 3
+$$
+$$
+1 = 3\alpha^{\frac 2 3}
+$$
+$$
+\alpha^{\frac 2 3} = \frac 1 3
+$$
+$$
+\alpha = \sqrt[\frac 2 3]\frac 1 3
+$$
+$$
+\alpha = 0.192450089...
+$$
+As we can see, $\alpha$ can be calculated purely from the first case, when both numbers are smaller than it. However, it's also possible to calculate it from the second case, where both numbers are larger.
+
+$\alpha$ is low enough to never be reached. In the case of $\sqrt[3]{PFEM_r}$, PFEM_r can never be less than 1, and therefore always greater than $\alpha$, because there will always be active mining identities in the network. In the other case, $\sqrt[3]{PFEM_r-vr_-/v}$, $PFEM_r-vr_-/v$ can never be less than 1. If it were less than 1, the value of $PFEM_r$ in the next timestep would be less than 1 as well, which isn't valid, as demonstrated in the first case.
 
 **3 Time Verifiers**
 
@@ -352,7 +399,7 @@ In the tradition of Bitcoin, all transactions on the Polycash blockchain are sto
 
 **9.2 ZK proofs**
 
-Every single smart contract execution in each block is bundled into a single succinct ZK SNARK that proves the correctness of all VM processing and execution in the block. This way, there is no need for recalculation and execution of smart contracts by every full node; VM verification is comprised solely of ZK verification. This produces two benefits. The first is scalability: recalculation of VM state is slow and costly. The second is decentralization. Because ZK verification makes it easier to verify transactions with slower hardware, it becomes more feasible to run full nodes on small, low-power, or outdated machines.
+Every single smart contract execution in each block is bundled into a single succinct ZK STARK that proves the correctness of all VM processing and execution in the block. This way, there is no need for recalculation and execution of smart contracts by every full node; VM verification is comprised solely of ZK verification. This produces two benefits. The first is scalability: recalculation of VM state is slow and costly. The second is decentralization. Because ZK verification makes it easier to verify transactions with slower hardware, it becomes more feasible to run full nodes on small, low-power, or outdated machines. Polycash uses STARKs rather than SNARKs due to their property of quantum-resistance. Combined with the CRYSTALS-Dilithium signature algorithm, the entirety of the blockchain can resist attacks against its cryptographic algorithms. In addition, while blockchains like Bitcoin are vulnerable to 51% attacks by quantum computers, which are far better at mining than classical computers, Polycash's difficulty adjustment algorithm ensures that they will face harder blocks than other classical nodes. This helps seal gaps in security that other blockchains cannot avoid.
 
 **Conclusion**
 
