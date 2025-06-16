@@ -108,6 +108,9 @@ func HashBlock(block Block, blockHeight int) [64]byte {
 				blockCpy.LegacyTransactions[i].Body = []byte{}
 			}
 			for _, node := range block.ZenTransactions {
+				if node.Data == nil || len(node.Data) == 0 {
+					continue
+				}
 				var tx Transaction
 				err = json.Unmarshal(node.Data, &tx)
 				if err != nil {

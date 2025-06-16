@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <bits/random.h>
+#include <random>
 
 #include "Compiler.h"
 

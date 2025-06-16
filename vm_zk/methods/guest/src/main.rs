@@ -97,7 +97,7 @@ fn main() {
     let input_hash = hex::encode(input_hash_output);
     
     // Calculate state transition hash
-    let state_transition_dump = merkle_state.dump(); // Pending state will record all state changes by the end of execution
+    let state_transition_dump = merkle_state.dump();
     println!("{:?}", state_transition_dump);
     let state_transition_merkle = merklize(state_transition_dump);
     let state_transition_root = state_transition_merkle[0].hash.clone();

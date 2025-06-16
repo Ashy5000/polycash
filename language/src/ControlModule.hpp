@@ -15,11 +15,13 @@
 class ControlModule {
   std::vector<RegisteredFunctionInfo> registeredFunctionInfos;
   int selectorLocLocation = -1;
+  int retLocation = -1;
 
 public:
   RegisteredFunctionInfo registerFunction(std::default_random_engine rnd);
   std::string compile(int &nextAllocatedLocation);
-  std::string close(int &nextAllocatedLocation) const;
+  std::string close(int &nextAllocatedLocation);
+  int getRetLocation() const;
 };
 
 

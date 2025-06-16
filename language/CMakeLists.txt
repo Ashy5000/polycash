@@ -38,3 +38,5 @@ add_executable(plc src/main.cpp
         src/ControlModule.hpp
         src/RegisteredFunctionInfo.h
 )
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

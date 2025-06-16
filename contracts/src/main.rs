@@ -27,7 +27,7 @@ use std::process::ExitCode;
 
 fn main() -> ExitCode {
     let contract_contents = read_contract::read_contract();
-    let args: Vec<std::string::String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
     let contract_hash = &args[2];
     let gas_limit_f64: f64 = args[3].parse().unwrap();
     let gas_limit = gas_limit_f64 as i64;

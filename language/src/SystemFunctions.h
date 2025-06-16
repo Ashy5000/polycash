@@ -21,7 +21,8 @@ const std::vector SYSTEM_FUNCTIONS = {
             const std::tuple<std::vector<int>, Signature> parsingResult = pp.ParseParams(nextAllocatedLocation, vars, blockasm, l);
             const std::vector<int> locations = std::get<0>(parsingResult);
             const int exitCodeLocation = locations[0];
-            blockasm << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation << " 0x00000000";
+            blockasm << "CpyBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << exitCodeLocation << " 0x~ 0x00000000" << std::endl;
+            blockasm << "Jmp `" << std::endl;
             if(exitCodeLocation >= nextAllocatedLocation) {
                 nextAllocatedLocation = exitCodeLocation + 1;
             }
@@ -40,7 +41,10 @@ const std::vector SYSTEM_FUNCTIONS = {
             if(exprLoc >= nextAllocatedLocation) {
                 nextAllocatedLocation = exprLoc + 1;
             }
-            blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x01fff0";
+            blockasm << "InitBfr 0x" << std::setw(8) << std::hex << nextAllocatedLocation++ << " 0x00000000" << std::endl;
+            blockasm << "SetCnst 0x" << std::setw(8) << std::hex << nextAllocatedLocation - 1 << " 0x01fff0 0x00000000" << std::endl;
+            blockasm << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << exprLoc << " 0x";
+            blockasm << std::setw(8) << std::hex << nextAllocatedLocation - 1 << " 0x00000000" << std::endl;
         },
         "contract",
         "return"

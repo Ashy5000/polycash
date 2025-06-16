@@ -259,15 +259,15 @@ func Send(receiver string, amount string, transactionBody []byte) {
 	}
 }
 
-func DeploySmartContract(contractPath string, contractLocation string) error {
+func DeploySmartContract(contractPath string, contractLocation string) ([32]byte, error) {
 	if contractPath == "" && contractLocation == "" {
-		return errors.New("must provide contract path or location")
+		return [32]byte{}, errors.New("must provide contract path or location")
 	}
 	var contract Contract
 	if contractPath != "" {
 		file, err := os.ReadFile(contractPath)
 		if err != nil {
-			return err
+			return [32]byte{}, err
 		}
 		contract = Contract{
 			Contents: string(file),
@@ -279,7 +279,7 @@ func DeploySmartContract(contractPath string, contractLocation string) error {
 	} else {
 		contractLocationUint, err := strconv.ParseUint(contractLocation, 10, 64)
 		if err != nil {
-			return err
+			return [32]byte{}, err
 		}
 		contract = Contract{
 			Location: contractLocationUint,
@@ -293,8 +293,8 @@ func DeploySmartContract(contractPath string, contractLocation string) error {
 			Y: deployer.Y,
 		},
 	}
-	hash := sha256.Sum256([]byte(contract.Contents))
-	partySig, err := key.X.Sign(hash[:])
+	contractHash := sha256.Sum256([]byte(contract.Contents))
+	partySig, err := key.X.Sign(contractHash[:])
 	if err != nil {
 		panic(err)
 	}
@@ -305,12 +305,12 @@ func DeploySmartContract(contractPath string, contractLocation string) error {
 	contracts := append(make([]Contract, 0), contract)
 	contractsStr, err := json.Marshal(contracts)
 	if err != nil {
-		return err
+		return [32]byte{}, err
 	}
 	amount := "0"
 	timestamp := time.Now().UnixNano()
 	transactionString := fmt.Sprintf("%s:%s:%s:%d", deployer.Y, deployer.Y, amount, timestamp)
-	hash = sha256.Sum256([]byte(transactionString))
+	hash := sha256.Sum256([]byte(transactionString))
 	sigBytes, err := key.X.Sign(hash[:])
 	sig := Signature{
 		S: sigBytes,
@@ -327,12 +327,12 @@ func DeploySmartContract(contractPath string, contractLocation string) error {
 		Log("Sending smart contract to peer: "+peer, false)
 		req, err := http.NewRequest(http.MethodGet, peer+"/mine", body)
 		if err != nil {
-			return err
+			return [32]byte{}, err
 		}
 		Wg.Add(1)
 		go SendRequest(req)
 	}
-	return nil
+	return contractHash, nil
 }
 
 func GetLastMinedBlock(key []byte) (Block, bool) {

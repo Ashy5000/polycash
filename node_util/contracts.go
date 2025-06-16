@@ -102,6 +102,7 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 		executionLocked = false
 		return nil, StateTransition{}, 0, err
 	}
+	fmt.Println("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%f", maxGas), hex.EncodeToString(sender.Y))
 	out, err := exec.Command("./contracts/target/release/contracts", "contract.blockasm", hex.EncodeToString(hash[:]), fmt.Sprintf("%f", maxGas), hex.EncodeToString(sender.Y)).Output()
 	if err != nil {
 		fmt.Println("Errored with output:", string(out))
@@ -133,7 +134,7 @@ func (c Contract) Execute(maxGas float64, sender PublicKey) ([]Transaction, Stat
 					address := parts[0]
 					valueHex := parts[1]
 					if valueHex == "" {
-						continue
+						transition.ZenUpdatedData = InsertValue(transition.ZenUpdatedData, address, []byte{})
 					}
 					valueBytes, err := hex.DecodeString(valueHex)
 					if err != nil {

@@ -131,16 +131,17 @@ func SendL2Cmd(fields []string) {
 
 func DeploySmartContractCmd(fields []string) {
 	path := fields[1]
-	err := DeploySmartContract(path, "")
+	hash, err := DeploySmartContract(path, "")
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(hex.EncodeToString(hash[:]))
 	fmt.Println("Smart contract deployed successfully!")
 }
 
 func RunSmartContractCmd(fields []string) {
 	location := fields[1]
-	err := DeploySmartContract("", location)
+	_, err := DeploySmartContract("", location)
 	if err != nil {
 		panic(err)
 	}

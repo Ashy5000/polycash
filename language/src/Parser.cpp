@@ -72,7 +72,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
             activeToken.children = {};
             activeToken.value = {};
             activeToken.type = TokenType::type_placeholder;
-            tokens.emplace_back(Token{TokenType::open_paren, {}});
+            // tokens.emplace_back(Token{TokenType::open_paren, {}});
             activeToken.type = TokenType::expr;
             continue;
         }
@@ -89,7 +89,7 @@ std::vector<Token> Parser::parse_tokens(const std::string &input) {
             activeToken.value = {};
             activeToken.type = TokenType::type_placeholder;
             substring.clear();
-            tokens.emplace_back(Token{TokenType::close_paren, {}});
+            // tokens.emplace_back(Token{TokenType::close_paren, {}});
         }
         if(activeToken.type == TokenType::expr || activeToken.type == TokenType::block) {
             substring.push_back(c);

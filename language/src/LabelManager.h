@@ -15,6 +15,7 @@ public:
     explicit LabelManager(const std::string &blockasm);
     std::string ReplacePreLabels(const std::string &blockasm);
     std::string ReplaceLabels(const std::string &blockasm);
+    void ReplaceControlLabels(std::string &blockasm);
 
     static std::string SkipLibs(const std::string &blockasm);
     std::string OffsetCalls(const std::string &blockasm, int offset);

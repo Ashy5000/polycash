@@ -14,6 +14,7 @@ RegisteredFunctionInfo ControlModule::registerFunction(std::default_random_engin
     random_int,
     static_cast<int>(registeredFunctionInfos.size())
   };
+  info.id += info.preLabelId;
   registeredFunctionInfos.emplace_back(info);
   return info;
 }
@@ -50,7 +51,7 @@ std::string ControlModule::compile(int &nextAllocatedLocation) {
   return result.str();
 }
 
-std::string ControlModule::close(int &nextAllocatedLocation) const {
+std::string ControlModule::close(int &nextAllocatedLocation) {
   if(selectorLocLocation == -1) {
     std::cerr << "Control module not compiled." << std::endl;
     exit(EXIT_FAILURE);
@@ -61,5 +62,11 @@ std::string ControlModule::close(int &nextAllocatedLocation) const {
   result << "SetCnst 0x" << std::setfill('0') << std::setw(8) << std::hex << eswvLocation << " 0x45787465726E616C5374617465577269746561626C6556616C7565 0x00000000" << std::endl;
   result << "UpdateState 0x" << std::setfill('0') << std::setw(8) << std::hex << selectorLocLocation << " 0x";
   result << std::setfill('0') << std::setw(8) << std::hex << eswvLocation << " 0x00000000" << std::endl;
+  retLocation = nextAllocatedLocation++;
+  result << "ExitBfr 0x" << std::setfill('0') << std::setw(8) << std::hex << retLocation << " 0x00000000" << std::endl;
   return result.str();
+}
+
+int ControlModule::getRetLocation() const {
+  return retLocation;
 }

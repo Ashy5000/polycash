@@ -96,7 +96,15 @@ impl MerkleContainer<Vec<u8>> for Vec<MerkleNode<Vec<u8>>> {
 pub fn get_from_merkle<A: MerkleContainer<Vec<u8>> + Clone>(tree: &mut A, loc: String) -> Vec<u8> {
     let mut active: usize = 0;
     for c in loc.chars() {
-        active = tree.get_wrapper(active).unwrap().children[&c];
+        let node = tree.get_wrapper(active).unwrap();
+        match node.children.get(&c) {
+            Some(x) => {
+                active = *x;
+            }
+            None => {
+                return Vec::new();
+            }
+        }
     }
     verify_node::<A>(tree, active);
     tree.get_wrapper(active).unwrap().value.clone()

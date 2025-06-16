@@ -7,6 +7,7 @@
 #include "LabelManager.h"
 #include <sstream>
 #include <fstream>
+#include <iomanip>
 
 void Compiler::LoadContents() {
     std::stringstream contents_stream;
@@ -21,6 +22,15 @@ void Compiler::ParseTokens() {
     tokens = Parser::parse_tokens(contents);
 }
 
+void Compiler::InjectControlBuffer(ControlModule& cm) {
+    size_t pos = 0;
+    std::stringstream hex("");
+    hex << std::setfill('0') << std::setw(8) << std::hex << cm.getRetLocation();
+    while ((pos = blockasm.find("~")) != std::string::npos) {
+        blockasm.replace(pos, 1, hex.str());
+    }
+}
+
 void Compiler::GenerateBlockasm(const std::default_random_engine rnd) {
     auto generator = BlockasmGenerator(tokens, 0x00001000, {}, true, rnd);
     auto cm = ControlModule();
@@ -28,9 +38,9 @@ void Compiler::GenerateBlockasm(const std::default_random_engine rnd) {
     int nextAllocatedLocation = generator.GetNextAllocatedLocation();
     std::string controlSegment = cm.compile(nextAllocatedLocation);
     controlSegmentSize = static_cast<int>(std::ranges::count(controlSegment, '\n' ));
-    controlSegmentSize += !controlSegment.empty() && controlSegment.back() != '\n';
     const std::string controlClose = cm.close(nextAllocatedLocation);
-    blockasm = controlSegment + generatedBlockasm + controlClose;
+    blockasm = controlSegment + generatedBlockasm + "; CONTROLCLOSE\n" + controlClose;
+    InjectControlBuffer(cm);
 }
 
 void Compiler::Link() {
@@ -42,8 +52,22 @@ void Compiler::Link() {
     blockasm = LabelManager::SkipLibs(blockasm);
     blockasm = lm.ReplacePreLabels(blockasm);
     blockasm = lm.ReplaceLabels(blockasm);
+    lm.ReplaceControlLabels(blockasm);
     blockasm = lm.OffsetCalls(blockasm, controlSegmentSize);
 }
+
+void Compiler::NullifyString(const std::string& string) {
+    size_t pos = 0;
+    while ((pos = blockasm.find(string)) != std::string::npos) {
+        blockasm.replace(pos, string.length(), "_");
+    }
+}
+
+
+void Compiler::Cleanup() {
+    NullifyString("^");
+}
+
 
 std::string Compiler::Compile(const std::string &filename_p, const std::default_random_engine rnd) {
     filename = filename_p;
@@ -51,5 +75,6 @@ std::string Compiler::Compile(const std::string &filename_p, const std::default_
     ParseTokens();
     GenerateBlockasm(rnd);
     Link();
+    Cleanup();
     return blockasm;
 }

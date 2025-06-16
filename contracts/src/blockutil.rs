@@ -1,4 +1,5 @@
 use std::process::Command;
+use hex::FromHexError;
 // Copyright 2024, Asher Wrobel
 /*
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -70,7 +71,7 @@ impl BlockUtilInterface for NodeBlockUtilInterface {
         let output = output.split("\n").collect::<Vec<&str>>();
         let output = output[output.len() - 1].to_string();
         let data_hex: String = output.chars().skip(6).collect();
-        let data = hex::decode(data_hex).expect("Decoding failed");
+        let data = hex::decode(data_hex).unwrap_or_else(|_| Vec::new());
         (data, true)
     }
     fn get_blockchain_len(&self) -> u64 {

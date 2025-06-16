@@ -14,14 +14,48 @@
 #include "OperatorType.h"
 #include "Variable.h"
 
+bool ExpressionBlockasmGenerator::IsAcceptable(TokenType type) {
+    switch (type) {
+        case TokenType::type_placeholder:
+        case TokenType::system_at:
+        case TokenType::open_paren:
+        case TokenType::close_paren:
+        case TokenType::semi:
+        case TokenType::newline:
+        case TokenType::concat:
+        case TokenType::add:
+        case TokenType::sub:
+        case TokenType::mul:
+        case TokenType::exp:
+        case TokenType::comma:
+        case TokenType::eq:
+        case TokenType::excl:
+        case TokenType::open_curly:
+        case TokenType::close_curly:
+        case TokenType::greater:
+        case TokenType::block:
+        case TokenType::div:
+            return false;
+        case TokenType::identifier:
+        case TokenType::expr:
+        case TokenType::int_lit:
+        case TokenType::string_lit:
+            return true;
+        default:
+            return false;
+    };
+}
+
+
 std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpression(Token expression, int nextAllocatedLocation, std::vector<Variable>& vars, std::stringstream &blockasm, Linker &l) {
-    if(expression.type != TokenType::expr) {
-        std::cerr << "Expected expression when generating Blockasm." << std::endl;
+    if(!IsAcceptable(expression.type)) {
+        std::cerr << "Expected valid expression when generating Blockasm." << std::endl;
         exit(EXIT_FAILURE);
     }
     if(expression.children.empty()) {
-        std::cerr << "Empty expression not allowed." << std::endl;
-        exit(EXIT_FAILURE);
+        Token newExpression(TokenType::expr, "");
+        newExpression.children.push_back(expression);
+        expression = newExpression;
     }
     if(expression.children[0].type == TokenType::open_paren) {
         auto first = expression.children.begin() + 1;
@@ -85,7 +119,7 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
             }
             return std::make_tuple(referencedVar.location, referencedVar.type);
         }
-        if(expression.children[0].type == TokenType::expr) {
+        if(IsAcceptable(expression.children[0].type)) {
             std::tuple exprTuple = GenerateBlockasmFromExpression(expression.children[0], nextAllocatedLocation, vars, blockasm, l);
             return exprTuple;
         }
@@ -156,7 +190,7 @@ std::tuple<int, Type> ExpressionBlockasmGenerator::GenerateBlockasmFromExpressio
     std::string operatorString = OperatorToString(Operator{type});
     blockasm << operatorString << " 0x" << std::setfill('0') << std::setw(8) << std::hex << exprALoc << " 0x";
     blockasm << std::setfill('0') << std::setw(8) << std::hex << exprBLoc << " 0x";
-    blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000";
+    blockasm << std::setfill('0') << std::setw(8) << std::hex << nextAllocatedLocation + 1 << " 0x00000000" << std::endl;
     Type returnType = OperatorToType(Operator{type});
     return std::make_tuple(nextAllocatedLocation + 1, returnType);
 }

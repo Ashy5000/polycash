@@ -129,6 +129,21 @@ std::string LabelManager::ReplaceLabels(const std::string& blockasm) {
     return newBlockasm.str();
 }
 
+void LabelManager::ReplaceControlLabels(std::string &blockasm) {
+    std::istringstream iss(blockasm);
+    int control_close = 1;
+    for(std::string line; std::getline(iss, line); ) {
+        if(line.substr(0, 14) == "; CONTROLCLOSE") {
+            break;
+        }
+        control_close++;
+    }
+    size_t pos = 0;
+    while ((pos = blockasm.find('`', pos)) != std::string::npos) {
+        blockasm.replace(pos, 1, std::to_string(control_close));
+    }
+}
+
 std::string LabelManager::SkipLibs(const std::string& blockasm) {
     std::istringstream iss(blockasm);
     std::stringstream newBlockasm;
